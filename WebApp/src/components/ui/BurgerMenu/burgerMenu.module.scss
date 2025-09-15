@@ -1,0 +1,67 @@
+  .menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 100%;
+    background: #ffffff;
+    z-index: 1001;
+
+    transform: translateX(-100%);
+    transition: transform 1s cubic-bezier(.22,.9,.35,1); // 1000ms -> ANIMATION_DURATION
+    visibility: hidden;
+    pointer-events: none;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .menu.open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .menuContent {
+    padding: 2rem;
+    height: 100%;
+    position: relative;
+    overflow-y: auto;
+    padding-top: 80px;
+
+    opacity: 0;
+    transition: opacity 0.6s ease-in-out 0.15s; // Content fade-in mit leichter Verzögerung
+  }
+
+  .menu.open .menuContent {
+    opacity: 1;
+  }
+.menuContent ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem; /* mehr Abstand zwischen Tabs */
+}
+
+.menuContent li {
+  font-size: 1.4rem;   /* größerer Text */
+  font-weight: 500;
+}
+
+.menuContent a {
+  text-decoration: none;
+  color: #222; /* minimalistisches Schwarz/Grau */
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  display: inline-block;
+  transition: background 0.25s ease, transform 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05); /* leichter Hover-Effekt */
+    transform: translateX(6px);      /* kleine Bewegung nach rechts */
+  }
+
+  &:active {
+    transform: translateX(3px);
+  }
+}

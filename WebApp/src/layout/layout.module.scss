@@ -1,0 +1,10 @@
+.layout-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto; // Allows main to grow, pushing footer to the bottom
+  padding-top: 60px; // Adjust for header height if fixed
+}

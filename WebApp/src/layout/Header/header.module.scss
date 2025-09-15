@@ -1,0 +1,23 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;        // ← обязательно, чтобы хэдер тоже был от самого края
+  width: 100%;
+  padding: 0;
+  background: #fff;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  z-index: 1002;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  user-select: none;
+  margin: 0.5rem;  // Отступ вокруг лого
+  z-index: 1003;
+  position: relative;
+}
