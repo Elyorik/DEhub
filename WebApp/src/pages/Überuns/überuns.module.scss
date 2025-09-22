@@ -1,7 +1,56 @@
-.überuns {
-  min-height: 100vh;
-  padding-top: 60px; // gleiche Höhe wie Header
+.storyPage {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+}
+
+.section {
+  min-height: 100vh;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  padding: 4rem 10%;
+  gap: 2rem;
+
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 1s ease, transform 1s ease;
+
+  .text {
+    flex: 1;
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      max-width: 600px;
+    }
+  }
+
+  .image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    img {
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+.normal {
+  flex-direction: row;
+}
+
+.reverse {
+  flex-direction: row-reverse;
+}
+
+.visible {
+  opacity: 1;
+  transform: translateY(0);
 }

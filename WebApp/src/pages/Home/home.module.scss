@@ -67,14 +67,16 @@
   flex: 1; /* gleich breit */
   min-height: 300px;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;   // 👈 stack items vertically
+  justify-content: center;  // center vertically inside
+  align-items: center;      // center horizontally inside
   font-size: 1.5rem;
 
   /* minimalistisch */
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  gap: 1rem;
 
   &:hover {
     transform: translateY(-6px);

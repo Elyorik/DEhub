@@ -5,6 +5,7 @@ import Suchen from '../pages/Suchen/Suchen';
 import Neuigkeiten from '../pages/Neuigkeiten/Neuigkeiten';
 import KIWerkzeuge from '../pages/KIWerkzeuge/KIWerkzeuge';
 import Überuns from '../pages/Überuns/Überuns';
+import Account from "../pages/Account/Account";
 
 export const routers = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ export const routers = createBrowserRouter([
       {
         path: "uber-uns",
         element: <Überuns />,
+      },
+      {
+        path: "account",
+        element: <Account />,
       },
     ],
   },
