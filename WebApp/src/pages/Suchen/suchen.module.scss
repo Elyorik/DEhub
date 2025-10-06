@@ -1,4 +1,4 @@
-.page {
+.page { 
   padding-top: 80px;
   min-height: 100vh;
   display: flex;
@@ -25,11 +25,10 @@
     color: #1da1f2;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease; // nur Größe animieren
 
     &:hover {
-      background: #1da1f2;
-      color: #fff;
+      transform: scale(1.05); // leicht größer  
     }
   }
 

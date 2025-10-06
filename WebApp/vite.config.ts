@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true, // чтобы Vite слушал внешний доступ
     allowedHosts: [
-      '2e2f88adcd86.ngrok-free.app' // твой ngrok-домен
+      "62c9f5491e23.ngrok-free.app"
     ]
   }
 })

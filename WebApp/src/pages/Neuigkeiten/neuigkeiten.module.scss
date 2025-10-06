@@ -11,3 +11,72 @@
     margin-bottom: 2rem;
   }
 }
+
+.results {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1400px;
+  padding: 1rem;
+}
+
+.card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #fff;
+  height: 360px;
+  display: flex;
+  align-items: flex-end;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+
+.bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.6);
+  z-index: 0;
+  background-color: #444; // Grauer Fallback
+}
+
+
+  .overlay {
+    position: relative;
+    z-index: 1;
+    padding: 1rem;
+    width: 100%;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0 0 16px 16px;
+
+    h2 {
+      font-size: 1rem;
+      margin: 0 0 0.5rem 0;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    p {
+      font-size: 0.85rem;
+      color: #f1f1f1;
+      margin-bottom: 0.5rem;
+      max-height: 40px;
+      overflow: hidden;
+    }
+
+    .source {
+      font-size: 0.75rem;
+      color: #ddd;
+    }
+  }
+}
