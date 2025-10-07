@@ -3,8 +3,12 @@ import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-BOT_TOKEN = "8470338364:AAFY_NrHPpamEQgsfBOHc_uqWqi61RXSHus"
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
 
 # News-Sites mit Typ (rss/html) und optional RSS-Link
 NEWS_SITES = [
