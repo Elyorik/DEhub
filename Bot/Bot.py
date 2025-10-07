@@ -22,7 +22,7 @@ USER_INDEX = {}  # user_id -> nächster Index
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     webapp_button = KeyboardButton(
         text="🚀 Open WebApp",
-        web_app=WebAppInfo(url="https://62c9f5491e23.ngrok-free.app")
+        web_app=WebAppInfo(url="https://dehub.vercel.app")
     )
     reply_markup = ReplyKeyboardMarkup([[webapp_button]], resize_keyboard=True)
 
