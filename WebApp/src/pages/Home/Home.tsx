@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import s from "./home.module.scss";
 import newSuchmaschiene from "../../assets/UpdatesImg/newSuchmaschiene.png";
-import newKIWerkzeuge from "../../assets/UpdatesImg/newKIwerkzeuge.png";
+import newKIWerkzeuge from "../../assets/UpdatesImg/newKIWerkzeuge.png";
 
 function Home() {
   return (
