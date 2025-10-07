@@ -21,7 +21,7 @@ export default function Neuigkeiten() {
   async function load() {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:4000/news");
+      const res = await fetch("/api/neuigkeiten");
       const data = await res.json();
       setArticles(data.items || []);
       setFetchedAt(data.fetchedAt || Date.now());

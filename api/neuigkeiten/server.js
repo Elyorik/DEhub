@@ -97,5 +97,4 @@ app.get("/news/refresh", async (req, res) => {
   res.json({ ok: true, fetchedAt: lastFetchTime, count: cachedNews.length });
 });
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`🚀 News backend läuft auf http://localhost:${PORT}/news`));
+export default app;

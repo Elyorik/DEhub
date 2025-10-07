@@ -32,6 +32,6 @@ export const facebookProvider = new FacebookAuthProvider();
 
 // 📩 Einstellungen für E-Mail-Link-Verifizierung
 export const actionCodeSettings = {
-  url: "http://localhost:5173/verify", // 👉 Здесь укажи свой реальный домен, если есть
+  url: "https://dehub.vercel.app/verify", // 👉 Здесь укажи свой реальный домен, если есть
   handleCodeInApp: true,
 };
