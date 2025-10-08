@@ -6,7 +6,8 @@ from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
 from dotenv import load_dotenv
 from flask import Flask
-from threading import Thread
+import threading
+import asyncio
 
 # --- Настройка окружения ---
 load_dotenv()
@@ -15,7 +16,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 # --- Flask сервер (для Render и UptimeRobot) ---
 app = Flask(__name__)
 
-@app.route('/')
+@app.route("/")
 def home():
     return "✅ Bot is alive and running on Render!"
 
@@ -44,7 +45,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = ReplyKeyboardMarkup([[webapp_button]], resize_keyboard=True)
 
     await update.message.reply_text(
-        "Hallo 👋!\nKlicke unten, um die WebApp zu öffnen.\n\nSchreib /news um die neuesten Nachrichten zu bekommen 📢",
+        "Hallo 👋!\nKlicke unten, um die WebApp zu öffnen.\n\nSchreib /news, um die neuesten Nachrichten zu bekommen 📢",
         reply_markup=reply_markup
     )
 
@@ -110,15 +111,24 @@ async def news(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text(text, parse_mode="Markdown")
 
-# --- Запуск Telegram-бота ---
-def run_bot():
+# --- Асинхронный запуск Telegram-бота ---
+async def run_telegram_bot():
+    if not BOT_TOKEN:
+        print("❌ BOT_TOKEN не найден. Проверь .env или Render переменные.")
+        return
+
     app_telegram = Application.builder().token(BOT_TOKEN).build()
     app_telegram.add_handler(CommandHandler("start", start))
     app_telegram.add_handler(CommandHandler("news", news))
     print("🤖 Telegram Bot is running...")
-    app_telegram.run_polling(allowed_updates=Update.ALL_TYPES)
+    await app_telegram.run_polling()
+
+def start_bot_thread():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(run_telegram_bot())
 
 # --- Главный запуск ---
 if __name__ == "__main__":
-    Thread(target=run_web).start()  # Flask сервер
-    run_bot()                       # Telegram бот
+    threading.Thread(target=run_web).start()  # Flask сервер
+    start_bot_thread()                        # Telegram бот
