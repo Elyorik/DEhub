@@ -1,18 +1,18 @@
+import os
 import requests
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
-import os
 from dotenv import load_dotenv
 from flask import Flask
 from threading import Thread
 
-# Загрузка токена
+# --- Настройка окружения ---
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# Flask сервер для Render и UptimeRobot
+# --- Flask сервер (для Render и UptimeRobot) ---
 app = Flask(__name__)
 
 @app.route('/')
@@ -23,8 +23,7 @@ def run_web():
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
 
-# ---------- Telegram Bot ---------- #
-
+# --- Telegram Bot ---
 NEWS_SITES = [
     {"type": "rss", "url": "https://www.tagesschau.de/xml/rss2"},
     {"type": "rss", "url": "https://rss.dw.com/xml/rss-de-all"},
@@ -36,6 +35,7 @@ NEWS_SITES = [
 
 USER_INDEX = {}
 
+# --- Команды ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     webapp_button = KeyboardButton(
         text="🚀 Open WebApp",
@@ -60,9 +60,9 @@ def parse_rss(url):
         link = item.find("link").text
         description = item.find("description").text
         enclosure = item.find("enclosure")
-        image_url = enclosure.attrib["url"] if enclosure else None
+        image_url = enclosure.attrib["url"] if enclosure is not None else None
         return {"title": title, "summary": description, "link": link, "image": image_url}
-    except:
+    except Exception:
         return None
 
 def parse_zdf_heute(url):
@@ -82,7 +82,7 @@ def parse_zdf_heute(url):
         link_tag = article.find("a", href=True)
         link = "https://www.zdf.de" + link_tag["href"] if link_tag else url
         return {"title": title, "summary": summary, "link": link, "image": image_url}
-    except:
+    except Exception:
         return None
 
 def get_next_news(user_id):
@@ -104,20 +104,21 @@ async def news(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Keine Nachrichten verfügbar ❌")
         return
 
-    text = f"**{news_item['title']}**\n\n{news_item['summary']}\n\nQuelle: {news_item['link']}"
+    text = f"*{news_item['title']}*\n\n{news_item['summary']}\n\nQuelle: {news_item['link']}"
     if news_item["image"]:
         await update.message.reply_photo(photo=news_item["image"], caption=text, parse_mode="Markdown")
     else:
         await update.message.reply_text(text, parse_mode="Markdown")
 
+# --- Запуск Telegram-бота ---
 def run_bot():
     app_telegram = Application.builder().token(BOT_TOKEN).build()
     app_telegram.add_handler(CommandHandler("start", start))
     app_telegram.add_handler(CommandHandler("news", news))
     print("🤖 Telegram Bot is running...")
-    app_telegram.run_polling()
+    app_telegram.run_polling(allowed_updates=Update.ALL_TYPES)
 
+# --- Главный запуск ---
 if __name__ == "__main__":
-    # Запускаем Flask и бота параллельно
-    Thread(target=run_web).start()
-    run_bot()
+    Thread(target=run_web).start()  # Flask сервер
+    run_bot()                       # Telegram бот
