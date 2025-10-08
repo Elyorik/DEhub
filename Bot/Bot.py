@@ -39,7 +39,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /start command"""
     webapp_button = KeyboardButton(
         text="🚀 Open WebApp",
-        web_app=WebAppInfo(url="https://dehub.vercel.app")
+        web_app=WebAppInfo(url="https://dehub-webapp.vercel.app")
     )
     reply_markup = ReplyKeyboardMarkup([[webapp_button]], resize_keyboard=True)
 
