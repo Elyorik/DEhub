@@ -5,12 +5,26 @@ from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
 import os
 from dotenv import load_dotenv
-load_dotenv()
+from flask import Flask
+from threading import Thread
 
+# Загрузка токена
+load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
+# Flask сервер для Render и UptimeRobot
+app = Flask(__name__)
 
-# News-Sites mit Typ (rss/html) und optional RSS-Link
+@app.route('/')
+def home():
+    return "✅ Bot is alive and running on Render!"
+
+def run_web():
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+
+# ---------- Telegram Bot ---------- #
+
 NEWS_SITES = [
     {"type": "rss", "url": "https://www.tagesschau.de/xml/rss2"},
     {"type": "rss", "url": "https://rss.dw.com/xml/rss-de-all"},
@@ -20,8 +34,7 @@ NEWS_SITES = [
     {"type": "rss", "url": "https://www.focus.de/rss/"},
 ]
 
-# Index für jeden Benutzer
-USER_INDEX = {}  # user_id -> nächster Index
+USER_INDEX = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     webapp_button = KeyboardButton(
@@ -36,7 +49,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 def parse_rss(url):
-    """Parst RSS-Feed"""
     try:
         r = requests.get(url, timeout=5)
         r.raise_for_status()
@@ -54,7 +66,6 @@ def parse_rss(url):
         return None
 
 def parse_zdf_heute(url):
-    """Parser für ZDF heute HTML"""
     try:
         r = requests.get(url, timeout=5)
         r.raise_for_status()
@@ -75,11 +86,9 @@ def parse_zdf_heute(url):
         return None
 
 def get_next_news(user_id):
-    """Nächste News für Benutzer"""
     index = USER_INDEX.get(user_id, 0)
     site = NEWS_SITES[index % len(NEWS_SITES)]
-    USER_INDEX[user_id] = index + 1  # Fortschritt speichern
-
+    USER_INDEX[user_id] = index + 1
     if site["type"] == "rss":
         return parse_rss(site["url"])
     elif site["type"] == "html" and "zdf" in site["url"]:
@@ -95,24 +104,20 @@ async def news(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Keine Nachrichten verfügbar ❌")
         return
 
+    text = f"**{news_item['title']}**\n\n{news_item['summary']}\n\nQuelle: {news_item['link']}"
     if news_item["image"]:
-        await update.message.reply_photo(
-            photo=news_item["image"],
-            caption=f"**{news_item['title']}**\n\n{news_item['summary']}\n\nQuelle: {news_item['link']}",
-            parse_mode="Markdown"
-        )
+        await update.message.reply_photo(photo=news_item["image"], caption=text, parse_mode="Markdown")
     else:
-        await update.message.reply_text(
-            f"**{news_item['title']}**\n\n{news_item['summary']}\n\nQuelle: {news_item['link']}",
-            parse_mode="Markdown"
-        )
+        await update.message.reply_text(text, parse_mode="Markdown")
 
-def main():
-    app = Application.builder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("news", news))
-    print("Bot is running...")
-    app.run_polling()
+def run_bot():
+    app_telegram = Application.builder().token(BOT_TOKEN).build()
+    app_telegram.add_handler(CommandHandler("start", start))
+    app_telegram.add_handler(CommandHandler("news", news))
+    print("🤖 Telegram Bot is running...")
+    app_telegram.run_polling()
 
 if __name__ == "__main__":
-    main()
+    # Запускаем Flask и бота параллельно
+    Thread(target=run_web).start()
+    run_bot()
