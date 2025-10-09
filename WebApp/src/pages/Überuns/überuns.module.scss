@@ -54,3 +54,24 @@
   opacity: 1;
   transform: translateY(0);
 }
+.footer {
+  text-align: center;
+  padding: 4rem 2rem;
+  font-size: 1.2rem;
+  color: #333;
+  background: #f8f8f8;
+  margin-top: 4rem;
+  border-top: 1px solid #ddd;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 1s ease, transform 1s ease;
+
+  strong {
+    color: #222;
+  }
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -50,7 +50,7 @@ function ÜberUns() {
           if (entry.isIntersecting) {
             entry.target.classList.add(s.visible);
           } else {
-            entry.target.classList.remove(s.visible); // 👈 wieder ausblenden
+            entry.target.classList.remove(s.visible);
           }
         });
       },
@@ -85,6 +85,15 @@ function ÜberUns() {
           </div>
         </section>
       ))}
+
+      {/* 👇 Блок благодарности внизу */}
+      <footer className={s.footer}>
+        <p>
+          Danke an <strong>Frau Arnhold</strong>, <strong>Frau Turaeva</strong>,{" "}
+          <strong>Afruz Rajabiy</strong>, <strong>Mirza Fazliddin Rashidov</strong> und{" "}
+          <strong>Sinan Abdullaev</strong> für ihre Hilfe.
+        </p>
+      </footer>
     </div>
   );
 }
