@@ -1,5 +1,4 @@
 // api/neuigkeiten/server.js
-// ✅ Vercel-ready RSS Proxy (ESM)
 import express from "express";
 import cors from "cors";
 import Parser from "rss-parser";
@@ -17,32 +16,34 @@ const parser = new Parser({
   },
 });
 
-// 🔹 RSS-Quellen
+// RSS-Quellen:
 const feeds = [
   { url: "https://www.spiegel.de/schlagzeilen/tops/index.rss", source: "Spiegel" },
   { url: "https://www.tagesschau.de/xml/rss2", source: "Tagesschau" },
   { url: "https://newsfeed.zeit.de/index", source: "Zeit" },
 ];
 
-// 🔹 Cache
+// Cache
 let cachedNews = [];
 let lastFetchTime = 0;
 const ONE_DAY = 24 * 60 * 60 * 1000;
 
-// 🧩 Hilfsfunktion zum Extrahieren von Bildern
+// Hilfsfunktion, um Bilder zu finden
 function extractImage(item) {
   if (item.enclosure?.url) return item.enclosure.url;
   if (item.media?.[0]?.$?.url) return item.media[0].$.url;
+
   const html = item.contentEncoded || item["content:encoded"] || item.content || "";
   const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
   return match ? match[1] : null;
 }
 
-// 🔹 News abrufen & cachen
+// Hauptfunktion: RSS laden und cachen
 async function fetchAndCache() {
   console.log("[news] fetching feeds...");
   try {
     let all = [];
+
     for (const f of feeds) {
       try {
         const parsed = await parser.parseURL(f.url);
@@ -56,10 +57,11 @@ async function fetchAndCache() {
         }));
         all = all.concat(items);
       } catch (err) {
-        console.error(`[news] feed error ${f.url}:`, err.message || err);
+        console.error(`[news] feed error ${f.url}:`, err.message);
       }
     }
 
+    // Nach Datum sortieren
     all.sort((a, b) => {
       const ta = a.pubDate ? new Date(a.pubDate).getTime() : 0;
       const tb = b.pubDate ? new Date(b.pubDate).getTime() : 0;
@@ -68,32 +70,31 @@ async function fetchAndCache() {
 
     cachedNews = all.slice(0, 200);
     lastFetchTime = Date.now();
-    console.log("[news] cached", cachedNews.length, "articles");
+
+    console.log("[news] fetched and cached:", cachedNews.length, "items");
   } catch (err) {
-    console.error("[news] fatal fetch error:", err.message || err);
+    console.error("[news] fatal fetch error:", err.message);
   }
 }
 
-// 🔹 Beim Start einmal laden
+// Beim Start einmal abrufen
 await fetchAndCache();
 
-// 🔹 Endpoint für Vercel Frontend: /api/neuigkeiten
-app.get("/api/neuigkeiten", (req, res) => {
-  res.status(200).json({
+// Automatisch täglich neu laden
+setInterval(fetchAndCache, ONE_DAY);
+
+// ✅ WICHTIG: Root-Route für Vercel
+app.get("/", (req, res) => {
+  res.json({
     fetchedAt: lastFetchTime,
     items: cachedNews,
   });
 });
 
-// 🔹 Optional: manuelles Refresh (Admin/Debug)
-app.get("/api/neuigkeiten/refresh", async (req, res) => {
+// Optional: manuelles Neuladen (z. B. /api/neuigkeiten/refresh)
+app.get("/refresh", async (req, res) => {
   await fetchAndCache();
-  res.status(200).json({
-    ok: true,
-    fetchedAt: lastFetchTime,
-    count: cachedNews.length,
-  });
+  res.json({ ok: true, fetchedAt: lastFetchTime, count: cachedNews.length });
 });
 
-// ✅ Export für Vercel (nicht listen!)
 export default app;
