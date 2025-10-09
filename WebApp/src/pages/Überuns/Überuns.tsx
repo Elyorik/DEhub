@@ -11,7 +11,7 @@ const sections = [
   {
     id: 0,
     img: boyImg,
-    title: "Ein Schultag",
+    title: "Ein SchultagG",
     text: "Es war ein Tag, an dem alle Kinder im Klassenzimmer saßen. Sie hatten Probleme im Deutschunterricht – niemand konnte die Datei mit den Redemitteln finden.",
   },
   {
