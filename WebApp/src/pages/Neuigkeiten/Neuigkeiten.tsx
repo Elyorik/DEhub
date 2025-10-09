@@ -1,4 +1,4 @@
-// Neuigkeiten.tsx
+// src/pages/Neuigkeiten.tsx
 import { useEffect, useState } from "react";
 import s from "./neuigkeiten.module.scss";
 
@@ -21,6 +21,7 @@ export default function Neuigkeiten() {
   async function load() {
     try {
       setLoading(true);
+      // 🔥 Vercel ruft automatisch deinen API-Route auf:
       const res = await fetch("/api/neuigkeiten");
       const data = await res.json();
       setArticles(data.items || []);
@@ -33,8 +34,8 @@ export default function Neuigkeiten() {
   }
 
   useEffect(() => {
-    load(); // beim Start einmal
-    const id = setInterval(load, ONE_DAY); // danach alle 24h automatisch
+    load();
+    const id = setInterval(load, ONE_DAY);
     return () => clearInterval(id);
   }, []);
 
@@ -50,13 +51,12 @@ export default function Neuigkeiten() {
       <div className={s.results}>
         {articles.map((a, i) => (
           <a key={i} href={a.link} target="_blank" rel="noopener noreferrer" className={s.card}>
-<div
-  className={s.bg}
-  style={{
-    backgroundImage: a.image ? `url(${a.image})` : "none",
-  }}
-/>
-
+            <div
+              className={s.bg}
+              style={{
+                backgroundImage: a.image ? `url(${a.image})` : "none",
+              }}
+            />
             <div className={s.overlay}>
               <h2>{a.title}</h2>
               <p>{a.contentSnippet}</p>
