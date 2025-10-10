@@ -1,4 +1,3 @@
-// src/pages/Neuigkeiten.tsx
 import { useEffect, useState } from "react";
 import s from "./neuigkeiten.module.scss";
 
@@ -21,7 +20,6 @@ export default function Neuigkeiten() {
   async function load() {
     try {
       setLoading(true);
-      // 🔥 Vercel ruft automatisch deinen API-Route auf:
       const res = await fetch("/api/neuigkeiten");
       const data = await res.json();
       setArticles(data.items || []);
@@ -50,7 +48,13 @@ export default function Neuigkeiten() {
 
       <div className={s.results}>
         {articles.map((a, i) => (
-          <a key={i} href={a.link} target="_blank" rel="noopener noreferrer" className={s.card}>
+          <a
+            key={i}
+            href={a.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={s.card}
+          >
             <div
               className={s.bg}
               style={{
@@ -61,7 +65,8 @@ export default function Neuigkeiten() {
               <h2>{a.title}</h2>
               <p>{a.contentSnippet}</p>
               <div className={s.source}>
-                {a.source} {a.pubDate ? `• ${new Date(a.pubDate).toLocaleString()}` : ""}
+                {a.source}{" "}
+                {a.pubDate ? `• ${new Date(a.pubDate).toLocaleString()}` : ""}
               </div>
             </div>
           </a>

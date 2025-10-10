@@ -19,6 +19,14 @@
   width: 100%;
   max-width: 1400px;
   padding: 1rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card {
@@ -30,8 +38,11 @@
   height: 360px;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s, opacity 0.4s ease-in;
+  opacity: 0;
+  animation: fadeIn 0.8s forwards;
 
   &:hover {
     transform: translateY(-6px) scale(1.02);
@@ -43,9 +54,10 @@
     inset: 0;
     background-size: cover;
     background-position: center;
-    filter: brightness(0.6);
+    background-repeat: no-repeat;
     z-index: 0;
-    background-color: #444;
+    filter: brightness(0.6);
+    background-color: #333; // если нет картинки — тёмно-серый фон
   }
 
   .overlay {
@@ -54,8 +66,8 @@
     padding: 1rem;
     width: 100%;
     backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.15);
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.4); // стеклянный чёрный фон
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 0 0 16px 16px;
 
     h2 {
@@ -78,48 +90,29 @@
       color: #ddd;
     }
   }
-}
 
-/* ======= 📱 Tablet Layout ======= */
-@media (max-width: 1024px) {
-  .results {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .card {
-    height: 380px;
-  }
-}
-
-/* ======= 📱 Smartphone Layout ======= */
-@media (max-width: 600px) {
-  .results {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    padding: 0.5rem;
-  }
-
-  .card {
-    height: auto; /* 👈 динамическая высота */
-    min-height: 420px; /* карточки не короткие */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+  @media (max-width: 600px) {
+    height: 420px;
 
     .bg {
-      height: 250px; /* 👈 изображение видно нормально */
       background-size: cover;
       background-position: center;
+      background-color: #222; // тёмно-серый фон на телефонах
     }
 
     .overlay {
-      padding: 1rem;
-      h2 {
-        font-size: 1.1rem;
-      }
-      p {
-        font-size: 0.95rem;
-        max-height: none;
-      }
+      background: rgba(0, 0, 0, 0.55); // чуть темнее, чтобы текст читался
     }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
