@@ -38,16 +38,15 @@
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   }
 
-.bg {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  filter: brightness(0.6);
-  z-index: 0;
-  background-color: #444; // Grauer Fallback
-}
-
+  .bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.6);
+    z-index: 0;
+    background-color: #444;
+  }
 
   .overlay {
     position: relative;
@@ -77,6 +76,50 @@
     .source {
       font-size: 0.75rem;
       color: #ddd;
+    }
+  }
+}
+
+/* ======= 📱 Tablet Layout ======= */
+@media (max-width: 1024px) {
+  .results {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .card {
+    height: 380px;
+  }
+}
+
+/* ======= 📱 Smartphone Layout ======= */
+@media (max-width: 600px) {
+  .results {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+
+  .card {
+    height: auto; /* 👈 динамическая высота */
+    min-height: 420px; /* карточки не короткие */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    .bg {
+      height: 250px; /* 👈 изображение видно нормально */
+      background-size: cover;
+      background-position: center;
+    }
+
+    .overlay {
+      padding: 1rem;
+      h2 {
+        font-size: 1.1rem;
+      }
+      p {
+        font-size: 0.95rem;
+        max-height: none;
+      }
     }
   }
 }

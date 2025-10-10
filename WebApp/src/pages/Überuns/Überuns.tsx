@@ -11,7 +11,7 @@ const sections = [
   {
     id: 0,
     img: boyImg,
-    title: "Ein SchultagG",
+    title: "Ein Schultag",
     text: "Es war ein Tag, an dem alle Kinder im Klassenzimmer saßen. Sie hatten Probleme im Deutschunterricht – niemand konnte die Datei mit den Redemitteln finden.",
   },
   {
@@ -86,14 +86,20 @@ function ÜberUns() {
         </section>
       ))}
 
-      {/* 👇 Блок благодарности внизу */}
-      <footer className={s.footer}>
-        <p>
-          Danke an <strong>Frau Arnhold</strong>, <strong>Frau Turaeva</strong>,{" "}
-          <strong>Afruz Rajabiy</strong>, <strong>Mirza Fazliddin Rashidov</strong> und{" "}
-          <strong>Sinan Abdullaev</strong> für ihre Hilfe.
-        </p>
-      </footer>
+      {/* 👇 Последняя секция — благодарность */}
+      <section
+        ref={(el) => (sectionRefs.current[sections.length] = el)}
+        className={`${s.section} ${s.center}`}
+      >
+        <div className={s.text}>
+          <h1>Danke!</h1>
+          <p>
+            Danke an <strong>Frau Arnhold</strong>, <strong>Frau Turaeva</strong>,{" "}
+            <strong>Mirza Fazliddin Rashidov</strong>, <strong>Sinan Abdullaev</strong>{" "}
+            und <strong>Afruz Rajabiy</strong> für ihre Hilfe.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

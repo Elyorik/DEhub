@@ -1,85 +1,158 @@
 .home {
   min-height: 100vh;
   padding-top: 60px; // Adjust for header height
+  overflow-x: hidden;
 }
 
+/* ===== Landing Section ===== */
 .landing {
-  height: 100vh;
+  height: 100vh; /* 👈 всегда на весь экран */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
   padding: 0 1rem;
+
+  h1 {
+    font-size: 3rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin: 1rem 0;
+  }
+
+  p {
+    font-size: 1.2rem;
+    max-width: 600px;
+  }
+
+  button {
+    margin-top: 1.5rem;
+    padding: 0.8rem 1.4rem;
+    font-size: 1rem;
+    background: #1da1f2;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: #0d8ae0;
+    }
+  }
 }
 
-.landing h1 {
-  font-size: 3rem;
-}
-
-.landing h2 {
-  font-size: 2rem;
-  margin: 1rem 0;
-}
-
-.landing p {
-  font-size: 1.2rem;
-  max-width: 600px;
-}
-
-.landing button {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background: #1da1f2;
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.newFeatures {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #ffebee;
-  font-size: 2rem;
-}
-
-.searchImprovement {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #e3f2fd;
-  font-size: 2rem;
-}
+/* ===== Containers Section ===== */
 .containers {
   display: flex;
-  justify-content: center;  /* in der Mitte auf X */
-  align-items: center;      /* vertikal in der Mitte */
-  gap: 2rem;                /* Abstand zwischen den Boxen */
-  padding: 2rem;
+  justify-content: center;
+  align-items: stretch;
+  gap: 2rem;
+  padding: 4rem 8%;
+  flex-wrap: wrap;
 }
 
+/* ===== Feature Boxes ===== */
 .newFeatures,
 .searchImprovement {
-  flex: 1; /* gleich breit */
-  min-height: 300px;
+  flex: 1 1 45%;
+  min-height: 400px;
   display: flex;
-  flex-direction: column;   // 👈 stack items vertically
-  justify-content: center;  // center vertically inside
-  align-items: center;      // center horizontally inside
-  font-size: 1.5rem;
-
-  /* minimalistisch */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 1.2rem;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   gap: 1rem;
+  padding: 2rem;
 
   &:hover {
     transform: translateY(-6px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  img {
+    width: 80%;
+    max-width: 400px;
+    height: auto;
+    border-radius: 10px;
+  }
+}
+
+.newFeatures {
+  background: #ffebee;
+}
+
+.searchImprovement {
+  background: #e3f2fd;
+}
+
+/* ===== 📱 Tablet Anpassung ===== */
+@media (max-width: 900px) {
+  .containers {
+    flex-direction: column;
+    gap: 3rem;
+    padding: 3rem 5%;
+  }
+
+  .newFeatures,
+  .searchImprovement {
+    font-size: 1rem;
+
+    img {
+      width: 90%;
+      max-width: 350px;
+    }
+  }
+
+  .landing h1 {
+    font-size: 2.2rem;
+  }
+
+  .landing h2 {
+    font-size: 1.6rem;
+  }
+}
+
+/* ===== 📱 Smartphone Anpassung ===== */
+@media (max-width: 500px) {
+  .landing {
+    height: 100vh; /* 👈 фиксируем, чтобы занимала весь экран */
+    padding: 2rem 1rem;
+    justify-content: center;
+  }
+
+  .landing h1 {
+    font-size: 2rem;
+  }
+
+  .landing h2 {
+    font-size: 1.3rem;
+  }
+
+  .landing p {
+    font-size: 1rem;
+    max-width: 90%;
+  }
+
+  .containers {
+    padding: 3rem 1rem;
+    gap: 2rem;
+  }
+
+  .newFeatures,
+  .searchImprovement {
+    padding: 1.5rem;
+    min-height: 300px;
+
+    img {
+      width: 100%;
+      max-width: 300px;
+    }
   }
 }

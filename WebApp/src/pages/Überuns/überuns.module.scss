@@ -54,24 +54,75 @@
   opacity: 1;
   transform: translateY(0);
 }
-.footer {
+.center {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
-  padding: 4rem 2rem;
-  font-size: 1.2rem;
-  color: #333;
-  background: #f8f8f8;
-  margin-top: 4rem;
-  border-top: 1px solid #ddd;
-  opacity: 0;
-  transform: translateY(50px);
-  transition: opacity 1s ease, transform 1s ease;
 
-  strong {
-    color: #222;
+  .text {
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      font-size: 1.3rem;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
   }
 
-  &.visible {
-    opacity: 1;
-    transform: translateY(0);
+  .image {
+    display: none; // без картинки
+  }
+}
+/* ===== 📱 Mobile Anpassung ===== */
+@media (max-width: 900px) {
+  .section {
+    flex-direction: column !important;
+    padding: 3rem 5%;
+    text-align: center;
+
+    .text {
+      h1 {
+        font-size: 1.8rem;
+      }
+      p {
+        font-size: 1rem;
+        max-width: 100%;
+      }
+    }
+
+    .image {
+      order: -1; /* картинка наверху */
+      margin-bottom: 1.5rem;
+      img {
+        max-width: 85%;
+        height: 50%;
+        max-height: none;
+      }
+    }
+  }
+}
+
+/* ===== 📱 Sehr kleine Geräte (Smartphones < 500px) ===== */
+@media (max-width: 500px) {
+  .section {
+    padding: 2rem 1rem;
+
+    .text {
+      h1 {
+        font-size: 1.5rem;
+      }
+      p {
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+    }
+
+    .image img {
+      max-width: 90%;
+    }
   }
 }
