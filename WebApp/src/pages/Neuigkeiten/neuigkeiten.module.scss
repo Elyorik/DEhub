@@ -37,10 +37,10 @@
   color: #fff;
   height: 360px;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-end;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s, box-shadow 0.3s, opacity 0.4s ease-in;
+  transition: transform 0.3s, box-shadow 0.3s;
   opacity: 0;
   animation: fadeIn 0.8s forwards;
 
@@ -55,18 +55,25 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    background-color: #333; // fallback
     z-index: 0;
-    filter: brightness(0.6);
-    background-color: #333; // если нет картинки — тёмно-серый фон
+  }
+
+  /* затемнение всей картинки, чтобы текст был виден */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2));
+    z-index: 1;
   }
 
   .overlay {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     padding: 1rem;
-    width: 100%;
-    backdrop-filter: blur(10px);
-    background: rgba(0, 0, 0, 0.4); // стеклянный чёрный фон
+    backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.3);
     border-top: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 0 0 16px 16px;
 
@@ -81,7 +88,7 @@
       font-size: 0.85rem;
       color: #f1f1f1;
       margin-bottom: 0.5rem;
-      max-height: 40px;
+      max-height: 50px;
       overflow: hidden;
     }
 
@@ -97,11 +104,14 @@
     .bg {
       background-size: cover;
       background-position: center;
-      background-color: #222; // тёмно-серый фон на телефонах
+    }
+
+    &::after {
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.3));
     }
 
     .overlay {
-      background: rgba(0, 0, 0, 0.55); // чуть темнее, чтобы текст читался
+      background: rgba(0, 0, 0, 0.45);
     }
   }
 }
