@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import s from "./Quellen.module.scss";
+import s from "./quellen.module.scss";
 import { ChevronDown } from "lucide-react";
 
 interface Quelle {
