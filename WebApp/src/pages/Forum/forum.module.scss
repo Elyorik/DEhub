@@ -1,0 +1,194 @@
+.forumContainer {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+  margin-top: 56px;
+  height: calc(100vh - 150px);
+  overflow: hidden;
+}
+
+.registerNotice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #0d1117;
+  color: white;
+  text-align: center;
+}
+
+.chatBox {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-radius: 8px;
+}
+
+.message {
+  max-width: 70%;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  word-wrap: break-word;
+}
+
+.myMessage {
+  background: #0078ff;
+  color: white;
+  align-self: flex-end;
+}
+
+.otherMessage {
+  background: #1f2937;
+  color: white;
+  align-self: flex-start;
+}
+
+.messageHeader {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-bottom: 0.25rem;
+}
+
+.inputContainer {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 1rem;
+}
+
+.input {
+  flex: 1;
+  padding: 0.7rem;
+  border-radius: 8px;
+  border: none;
+  background: #1f2937;
+  color: white;
+}
+
+.sendButton {
+  background: #0078ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.2rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.sendButton:hover {
+  background: #3399ff;
+}
+.dateDivider {
+  text-align: center;
+  margin: 1rem 0;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.messageTime {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  text-align: right;
+  margin-top: 0.2rem;
+}
+/* 🔘 Кнопка для Developer Panel */
+.devButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: #0078ff;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: 0.2s ease;
+  z-index: 999;
+}
+
+.devButton:hover {
+  background: #3399ff;
+  transform: scale(1.05);
+}
+
+/* 🧰 Developer Panel */
+.devPanel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  max-height: 40vh;
+  background: #111827;
+  color: white;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  overflow-y: auto;
+  z-index: 998;
+  animation: slideUp 0.3s ease forwards;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.devHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.closeDevPanel {
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.devMessages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.devMessage {
+  background: #1f2937;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+}
+.liveCount {
+  font-size: 14px;
+  font-weight: bold;
+  color: #00ff88;
+  margin-left: auto;
+  margin-right: 1rem;
+}
+// 🔹 Добавляем адаптив под телефон
+@media (max-width: 768px) {
+
+    .sendButton {
+      padding: 8px 10px;
+      
+    }
+}

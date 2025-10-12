@@ -3,9 +3,11 @@ import Layout from '../layout/Layout';
 import Home from '../pages/Home/Home';
 import Suchen from '../pages/Suchen/Suchen';
 import Neuigkeiten from '../pages/Neuigkeiten/Neuigkeiten';
-import KIWerkzeuge from '../pages/KIWerkzeuge/KIWerkzeuge';
+import KI from '../pages/KI/KI';
 import Überuns from '../pages/Überuns/Überuns';
 import Account from "../pages/Account/Account";
+import Quellen from "../pages/Quellen/Quellen";
+import Forum from "../pages/Forum/Forum";
 
 export const routers = createBrowserRouter([
   {
@@ -18,15 +20,15 @@ export const routers = createBrowserRouter([
       },
       {
         path: "suchen",
-        element: <Suchen   />,
+        element: <Suchen />,
       },
       {
         path: "neuigkeiten",
         element: <Neuigkeiten />,
       },
       {
-        path: "ki-werkzeuge",
-        element: <KIWerkzeuge />,
+        path: "ki",
+        element: <KI />,
       },
       {
         path: "uber-uns",
@@ -35,6 +37,14 @@ export const routers = createBrowserRouter([
       {
         path: "account",
         element: <Account />,
+      },
+      {
+        path: "quellen",
+        element: <Quellen />,
+      },
+      {
+        path: "forum",
+        element: <Forum />,
       },
     ],
   },

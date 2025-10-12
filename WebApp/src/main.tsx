@@ -8,6 +8,7 @@ import { store } from "./store";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { login, logout } from "./store/userSlice";
+import { UserProvider } from "./store/UserContext"; // ✅ Wichtig!
 
 // 🔑 Firebase observer sorgt dafür, dass User nach Reload eingeloggt bleibt
 onAuthStateChanged(auth, (firebaseUser) => {
@@ -27,7 +28,9 @@ onAuthStateChanged(auth, (firebaseUser) => {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
-      <RouterProvider router={routers} />
+      <UserProvider> {/* ✅ Jetzt ist dein Forum im Context */}
+        <RouterProvider router={routers} />
+      </UserProvider>
     </Provider>
   </StrictMode>
 );

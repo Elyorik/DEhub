@@ -1,0 +1,45 @@
+.counterContainer {
+  text-align: center;
+  margin-top: 100px;
+  margin-bottom: 100px;
+  padding: 40px 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f5f8ff 100%);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s ease;
+}
+
+.counterContainer:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0d0d0d;
+  margin-bottom: 25px;
+  letter-spacing: 0.5px;
+}
+
+.number {
+  font-size: 72px;
+  font-weight: 900;
+  color: #007bff;
+  text-shadow: 0 3px 10px rgba(0, 123, 255, 0.25);
+  display: inline-block;
+  margin-left: 10px;
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* 🔢 Плавная анимация появления */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

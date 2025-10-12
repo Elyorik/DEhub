@@ -1,9 +1,11 @@
+// src/UserContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-// Typen für Benutzer
+// 🔹 Benutzer-Typ
 interface User {
+  id: string;
   name: string;
-  password?: string; // oder email, wenn du später Firebase Auth nutzt
+  email?: string;
 }
 
 interface UserContextType {
@@ -12,20 +14,14 @@ interface UserContextType {
   logout: () => void;
 }
 
-// Context erstellen
+// 🔹 Context erstellen
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Provider-Komponente
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = (userData: User) => {
-    setUser(userData);
-  };
-
-  const logout = () => {
-    setUser(null);
-  };
+  const login = (userData: User) => setUser(userData);
+  const logout = () => setUser(null);
 
   return (
     <UserContext.Provider value={{ user, login, logout }}>
@@ -34,11 +30,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Custom Hook, damit du einfacher auf den UserContext zugreifen kannst
+// 🔹 Einfacher Zugriff auf Context
 export const useUser = () => {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
-  return context;
+  const ctx = useContext(UserContext);
+  if (!ctx) throw new Error("useUser must be used within UserProvider");
+  return ctx;
 };

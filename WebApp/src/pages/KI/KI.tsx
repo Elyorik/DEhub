@@ -1,6 +1,6 @@
-import s from "./kiwerkzeuge.module.scss";
+import s from "./ki.module.scss";
 
-function KiWerkzeuge() {
+function KI() {
   return (
     <div className={s.page}>
       <h1>KI Werkzeuge</h1>
@@ -15,8 +15,9 @@ function KiWerkzeuge() {
           AITester
         </a>
       </div>
+      <h1>Die Seite befindet sich derzeit im Aufbau.😁</h1>
     </div>
   );
 }
 
-export default KiWerkzeuge;
+export default KI;
