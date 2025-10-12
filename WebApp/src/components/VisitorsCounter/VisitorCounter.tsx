@@ -31,7 +31,7 @@ export default function VisitorCounter() {
   return (
     <div className={s.counterContainer}>
       <h2 className={s.title}>
-        Сейчас онлайн:{" "}
+        Jetzt online: {" "}
         <span className={s.number}>{count}</span>
       </h2>
     </div>
