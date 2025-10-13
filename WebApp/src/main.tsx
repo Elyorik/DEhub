@@ -1,7 +1,7 @@
-import { StrictMode } from "react";
+import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { RouterProvider, useLocation } from "react-router-dom";
 import { routers } from "./routers/routers";
 import { Provider } from "react-redux";
 import { store } from "./store";
@@ -10,8 +10,6 @@ import { auth } from "./firebase";
 import { login, logout } from "./store/userSlice";
 import { UserProvider } from "./store/UserContext";
 import VisitorsCounter from "./components/VisitorsCounter/VisitorCounter";
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 
 // 🔑 Firebase observer sorgt dafür, dass User nach Reload eingeloggt bleibt
 onAuthStateChanged(auth, (firebaseUser) => {
@@ -28,23 +26,23 @@ onAuthStateChanged(auth, (firebaseUser) => {
   }
 });
 
-// ⚡ Создаём обёртку вокруг RouterProvider, чтобы можно было использовать useLocation
-import { BrowserRouter } from "react-router-dom";
-
-function AppWrapper() {
+// 🧩 Вспомогательный компонент, чтобы рендерить счетчик только на /home
+function CounterWrapper() {
   const location = useLocation();
-  const [isHome, setIsHome] = useState(location.pathname === "/");
+  const [showCounter, setShowCounter] = useState(location.pathname === "/");
 
   useEffect(() => {
-    setIsHome(location.pathname === "/");
+    setShowCounter(location.pathname === "/");
   }, [location]);
 
+  return showCounter ? <VisitorsCounter /> : null;
+}
+
+function App() {
   return (
     <>
-      {/* Основной роутер */}
       <RouterProvider router={routers} />
-      {/* Показать счетчик только на главной */}
-      {isHome && <VisitorsCounter />}
+      <CounterWrapper />
     </>
   );
 }
@@ -53,10 +51,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
       <UserProvider>
-        {/* ✅ Теперь useLocation работает, потому что мы оборачиваем всё в BrowserRouter */}
-        <BrowserRouter>
-          <AppWrapper />
-        </BrowserRouter>
+        <App />
       </UserProvider>
     </Provider>
   </StrictMode>
