@@ -35,7 +35,7 @@ export default function VisitorCounter() {
     setOnline();
 
     // ⏰ Каждые 30 сек обновляем "lastSeen"
-    const interval = setInterval(setOnline, 30000);
+   const interval = setInterval(setOnline, 10000);
 
     // 📉 Удаляем при закрытии страницы
     const cleanup = async () => {
