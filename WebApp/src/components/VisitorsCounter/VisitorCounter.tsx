@@ -6,8 +6,6 @@ import {
   deleteDoc,
   collection,
   onSnapshot,
-  serverTimestamp,
-  getDocs,
 } from "firebase/firestore";
 import s from "./visitorCounter.module.scss";
 
@@ -15,7 +13,7 @@ export default function VisitorCounter() {
   const [count, setCount] = useState<number>(0);
 
   useEffect(() => {
-    // 📌 1. Уникальный ID устройства (фиксируется в localStorage)
+    // 🔹 1. Уникальный ID устройства (фиксируется в localStorage)
     let id = localStorage.getItem("device_id");
     if (!id) {
       id = Math.random().toString(36).substring(2, 10);
@@ -24,7 +22,7 @@ export default function VisitorCounter() {
 
     const userRef = doc(db, "visitors", id);
 
-    // 📌 2. Помечаем как активного
+    // 🔹 2. Помечаем как активного
     const setOnline = async () => {
       await setDoc(userRef, {
         active: true,
@@ -34,24 +32,26 @@ export default function VisitorCounter() {
 
     setOnline();
 
-    // ⏰ Каждые 30 сек обновляем "lastSeen"
-   const interval = setInterval(setOnline, 10000);
+    // 🔄 обновляем активность каждые 10 сек
+    const interval = setInterval(setOnline, 10000);
 
-    // 📉 Удаляем при закрытии страницы
-    const cleanup = async () => {
-      await deleteDoc(userRef);
+    // 🔹 3. Удаляем при закрытии страницы (через sendBeacon)
+    const cleanup = () => {
+      const url = `https://firestore.googleapis.com/v1/projects/dehub-349de/databases/(default)/documents/visitors/${id}`;
+      navigator.sendBeacon(url, JSON.stringify({ delete: true }));
     };
-    window.addEventListener("beforeunload", cleanup);
+    window.addEventListener("unload", cleanup);
 
-    // 👀 Подписываемся на обновления
+    // 🔹 4. Слушаем активных пользователей
     const unsub = onSnapshot(collection(db, "visitors"), async (snapshot) => {
       const now = Date.now();
       let activeCount = 0;
 
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
-        // если не обновлялся более 60 сек → удаляем
-        if (data.lastSeen && now - data.lastSeen > 60000) {
+
+        // если неактивен более 15 секунд → удаляем
+        if (data.lastSeen && now - data.lastSeen > 15000) {
           await deleteDoc(doc(db, "visitors", docSnap.id));
         } else {
           activeCount++;
@@ -61,10 +61,11 @@ export default function VisitorCounter() {
       setCount(activeCount);
     });
 
+    // 🧹 Очистка
     return () => {
       clearInterval(interval);
       unsub();
-      window.removeEventListener("beforeunload", cleanup);
+      window.removeEventListener("unload", cleanup);
       cleanup();
     };
   }, []);
