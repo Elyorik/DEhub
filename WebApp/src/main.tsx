@@ -1,15 +1,14 @@
-import { StrictMode, useEffect, useState } from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { RouterProvider, useLocation } from "react-router-dom";
+import { RouterProvider } from "react-router-dom";
 import { routers } from "./routers/routers";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { login, logout } from "./store/userSlice";
-import { UserProvider } from "./store/UserContext";
-import VisitorsCounter from "./components/VisitorsCounter/VisitorCounter";
+import { UserProvider } from "./store/UserContext"; // ✅ Wichtig!
 
 // 🔑 Firebase observer sorgt dafür, dass User nach Reload eingeloggt bleibt
 onAuthStateChanged(auth, (firebaseUser) => {
@@ -26,32 +25,11 @@ onAuthStateChanged(auth, (firebaseUser) => {
   }
 });
 
-// 🧩 Вспомогательный компонент, чтобы рендерить счетчик только на /home
-function CounterWrapper() {
-  const location = useLocation();
-  const [showCounter, setShowCounter] = useState(location.pathname === "/");
-
-  useEffect(() => {
-    setShowCounter(location.pathname === "/");
-  }, [location]);
-
-  return showCounter ? <VisitorsCounter /> : null;
-}
-
-function App() {
-  return (
-    <>
-      <RouterProvider router={routers} />
-      <CounterWrapper />
-    </>
-  );
-}
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
-      <UserProvider>
-        <App />
+      <UserProvider> {/* ✅ Jetzt ist dein Forum im Context */}
+        <RouterProvider router={routers} />
       </UserProvider>
     </Provider>
   </StrictMode>
