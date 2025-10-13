@@ -7,6 +7,7 @@ import {
   collection,
   onSnapshot,
   serverTimestamp,
+  getDocs,
 } from "firebase/firestore";
 import s from "./visitorCounter.module.scss";
 
@@ -14,7 +15,7 @@ export default function VisitorCounter() {
   const [count, setCount] = useState<number>(0);
 
   useEffect(() => {
-    // 📌 1. Получаем постоянный ID из localStorage
+    // 📌 1. Уникальный ID устройства (фиксируется в localStorage)
     let id = localStorage.getItem("device_id");
     if (!id) {
       id = Math.random().toString(36).substring(2, 10);
@@ -23,28 +24,41 @@ export default function VisitorCounter() {
 
     const userRef = doc(db, "visitors", id);
 
-    // 📌 2. Отмечаем устройство как онлайн
+    // 📌 2. Помечаем как активного
     const setOnline = async () => {
       await setDoc(userRef, {
         active: true,
-        lastSeen: serverTimestamp(),
+        lastSeen: Date.now(),
       });
     };
 
     setOnline();
 
-    // 📌 3. Каждые 30 секунд обновляем время активности
+    // ⏰ Каждые 30 сек обновляем "lastSeen"
     const interval = setInterval(setOnline, 30000);
 
-    // 📌 4. Удаляем при закрытии страницы
+    // 📉 Удаляем при закрытии страницы
     const cleanup = async () => {
       await deleteDoc(userRef);
     };
     window.addEventListener("beforeunload", cleanup);
 
-    // 📌 5. Слушаем изменения
-    const unsub = onSnapshot(collection(db, "visitors"), (snapshot) => {
-      setCount(snapshot.size);
+    // 👀 Подписываемся на обновления
+    const unsub = onSnapshot(collection(db, "visitors"), async (snapshot) => {
+      const now = Date.now();
+      let activeCount = 0;
+
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        // если не обновлялся более 60 сек → удаляем
+        if (data.lastSeen && now - data.lastSeen > 60000) {
+          await deleteDoc(doc(db, "visitors", docSnap.id));
+        } else {
+          activeCount++;
+        }
+      }
+
+      setCount(activeCount);
     });
 
     return () => {
