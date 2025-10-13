@@ -14,29 +14,44 @@ export default function VisitorCounter() {
   const [count, setCount] = useState<number>(0);
 
   useEffect(() => {
-    // Jede Sitzung bekommt eine zufällige ID
-    const id = Math.random().toString(36).substring(2, 10);
+    // 📌 1. Получаем постоянный ID из localStorage
+    let id = localStorage.getItem("device_id");
+    if (!id) {
+      id = Math.random().toString(36).substring(2, 10);
+      localStorage.setItem("device_id", id);
+    }
+
     const userRef = doc(db, "visitors", id);
 
-    // Benutzer als "online" markieren
-    setDoc(userRef, {
-      active: true,
-      lastSeen: serverTimestamp(),
-    });
+    // 📌 2. Отмечаем устройство как онлайн
+    const setOnline = async () => {
+      await setDoc(userRef, {
+        active: true,
+        lastSeen: serverTimestamp(),
+      });
+    };
 
-    // Wenn Benutzer die Seite verlässt, löschen
-    const cleanup = () => deleteDoc(userRef);
+    setOnline();
+
+    // 📌 3. Каждые 30 секунд обновляем время активности
+    const interval = setInterval(setOnline, 30000);
+
+    // 📌 4. Удаляем при закрытии страницы
+    const cleanup = async () => {
+      await deleteDoc(userRef);
+    };
     window.addEventListener("beforeunload", cleanup);
 
-    // Echtzeit-Listener auf alle Besucher
+    // 📌 5. Слушаем изменения
     const unsub = onSnapshot(collection(db, "visitors"), (snapshot) => {
       setCount(snapshot.size);
     });
 
     return () => {
+      clearInterval(interval);
       unsub();
-      cleanup();
       window.removeEventListener("beforeunload", cleanup);
+      cleanup();
     };
   }, []);
 
