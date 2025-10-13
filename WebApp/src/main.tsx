@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { RouterProvider, useLocation } from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { routers } from "./routers/routers";
 import { Provider } from "react-redux";
 import { store } from "./store";
@@ -10,6 +10,8 @@ import { auth } from "./firebase";
 import { login, logout } from "./store/userSlice";
 import { UserProvider } from "./store/UserContext";
 import VisitorsCounter from "./components/VisitorsCounter/VisitorCounter";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 // 🔑 Firebase observer sorgt dafür, dass User nach Reload eingeloggt bleibt
 onAuthStateChanged(auth, (firebaseUser) => {
@@ -26,15 +28,23 @@ onAuthStateChanged(auth, (firebaseUser) => {
   }
 });
 
-// 🔥 Diese kleine Wrapper-Komponente zeigt den Counter nur auf der Startseite
-function AppWithCounter() {
+// ⚡ Создаём обёртку вокруг RouterProvider, чтобы можно было использовать useLocation
+import { BrowserRouter } from "react-router-dom";
+
+function AppWrapper() {
   const location = useLocation();
-  const isHome = location.pathname === "/"; // проверяем, что находимся на главной
+  const [isHome, setIsHome] = useState(location.pathname === "/");
+
+  useEffect(() => {
+    setIsHome(location.pathname === "/");
+  }, [location]);
 
   return (
     <>
+      {/* Основной роутер */}
       <RouterProvider router={routers} />
-      {isHome && <VisitorsCounter />} {/* 👈 показываем только на / */}
+      {/* Показать счетчик только на главной */}
+      {isHome && <VisitorsCounter />}
     </>
   );
 }
@@ -43,7 +53,10 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
       <UserProvider>
-        <AppWithCounter />
+        {/* ✅ Теперь useLocation работает, потому что мы оборачиваем всё в BrowserRouter */}
+        <BrowserRouter>
+          <AppWrapper />
+        </BrowserRouter>
       </UserProvider>
     </Provider>
   </StrictMode>
