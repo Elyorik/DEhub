@@ -28,7 +28,6 @@ function Home() {
           <img src={newSuchmaschiene} alt="Suchverbesserung" />
         </section>
       </div>
-      <VisitorsCounter />
     </div>
   );
 }
