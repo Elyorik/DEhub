@@ -1,114 +1,151 @@
 import { useState } from "react";
 import s from "./spiele.module.scss";
 
-// === Мини-игры ===
-function GuessArticleGame() {
-  const words = [
-    { word: "Tisch", article: "der" },
-    { word: "Lampe", article: "die" },
-    { word: "Auto", article: "das" },
-  ];
-  const [index, setIndex] = useState(0);
-  const [message, setMessage] = useState("");
+// 🔹 Lokale Bilder importieren
+import artikelImg from "../../assets/SpieleImg/DerDieDas.png";
+import memoryImg from "../../assets/SpieleImg/Memory.png";
 
-  const current = words[index];
+type GameType = "artikel" | "memory" | null;
 
-  const check = (a: string) => {
-    if (a === current.article) {
-      setMessage("✅ Richtig!");
-      setTimeout(() => nextWord(), 800);
-    } else {
-      setMessage("❌ Falsch!");
-    }
-  };
-
-  const nextWord = () => {
-    setIndex((prev) => (prev + 1) % words.length);
-    setMessage("");
-  };
-
-  return (
-    <div className={s.gameContainer}>
-      <h2>🎯 Угадай артикль</h2>
-      <p className={s.word}>{current.word}</p>
-      <div className={s.buttons}>
-        <button onClick={() => check("der")}>der</button>
-        <button onClick={() => check("die")}>die</button>
-        <button onClick={() => check("das")}>das</button>
-      </div>
-      <p className={s.message}>{message}</p>
-    </div>
-  );
-}
-
-function MemoryGame() {
-  return (
-    <div className={s.gameContainer}>
-      <h2>🧠 Игра “Память”</h2>
-      <p>Здесь будет мини-игра на запоминание слов (можно добавить позже).</p>
-    </div>
-  );
-}
-
-// === Главный компонент Spiele ===
 export default function Spiele() {
-  const [selectedGame, setSelectedGame] = useState<string | null>(null);
+  const [activeGame, setActiveGame] = useState<GameType>(null);
+  const [score, setScore] = useState(0);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
-  const games = [
-    {
-      id: "article",
-      title: "Угадай артикль",
-      image:
-        "https://images.unsplash.com/photo-1553531888-6e554a9a7e96?auto=format&fit=crop&w=800&q=60",
-    },
-    {
-      id: "memory",
-      title: "Память для слов",
-      image:
-        "https://images.unsplash.com/photo-1581093588401-22d8a2bfb42d?auto=format&fit=crop&w=800&q=60",
-    },
+  // 🧩 Spiel 1: Artikel-Quiz
+  const artikelWords = [
+    { word: "Tisch", correct: "der" },
+    { word: "Lampe", correct: "die" },
+    { word: "Auto", correct: "das" },
+    { word: "Hund", correct: "der" },
+    { word: "Blume", correct: "die" },
+    { word: "Haus", correct: "das" },
+    { word: "Computer", correct: "der" },
+    { word: "Zeitung", correct: "die" },
+    { word: "Buch", correct: "das" },
+    { word: "Stuhl", correct: "der" },
+    { word: "Katze", correct: "die" },
+    { word: "Fenster", correct: "das" },
+    { word: "Apfel", correct: "der" },
+    { word: "Schule", correct: "die" },
+    { word: "Kind", correct: "das" },
   ];
 
-  if (selectedGame) {
-    let GameComponent;
-    switch (selectedGame) {
-      case "article":
-        GameComponent = <GuessArticleGame />;
-        break;
-      case "memory":
-        GameComponent = <MemoryGame />;
-        break;
-      default:
-        GameComponent = null;
-    }
+  const currentWord = artikelWords[currentWordIndex];
 
-    return (
-      <div className={s.spieleWrapper}>
-        <button className={s.backButton} onClick={() => setSelectedGame(null)}>
-          ⬅️ Назад к играм
-        </button>
-        <div className={s.gameWrapper}>{GameComponent}</div>
-      </div>
-    );
-  }
+  const handleArtikelSelect = (artikel: string) => {
+    if (artikel === currentWord.correct) {
+      setScore(score + 1);
+    }
+    if (currentWordIndex < artikelWords.length - 1) {
+      setCurrentWordIndex(currentWordIndex + 1);
+    } else {
+      alert(`Spiel beendet! Du hast ${score + 1} Punkte.`);
+      resetGame();
+    }
+  };
+
+  // 🎯 Spiel 2: Wort-Memory
+  const words = [
+    { de: "Hund", en: "dog" },
+    { de: "Katze", en: "cat" },
+    { de: "Haus", en: "house" },
+    { de: "Buch", en: "book" },
+    { de: "Auto", en: "car" },
+    { de: "Baum", en: "tree" },
+  ];
+
+  const [flipped, setFlipped] = useState<string[]>([]);
+  const [matched, setMatched] = useState<string[]>([]);
+
+  const cards = [...words, ...words].sort(() => Math.random() - 0.5);
+
+  const handleFlip = (index: number) => {
+    if (flipped.length === 2 || flipped.includes(cards[index].de)) return;
+
+    const newFlipped = [...flipped, cards[index].de];
+    setFlipped(newFlipped);
+
+    if (newFlipped.length === 2) {
+      const [first, second] = newFlipped;
+      const firstWord = cards.find((c) => c.de === first)!;
+      const secondWord = cards.find((c) => c.de === second)!;
+
+      if (firstWord.de === secondWord.de) {
+        setMatched([...matched, first]);
+      }
+
+      setTimeout(() => setFlipped([]), 1000);
+    }
+  };
+
+  const resetGame = () => {
+    setActiveGame(null);
+    setScore(0);
+    setCurrentWordIndex(0);
+    setFlipped([]);
+    setMatched([]);
+  };
 
   return (
-    <div className={s.spieleWrapper}>
-      <h1 className={s.title}>🎮 Spiele – Игры для изучения немецкого</h1>
-      <div className={s.cardsGrid}>
-        {games.map((g) => (
-          <div
-            key={g.id}
-            className={s.card}
-            style={{ backgroundImage: `url(${g.image})` }}
-            onClick={() => setSelectedGame(g.id)}
-          >
-            <div className={s.overlay}>
-              <h2>{g.title}</h2>
+    <div className={s.wrapper}>
+      {!activeGame && (
+        <>
+          <h1>Spiele</h1>
+          <p>Wähle ein Spiel aus, um dein Deutsch spielerisch zu verbessern:</p>
+          <div className={s.gamesGrid}>
+            <div className={s.card} onClick={() => setActiveGame("artikel")}>
+              <img src={artikelImg} alt="Artikel-Quiz" />
+              <div className={s.cardTitle}>Artikel-Quiz</div>
+            </div>
+
+            <div className={s.card} onClick={() => setActiveGame("memory")}>
+              <img src={memoryImg} alt="Wort-Memory" />
+              <div className={s.cardTitle}>Wort-Memory</div>
             </div>
           </div>
-        ))}
-      </div>
+        </>
+      )}
+
+      {/* 🎮 Artikel-Quiz */}
+      {activeGame === "artikel" && (
+        <div className={s.gameContainer}>
+          <h2>Wähle den richtigen Artikel</h2>
+          <h3>{currentWord.word}</h3>
+          <div className={s.buttons}>
+            {["der", "die", "das"].map((art) => (
+              <button key={art} onClick={() => handleArtikelSelect(art)}>
+                {art}
+              </button>
+            ))}
+          </div>
+          <p>Punkte: {score}</p>
+          <button className={s.backButton} onClick={resetGame}>
+            Zurück zur Auswahl
+          </button>
+        </div>
+      )}
+
+      {/* 🧠 Wort-Memory */}
+      {activeGame === "memory" && (
+        <div className={s.memoryGrid}>
+          {cards.map((card, index) => {
+            const isFlipped = flipped.includes(card.de) || matched.includes(card.de);
+            return (
+              <div
+                key={index}
+                className={`${s.memoryCard} ${isFlipped ? s.flipped : ""}`}
+                onClick={() => handleFlip(index)}
+              >
+                {isFlipped ? <span>{card.de}</span> : <span>?</span>}
+              </div>
+            );
+          })}
+          <button className={s.backButton} onClick={resetGame}>
+            Zurück zur Auswahl
+          </button>
+        </div>
+      )}
     </div>
   );
 }
