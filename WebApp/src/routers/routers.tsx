@@ -8,6 +8,7 @@ import Überuns from '../pages/Überuns/Überuns';
 import Account from "../pages/Account/Account";
 import Quellen from "../pages/Quellen/Quellen";
 import Forum from "../pages/Forum/Forum";
+import Spiele from "../pages/Spiele/Spiele";
 
 export const routers = createBrowserRouter([
   {
@@ -46,6 +47,10 @@ export const routers = createBrowserRouter([
         path: "forum",
         element: <Forum />,
       },
+            {
+        path: "spiele",
+        element: <Spiele />,
+      }
     ],
   },
 ]);
