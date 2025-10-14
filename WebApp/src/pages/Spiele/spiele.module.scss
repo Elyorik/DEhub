@@ -65,4 +65,59 @@
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
 }
 
-.ba
+.backButton {
+  background: #007bff;
+  color: white;
+  font-size: 18px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 30px;
+  transition: background 0.3s;
+}
+
+.backButton:hover {
+  background: #0056b3;
+}
+
+/* === Игра “Угадай артикль” === */
+.gameContainer {
+  text-align: center;
+}
+
+.word {
+  font-size: 60px;
+  font-weight: 800;
+  margin: 40px 0;
+  color: #007bff;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.buttons button {
+  font-size: 24px;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 12px;
+  background: #f0f3ff;
+  color: #0d0d0d;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.buttons button:hover {
+  background: #007bff;
+  color: white;
+}
+
+.message {
+  font-size: 24px;
+  margin-top: 25px;
+  font-weight: 700;
+}
