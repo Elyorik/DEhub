@@ -123,8 +123,6 @@ h3 {
 
 /* 🧩 Memory-Spiel */
 .memoryGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 15px;
   width: 90%;
   max-width: 500px;
