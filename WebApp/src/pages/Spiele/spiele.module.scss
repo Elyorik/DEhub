@@ -88,7 +88,7 @@ h1 {
 h2 {
   font-size: 32px;
   margin-bottom: 15px;
-  color: #007bff;
+  color: black;
 }
 
 h3 {
@@ -265,12 +265,14 @@ button:hover {
 }
 
 /* 📱 Только для телефона */
-/* 📱 Только для телефона */
 @media (max-width: 600px) {
   .memoryGrid {
+    display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 4px;
     max-width: 300px;
+    margin: 0 auto;            /* 💎 Центрирует сетку */
+    justify-items: center;     /* 💎 Центрирует карточки внутри ячеек */
   }
 
   .memoryCard {
@@ -301,10 +303,18 @@ button:hover {
   .gameContainer {
     padding: 20px;
     width: 95%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;       /* 💎 Центрирует контент по горизонтали */
+    justify-content: center;
   }
 
   .wrapper {
     padding: 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 }
-
