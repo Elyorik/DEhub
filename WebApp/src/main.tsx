@@ -8,9 +8,9 @@ import { store } from "./store";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { login, logout } from "./store/userSlice";
-import { UserProvider } from "./store/UserContext"; // ✅ Wichtig!
+import { UserProvider } from "./store/UserContext";
+import VisitorTracker from "./components/VisitorsCounter/VisitorCounter"; // ⚡ только трекинг
 
-// 🔑 Firebase observer sorgt dafür, dass User nach Reload eingeloggt bleibt
 onAuthStateChanged(auth, (firebaseUser) => {
   if (firebaseUser) {
     store.dispatch(
@@ -26,11 +26,12 @@ onAuthStateChanged(auth, (firebaseUser) => {
 });
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <Provider store={store}>
-      <UserProvider> {/* ✅ Jetzt ist dein Forum im Context */}
-        <RouterProvider router={routers} />
-      </UserProvider>
-    </Provider>
-  </StrictMode>
+    <StrictMode>
+      <Provider store={store}>
+        <UserProvider>
+          <VisitorTracker />  {/* работает в фоне, каждые 10 сек */}
+          <RouterProvider router={routers} />
+        </UserProvider>
+      </Provider>
+    </StrictMode>
 );
