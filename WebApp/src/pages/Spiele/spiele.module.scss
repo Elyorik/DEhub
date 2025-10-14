@@ -266,14 +266,12 @@ button:hover {
 
 /* 📱 Только для телефона */
 @media (max-width: 600px) {
-  .memoryGrid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-    max-width: 300px;
-    margin: 0 auto;            /* 💎 Центрирует сетку */
-    justify-items: center;     /* 💎 Центрирует карточки внутри ячеек */
-  }
+.memoryGrid {
+  margin: 0 auto;          /* Центрирует саму сетку */
+  justify-content: center; /* Центрирует ячейки, если ширина меньше контейнера */
+  justify-items: center;   /* Центрирует содержимое ячеек */
+  display: grid;
+}
 
   .memoryCard {
     width: 65px;
