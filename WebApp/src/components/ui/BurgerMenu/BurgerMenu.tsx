@@ -65,12 +65,12 @@ function BurgerMenu({ onClose, isOpen }: BurgerMenuProps) {
 
           {/* --- KI Folder --- */}
           <li className={s.folder}>
-            <button className={s.folderButton} onClick={() => toggleFolder("ki")}>
+            <button className={s.folderButton} onClick={() => toggleFolder("Werkzeuge")}>
               KI
-              <span className={`${s.arrow} ${openFolder === "ki" ? s.openArrow : ""}`}>▾</span>
+              <span className={`${s.arrow} ${openFolder === "Werkzeuge" ? s.openArrow : ""}`}>▾</span>
             </button>
-            <ul className={`${s.submenu} ${openFolder === "ki" ? s.show : ""}`}>
-              <li><Link to="/ki" onClick={handleNavClick}>Werkzeuge</Link></li>
+            <ul className={`${s.submenu} ${openFolder === "Werkzeuge" ? s.show : ""}`}>
+              <li><Link to="/ki" onClick={handleNavClick}>KI</Link></li>
             </ul>
           </li>
 
