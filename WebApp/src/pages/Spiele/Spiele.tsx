@@ -1,235 +1,176 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState, useEffect } from "react";
 import s from "./spiele.module.scss";
-
-import artikelImg from "../../assets/SpieleImg/DerDieDas.png";
+import derDieDasImg from "../../assets/SpieleImg/DerDieDas.png";
 import memoryImg from "../../assets/SpieleImg/Memory.png";
 
-type GameType = "artikel" | "memory" | null;
+type GameType = "menu" | "derDieDas" | "memory";
 
 export default function Spiele() {
-  const [activeGame, setActiveGame] = useState<GameType>(null);
-  const [score, setScore] = useState(0);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [selectedGame, setSelectedGame] = useState<GameType>("menu");
 
-  // ======= Artikel-Quiz =======
-  const artikelWords = useMemo(
-    () => [
-      { word: "Tisch", correct: "der" },
-      { word: "Lampe", correct: "die" },
-      { word: "Auto", correct: "das" },
-      { word: "Hund", correct: "der" },
-      { word: "Blume", correct: "die" },
-      { word: "Haus", correct: "das" },
-      { word: "Computer", correct: "der" },
-      { word: "Zeitung", correct: "die" },
-      { word: "Buch", correct: "das" },
-      { word: "Stuhl", correct: "der" },
-      { word: "Katze", correct: "die" },
-      { word: "Fenster", correct: "das" },
-      { word: "Apfel", correct: "der" },
-      { word: "Schule", correct: "die" },
-      { word: "Kind", correct: "das" },
-      { word: "Affe", correct: "der" }, // добавил Affe для emoji
-    ],
-    []
-  );
+  // 🔹 Spiel 1 – Der / Die / Das
+  const [word, setWord] = useState<string>("");
+  const [article, setArticle] = useState<string>("");
+  const [result, setResult] = useState<string>("");
 
-  const currentWord = artikelWords[currentWordIndex];
+  const words = [
+    { word: "Apfel", article: "der" },
+    { word: "Banane", article: "die" },
+    { word: "Auto", article: "das" },
+    { word: "Tisch", article: "der" },
+    { word: "Lampe", article: "die" },
+    { word: "Haus", article: "das" },
+    { word: "Hund", article: "der" },
+    { word: "Katze", article: "die" },
+    { word: "Buch", article: "das" },
+    { word: "Stuhl", article: "der" },
+  ];
 
-  const handleArtikelSelect = (artikel: string) => {
-    if (artikel === currentWord.correct) {
-      setScore((s) => s + 1);
-    }
-    if (currentWordIndex < artikelWords.length - 1) {
-      setCurrentWordIndex((i) => i + 1);
-    } else {
-      alert(`Spiel beendet! Du hast ${score + (artikel === currentWord.correct ? 1 : 0)} Punkte.`);
-      resetGame();
-    }
+  const getNewWord = () => {
+    const random = words[Math.floor(Math.random() * words.length)];
+    setWord(random.word);
+    setArticle(random.article);
+    setResult("");
   };
 
-  // ======= Wort-Memory (исправленная логика) =======
-  // Словарь с emoji
-  const wordList = useMemo(
-    () => [
-      { de: "Hund", en: "dog", emoji: "🐶" },
-      { de: "Katze", en: "cat", emoji: "🐱" },
-      { de: "Haus", en: "house", emoji: "🏠" },
-      { de: "Buch", en: "book", emoji: "📚" },
-      { de: "Auto", en: "car", emoji: "🚗" },
-      { de: "Baum", en: "tree", emoji: "🌳" },
-      { de: "Affe", en: "monkey", emoji: "🐒" },
-      { de: "Apfel", en: "apple", emoji: "🍎" },
-    ],
-    []
+  const checkAnswer = (chosen: string) => {
+    if (chosen === article) {
+      setResult("✅ Richtig!");
+    } else {
+      setResult("❌ Falsch!");
+    }
+    setTimeout(getNewWord, 1000);
+  };
+
+  useEffect(() => {
+    if (selectedGame === "derDieDas") getNewWord();
+  }, [selectedGame]);
+
+  // 🔹 Spiel 2 – Memory (mit Emojis)
+  const emojiPairs = [
+    ["Affe 🐒", "Affe 🐒"],
+    ["Hund 🐶", "Hund 🐶"],
+    ["Katze 🐱", "Katze 🐱"],
+    ["Apfel 🍎", "Apfel 🍎"],
+    ["Baum 🌳", "Baum 🌳"],
+    ["Auto 🚗", "Auto 🚗"],
+    ["Buch 📖", "Buch 📖"],
+    ["Haus 🏠", "Haus 🏠"],
   ];
 
   type Card = {
-    id: string; // уникальный id карточки
-    pairId: string; // идентификатор пары (одинаков для двух карточек-пары)
-    content: string; // отображаемое (немецкое слово)
-    emoji?: string; // emoji (опционально)
+    id: number;
+    value: string;
+    flipped: boolean;
+    matched: boolean;
   };
 
-  const [deck, setDeck] = useState<Card[]>([]);
-  const [flippedIds, setFlippedIds] = useState<string[]>([]); // ids перевёрнутых сейчас
-  const [matchedPairIds, setMatchedPairIds] = useState<string[]>([]);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [lockBoard, setLockBoard] = useState(false);
 
-  // Инициализация/перемешивание колоды при старте Memory
   useEffect(() => {
-    if (activeGame === "memory") {
-      // Возьмём первые N слов (например, 6 пар) или весь список если нужен
-      const pairs = wordList.slice(0, 6); // 6 пар = 12 карточек
-      let tmpDeck: Card[] = [];
-
-      pairs.forEach((w) => {
-        const pairId = Math.random().toString(36).slice(2, 9);
-        tmpDeck.push({
-          id: pairId + "_a",
-          pairId,
-          content: w.de,
-          emoji: w.emoji,
-        });
-        tmpDeck.push({
-          id: pairId + "_b",
-          pairId,
-          content: w.de,
-          emoji: w.emoji,
-        });
-      });
-
-      // Перемешать
-      tmpDeck = tmpDeck.sort(() => Math.random() - 0.5);
-      setDeck(tmpDeck);
-      setFlippedIds([]);
-      setMatchedPairIds([]);
-      setLockBoard(false);
-    } else {
-      // если выходим из memory, очистим
-      setDeck([]);
-      setFlippedIds([]);
-      setMatchedPairIds([]);
-      setLockBoard(false);
+    if (selectedGame === "memory") {
+      const shuffled = emojiPairs
+        .flat()
+        .sort(() => Math.random() - 0.5)
+        .map((val, i) => ({ id: i, value: val, flipped: false, matched: false }));
+      setCards(shuffled);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeGame]);
+  }, [selectedGame]);
 
-  const handleFlip = (cardId: string) => {
+  const handleFlip = (id: number) => {
     if (lockBoard) return;
-    if (flippedIds.includes(cardId)) return; // уже перевёрнута
-    const card = deck.find((c) => c.id === cardId);
-    if (!card) return;
+    const newCards = [...cards];
+    const clicked = newCards.find((c) => c.id === id);
+    if (!clicked || clicked.flipped || clicked.matched) return;
 
-    // если уже одна карточка перевернута — пытаемся открыть вторую
-    if (flippedIds.length === 1) {
-      const firstId = flippedIds[0];
-      const firstCard = deck.find((c) => c.id === firstId)!;
+    clicked.flipped = true;
+    setCards(newCards);
 
-      // временно показываем вторую
-      setFlippedIds([firstId, cardId]);
-      // если пара совпадает — помечаем matched
-      if (firstCard.pairId === card.pairId) {
-        setMatchedPairIds((m) => [...m, firstCard.pairId]);
-        // очистка перевёрнутых через короткое время (с анимацией)
+    const flippedNow = [...flippedCards, id];
+    setFlippedCards(flippedNow);
+
+    if (flippedNow.length === 2) {
+      setLockBoard(true);
+      const [first, second] = flippedNow.map((i) => newCards.find((c) => c.id === i)!);
+
+      if (first.value === second.value) {
+        // ✅ Match
+        first.matched = true;
+        second.matched = true;
         setTimeout(() => {
-          setFlippedIds([]);
-        }, 600);
+          setFlippedCards([]);
+          setLockBoard(false);
+        }, 800);
       } else {
-        // не совпадает — заблокируем доску и перевернём обратно
-        setLockBoard(true);
+        // ❌ Kein Match
         setTimeout(() => {
-          setFlippedIds([]);
+          first.flipped = false;
+          second.flipped = false;
+          setCards([...newCards]);
+          setFlippedCards([]);
           setLockBoard(false);
         }, 800);
       }
-    } else {
-      // ещё нет открытых карточек — просто откроем одну
-      setFlippedIds([cardId]);
     }
   };
 
-  const resetGame = () => {
-    setActiveGame(null);
-    setScore(0);
-    setCurrentWordIndex(0);
-    // memory reset handled by effect on activeGame change
-  };
-
-  // ======= UI =======
+  // 🔹 Haupt-Render
   return (
     <div className={s.wrapper}>
-      {!activeGame && (
-        <>
-          <h1>Spiele</h1>
-          <p>Wähle ein Spiel aus, um dein Deutsch spielerisch zu verbessern:</p>
-          <div className={s.gamesGrid}>
-            <div className={s.card} onClick={() => setActiveGame("artikel")}>
-              <img src={artikelImg} alt="Artikel-Quiz" />
-              <div className={s.cardTitle}>Artikel-Quiz</div>
-            </div>
+      {selectedGame === "menu" && (
+        <div>
+          <h1>🎮 Spiele</h1>
+          <p>Wähle ein Spiel, um dein Deutsch zu verbessern!</p>
 
-            <div className={s.card} onClick={() => setActiveGame("memory")}>
-              <img src={memoryImg} alt="Wort-Memory" />
-              <div className={s.cardTitle}>Wort-Memory</div>
+          <div className={s.gamesGrid}>
+            <div className={s.card} onClick={() => setSelectedGame("derDieDas")}>
+              <img src={derDieDasImg} alt="Der Die Das" />
+              <div className={s.cardTitle}>Der / Die / Das</div>
+            </div>
+            <div className={s.card} onClick={() => setSelectedGame("memory")}>
+              <img src={memoryImg} alt="Memory Spiel" />
+              <div className={s.cardTitle}>Memory</div>
             </div>
           </div>
-        </>
+        </div>
       )}
 
-      {/* Artikel-Quiz */}
-      {activeGame === "artikel" && (
+      {selectedGame === "derDieDas" && (
         <div className={s.gameContainer}>
-          <h2>Wähle den richtigen Artikel</h2>
-          <h3>{currentWord.word}</h3>
+          <h2>🧩 Der / Die / Das</h2>
+          <h3>{word}</h3>
           <div className={s.buttons}>
-            {["der", "die", "das"].map((art) => (
-              <button key={art} onClick={() => handleArtikelSelect(art)}>
-                {art}
-              </button>
-            ))}
+            <button onClick={() => checkAnswer("der")}>der</button>
+            <button onClick={() => checkAnswer("die")}>die</button>
+            <button onClick={() => checkAnswer("das")}>das</button>
           </div>
-          <p>Punkte: {score}</p>
-          <button className={s.backButton} onClick={resetGame}>
-            Zurück zur Auswahl
+          <p>{result}</p>
+          <button className={s.backButton} onClick={() => setSelectedGame("menu")}>
+            ⬅️ Zurück zur Auswahl
           </button>
         </div>
       )}
 
-      {/* Memory */}
-      {activeGame === "memory" && (
+      {selectedGame === "memory" && (
         <div className={s.gameContainer}>
-          <h2>Wort-Memory</h2>
-          <p>Finde die Paare. Tippe auf zwei Karten, um zu vergleichen.</p>
-
+          <h2>🧠 Memory-Spiel</h2>
           <div className={s.memoryGrid}>
-            {deck.map((card) => {
-              const isFlipped = flippedIds.includes(card.id) || matchedPairIds.includes(card.pairId);
-              return (
-                <div
-                  key={card.id}
-                  className={`${s.memoryCard} ${isFlipped ? s.flipped : ""}`}
-                  onClick={() => {
-                    // если уже совпала пара, клики игнорируем
-                    if (matchedPairIds.includes(card.pairId)) return;
-                    handleFlip(card.id);
-                  }}
-                >
-                  {isFlipped ? (
-                    <>
-                      <div style={{ fontSize: 28 }}>{card.emoji ?? ""}</div>
-                      <div style={{ fontSize: 16, marginTop: 6 }}>{card.content}</div>
-                    </>
-                  ) : (
-                    <span style={{ fontSize: 32 }}>?</span>
-                  )}
-                </div>
-              );
-            })}
+            {cards.map((card) => (
+              <div
+                key={card.id}
+                className={`${s.memoryCard} ${
+                  card.flipped || card.matched ? s.flipped : ""
+                }`}
+                onClick={() => handleFlip(card.id)}
+              >
+                {card.flipped || card.matched ? card.value : "❓"}
+              </div>
+            ))}
           </div>
-
-          <button className={s.backButton} onClick={resetGame}>
-            Zurück zur Auswahl
+          <button className={s.backButton} onClick={() => setSelectedGame("menu")}>
+            ⬅️ Zurück zur Auswahl
           </button>
         </div>
       )}
