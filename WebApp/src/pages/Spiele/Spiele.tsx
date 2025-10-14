@@ -24,7 +24,6 @@ export default function Spiele() {
     { word: "Bleistift", article: "der" },
     { word: "Computer", article: "der" },
     { word: "Zug", article: "der" },
-
     { word: "Banane", article: "die" },
     { word: "Katze", article: "die" },
     { word: "Lampe", article: "die" },
@@ -35,7 +34,6 @@ export default function Spiele() {
     { word: "Küche", article: "die" },
     { word: "Tür", article: "die" },
     { word: "Straße", article: "die" },
-
     { word: "Auto", article: "das" },
     { word: "Haus", article: "das" },
     { word: "Buch", article: "das" },
@@ -56,11 +54,7 @@ export default function Spiele() {
   };
 
   const checkAnswer = (chosen: string) => {
-    if (chosen === article) {
-      setResult("✅ Richtig!");
-    } else {
-      setResult("❌ Falsch!");
-    }
+    setResult(chosen === article ? "✅ Richtig!" : "❌ Falsch!");
     setTimeout(getNewWord, 1000);
   };
 
@@ -68,23 +62,16 @@ export default function Spiele() {
     if (selectedGame === "derDieDas") getNewWord();
   }, [selectedGame]);
 
-  // 🔹 Spiel 2 – Memory (mit Emojis)
-  const emojiPairs = [
-    ["Affe 🐒", "Affe 🐒"],
-    ["Hund 🐶", "Hund 🐶"],
-    ["Katze 🐱", "Katze 🐱"],
-    ["Apfel 🍎", "Apfel 🍎"],
-    ["Baum 🌳", "Baum 🌳"],
-    ["Auto 🚗", "Auto 🚗"],
-    ["Buch 📖", "Buch 📖"],
-    ["Haus 🏠", "Haus 🏠"],
-    ["Sonne ☀️", "Sonne ☀️"],
-    ["Mond 🌙", "Mond 🌙"],
-    ["Ball ⚽", "Ball ⚽"],
-    ["Herz ❤️", "Herz ❤️"],
-    ["Blume 🌸", "Blume 🌸"],
-    ["Pizza 🍕", "Pizza 🍕"],
-    ["Musik 🎵", "Musik 🎵"],
+  // 🔹 Spiel 2 – Memory
+  const allEmojiWords = [
+    "Affe 🐒", "Hund 🐶", "Katze 🐱", "Apfel 🍎", "Baum 🌳", "Auto 🚗", "Buch 📖",
+    "Haus 🏠", "Sonne ☀️", "Mond 🌙", "Ball ⚽", "Herz ❤️", "Blume 🌸", "Pizza 🍕",
+    "Musik 🎵", "Vogel 🐦", "Eis 🍦", "Fisch 🐟", "Feuer 🔥", "Schnee ❄️", "Berg 🏔️",
+    "Kaffee ☕", "Tee 🍵", "Regen 🌧️", "Donner ⚡", "Wolke ☁️", "Brief ✉️", "Schlüssel 🔑",
+    "Uhr ⏰", "Rakete 🚀", "Brot 🍞", "Käse 🧀", "Kuchen 🍰", "Telefon 📱", "Kamera 📷",
+    "Laptop 💻", "Stift ✏️", "Zebra 🦓", "Tiger 🐅", "Elefant 🐘", "Giraffe 🦒",
+    "Eule 🦉", "Biene 🐝", "Schmetterling 🦋", "Schaf 🐑", "Pferd 🐎", "Schwein 🐷",
+    "Torte 🎂", "Kirsche 🍒", "Traube 🍇", "Melone 🍉", "Karotte 🥕", "Kaktus 🌵",
   ];
 
   type Card = {
@@ -100,8 +87,10 @@ export default function Spiele() {
 
   useEffect(() => {
     if (selectedGame === "memory") {
-      const shuffled = emojiPairs
-        .flat()
+      // 🎲 выбираем 8 случайных пар (всего 16 карт)
+      const chosenWords = allEmojiWords.sort(() => Math.random() - 0.5).slice(0, 8);
+      const pairs = chosenWords.flatMap((word) => [word, word]);
+      const shuffled = pairs
         .sort(() => Math.random() - 0.5)
         .map((val, i) => ({ id: i, value: val, flipped: false, matched: false }));
       setCards(shuffled);
@@ -116,7 +105,6 @@ export default function Spiele() {
 
     clicked.flipped = true;
     setCards(newCards);
-
     const flippedNow = [...flippedCards, id];
     setFlippedCards(flippedNow);
 
@@ -130,7 +118,7 @@ export default function Spiele() {
         setTimeout(() => {
           setFlippedCards([]);
           setLockBoard(false);
-        }, 700);
+        }, 600);
       } else {
         setTimeout(() => {
           first.flipped = false;

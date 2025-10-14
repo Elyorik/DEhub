@@ -190,17 +190,15 @@ h3 {
   }
 }
 .wrapper {
-  user-select: none; /* 🚫 Запрещает выделение текста */
-  -webkit-user-select: none;
-  -ms-user-select: none;
+  user-select: none;
   text-align: center;
   padding: 20px;
 }
 
 .gamesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
   margin-top: 20px;
 }
 
@@ -253,15 +251,15 @@ button:hover {
 
 .memoryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: 10px;
-  max-width: 400px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 480px;
 }
 
 .memoryCard {
   background: #eee;
   border-radius: 8px;
-  padding: 20px;
+  padding: 22px 0;
   font-size: 24px;
   cursor: pointer;
   transition: 0.3s;
@@ -270,17 +268,22 @@ button:hover {
   background: #d1e7ff;
 }
 
-/* 📱 Mobile Anpassung */
+/* 📱 Только для телефона */
 @media (max-width: 600px) {
   .memoryGrid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    max-width: 340px;
+  }
+  .memoryCard {
+    font-size: 18px;
+    padding: 16px 0;
   }
   button {
     font-size: 14px;
     padding: 8px 12px;
   }
   .cardTitle {
-    font-size: 16px;
+    font-size: 15px;
   }
 }
