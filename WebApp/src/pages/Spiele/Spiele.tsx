@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import s from "./spiele.module.scss";
 
-// 🔹 Lokale Bilder importieren
 import artikelImg from "../../assets/SpieleImg/DerDieDas.png";
 import memoryImg from "../../assets/SpieleImg/Memory.png";
 
@@ -12,70 +11,141 @@ export default function Spiele() {
   const [score, setScore] = useState(0);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
-  // 🧩 Spiel 1: Artikel-Quiz
-  const artikelWords = [
-    { word: "Tisch", correct: "der" },
-    { word: "Lampe", correct: "die" },
-    { word: "Auto", correct: "das" },
-    { word: "Hund", correct: "der" },
-    { word: "Blume", correct: "die" },
-    { word: "Haus", correct: "das" },
-    { word: "Computer", correct: "der" },
-    { word: "Zeitung", correct: "die" },
-    { word: "Buch", correct: "das" },
-    { word: "Stuhl", correct: "der" },
-    { word: "Katze", correct: "die" },
-    { word: "Fenster", correct: "das" },
-    { word: "Apfel", correct: "der" },
-    { word: "Schule", correct: "die" },
-    { word: "Kind", correct: "das" },
-  ];
+  // ======= Artikel-Quiz =======
+  const artikelWords = useMemo(
+    () => [
+      { word: "Tisch", correct: "der" },
+      { word: "Lampe", correct: "die" },
+      { word: "Auto", correct: "das" },
+      { word: "Hund", correct: "der" },
+      { word: "Blume", correct: "die" },
+      { word: "Haus", correct: "das" },
+      { word: "Computer", correct: "der" },
+      { word: "Zeitung", correct: "die" },
+      { word: "Buch", correct: "das" },
+      { word: "Stuhl", correct: "der" },
+      { word: "Katze", correct: "die" },
+      { word: "Fenster", correct: "das" },
+      { word: "Apfel", correct: "der" },
+      { word: "Schule", correct: "die" },
+      { word: "Kind", correct: "das" },
+      { word: "Affe", correct: "der" }, // добавил Affe для emoji
+    ],
+    []
+  );
 
   const currentWord = artikelWords[currentWordIndex];
 
   const handleArtikelSelect = (artikel: string) => {
     if (artikel === currentWord.correct) {
-      setScore(score + 1);
+      setScore((s) => s + 1);
     }
     if (currentWordIndex < artikelWords.length - 1) {
-      setCurrentWordIndex(currentWordIndex + 1);
+      setCurrentWordIndex((i) => i + 1);
     } else {
-      alert(`Spiel beendet! Du hast ${score + 1} Punkte.`);
+      alert(`Spiel beendet! Du hast ${score + (artikel === currentWord.correct ? 1 : 0)} Punkte.`);
       resetGame();
     }
   };
 
-  // 🎯 Spiel 2: Wort-Memory
-  const words = [
-    { de: "Hund", en: "dog" },
-    { de: "Katze", en: "cat" },
-    { de: "Haus", en: "house" },
-    { de: "Buch", en: "book" },
-    { de: "Auto", en: "car" },
-    { de: "Baum", en: "tree" },
+  // ======= Wort-Memory (исправленная логика) =======
+  // Словарь с emoji
+  const wordList = useMemo(
+    () => [
+      { de: "Hund", en: "dog", emoji: "🐶" },
+      { de: "Katze", en: "cat", emoji: "🐱" },
+      { de: "Haus", en: "house", emoji: "🏠" },
+      { de: "Buch", en: "book", emoji: "📚" },
+      { de: "Auto", en: "car", emoji: "🚗" },
+      { de: "Baum", en: "tree", emoji: "🌳" },
+      { de: "Affe", en: "monkey", emoji: "🐒" },
+      { de: "Apfel", en: "apple", emoji: "🍎" },
+    ],
+    []
   ];
 
-  const [flipped, setFlipped] = useState<string[]>([]);
-  const [matched, setMatched] = useState<string[]>([]);
+  type Card = {
+    id: string; // уникальный id карточки
+    pairId: string; // идентификатор пары (одинаков для двух карточек-пары)
+    content: string; // отображаемое (немецкое слово)
+    emoji?: string; // emoji (опционально)
+  };
 
-  const cards = [...words, ...words].sort(() => Math.random() - 0.5);
+  const [deck, setDeck] = useState<Card[]>([]);
+  const [flippedIds, setFlippedIds] = useState<string[]>([]); // ids перевёрнутых сейчас
+  const [matchedPairIds, setMatchedPairIds] = useState<string[]>([]);
+  const [lockBoard, setLockBoard] = useState(false);
 
-  const handleFlip = (index: number) => {
-    if (flipped.length === 2 || flipped.includes(cards[index].de)) return;
+  // Инициализация/перемешивание колоды при старте Memory
+  useEffect(() => {
+    if (activeGame === "memory") {
+      // Возьмём первые N слов (например, 6 пар) или весь список если нужен
+      const pairs = wordList.slice(0, 6); // 6 пар = 12 карточек
+      let tmpDeck: Card[] = [];
 
-    const newFlipped = [...flipped, cards[index].de];
-    setFlipped(newFlipped);
+      pairs.forEach((w) => {
+        const pairId = Math.random().toString(36).slice(2, 9);
+        tmpDeck.push({
+          id: pairId + "_a",
+          pairId,
+          content: w.de,
+          emoji: w.emoji,
+        });
+        tmpDeck.push({
+          id: pairId + "_b",
+          pairId,
+          content: w.de,
+          emoji: w.emoji,
+        });
+      });
 
-    if (newFlipped.length === 2) {
-      const [first, second] = newFlipped;
-      const firstWord = cards.find((c) => c.de === first)!;
-      const secondWord = cards.find((c) => c.de === second)!;
+      // Перемешать
+      tmpDeck = tmpDeck.sort(() => Math.random() - 0.5);
+      setDeck(tmpDeck);
+      setFlippedIds([]);
+      setMatchedPairIds([]);
+      setLockBoard(false);
+    } else {
+      // если выходим из memory, очистим
+      setDeck([]);
+      setFlippedIds([]);
+      setMatchedPairIds([]);
+      setLockBoard(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeGame]);
 
-      if (firstWord.de === secondWord.de) {
-        setMatched([...matched, first]);
+  const handleFlip = (cardId: string) => {
+    if (lockBoard) return;
+    if (flippedIds.includes(cardId)) return; // уже перевёрнута
+    const card = deck.find((c) => c.id === cardId);
+    if (!card) return;
+
+    // если уже одна карточка перевернута — пытаемся открыть вторую
+    if (flippedIds.length === 1) {
+      const firstId = flippedIds[0];
+      const firstCard = deck.find((c) => c.id === firstId)!;
+
+      // временно показываем вторую
+      setFlippedIds([firstId, cardId]);
+      // если пара совпадает — помечаем matched
+      if (firstCard.pairId === card.pairId) {
+        setMatchedPairIds((m) => [...m, firstCard.pairId]);
+        // очистка перевёрнутых через короткое время (с анимацией)
+        setTimeout(() => {
+          setFlippedIds([]);
+        }, 600);
+      } else {
+        // не совпадает — заблокируем доску и перевернём обратно
+        setLockBoard(true);
+        setTimeout(() => {
+          setFlippedIds([]);
+          setLockBoard(false);
+        }, 800);
       }
-
-      setTimeout(() => setFlipped([]), 1000);
+    } else {
+      // ещё нет открытых карточек — просто откроем одну
+      setFlippedIds([cardId]);
     }
   };
 
@@ -83,10 +153,10 @@ export default function Spiele() {
     setActiveGame(null);
     setScore(0);
     setCurrentWordIndex(0);
-    setFlipped([]);
-    setMatched([]);
+    // memory reset handled by effect on activeGame change
   };
 
+  // ======= UI =======
   return (
     <div className={s.wrapper}>
       {!activeGame && (
@@ -107,7 +177,7 @@ export default function Spiele() {
         </>
       )}
 
-      {/* 🎮 Artikel-Quiz */}
+      {/* Artikel-Quiz */}
       {activeGame === "artikel" && (
         <div className={s.gameContainer}>
           <h2>Wähle den richtigen Artikel</h2>
@@ -126,21 +196,38 @@ export default function Spiele() {
         </div>
       )}
 
-      {/* 🧠 Wort-Memory */}
+      {/* Memory */}
       {activeGame === "memory" && (
-        <div className={s.memoryGrid}>
-          {cards.map((card, index) => {
-            const isFlipped = flipped.includes(card.de) || matched.includes(card.de);
-            return (
-              <div
-                key={index}
-                className={`${s.memoryCard} ${isFlipped ? s.flipped : ""}`}
-                onClick={() => handleFlip(index)}
-              >
-                {isFlipped ? <span>{card.de}</span> : <span>?</span>}
-              </div>
-            );
-          })}
+        <div className={s.gameContainer}>
+          <h2>Wort-Memory</h2>
+          <p>Finde die Paare. Tippe auf zwei Karten, um zu vergleichen.</p>
+
+          <div className={s.memoryGrid}>
+            {deck.map((card) => {
+              const isFlipped = flippedIds.includes(card.id) || matchedPairIds.includes(card.pairId);
+              return (
+                <div
+                  key={card.id}
+                  className={`${s.memoryCard} ${isFlipped ? s.flipped : ""}`}
+                  onClick={() => {
+                    // если уже совпала пара, клики игнорируем
+                    if (matchedPairIds.includes(card.pairId)) return;
+                    handleFlip(card.id);
+                  }}
+                >
+                  {isFlipped ? (
+                    <>
+                      <div style={{ fontSize: 28 }}>{card.emoji ?? ""}</div>
+                      <div style={{ fontSize: 16, marginTop: 6 }}>{card.content}</div>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: 32 }}>?</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
           <button className={s.backButton} onClick={resetGame}>
             Zurück zur Auswahl
           </button>
