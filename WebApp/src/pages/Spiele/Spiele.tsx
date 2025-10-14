@@ -15,15 +15,37 @@ export default function Spiele() {
 
   const words = [
     { word: "Apfel", article: "der" },
-    { word: "Banane", article: "die" },
-    { word: "Auto", article: "das" },
-    { word: "Tisch", article: "der" },
-    { word: "Lampe", article: "die" },
-    { word: "Haus", article: "das" },
     { word: "Hund", article: "der" },
-    { word: "Katze", article: "die" },
-    { word: "Buch", article: "das" },
+    { word: "Tisch", article: "der" },
     { word: "Stuhl", article: "der" },
+    { word: "Baum", article: "der" },
+    { word: "Vogel", article: "der" },
+    { word: "Ball", article: "der" },
+    { word: "Bleistift", article: "der" },
+    { word: "Computer", article: "der" },
+    { word: "Zug", article: "der" },
+
+    { word: "Banane", article: "die" },
+    { word: "Katze", article: "die" },
+    { word: "Lampe", article: "die" },
+    { word: "Blume", article: "die" },
+    { word: "Uhr", article: "die" },
+    { word: "Tasche", article: "die" },
+    { word: "Gitarre", article: "die" },
+    { word: "Küche", article: "die" },
+    { word: "Tür", article: "die" },
+    { word: "Straße", article: "die" },
+
+    { word: "Auto", article: "das" },
+    { word: "Haus", article: "das" },
+    { word: "Buch", article: "das" },
+    { word: "Kind", article: "das" },
+    { word: "Fenster", article: "das" },
+    { word: "Bild", article: "das" },
+    { word: "Bett", article: "das" },
+    { word: "Telefon", article: "das" },
+    { word: "Wasser", article: "das" },
+    { word: "Mädchen", article: "das" },
   ];
 
   const getNewWord = () => {
@@ -56,6 +78,13 @@ export default function Spiele() {
     ["Auto 🚗", "Auto 🚗"],
     ["Buch 📖", "Buch 📖"],
     ["Haus 🏠", "Haus 🏠"],
+    ["Sonne ☀️", "Sonne ☀️"],
+    ["Mond 🌙", "Mond 🌙"],
+    ["Ball ⚽", "Ball ⚽"],
+    ["Herz ❤️", "Herz ❤️"],
+    ["Blume 🌸", "Blume 🌸"],
+    ["Pizza 🍕", "Pizza 🍕"],
+    ["Musik 🎵", "Musik 🎵"],
   ];
 
   type Card = {
@@ -96,31 +125,28 @@ export default function Spiele() {
       const [first, second] = flippedNow.map((i) => newCards.find((c) => c.id === i)!);
 
       if (first.value === second.value) {
-        // ✅ Match
         first.matched = true;
         second.matched = true;
         setTimeout(() => {
           setFlippedCards([]);
           setLockBoard(false);
-        }, 800);
+        }, 700);
       } else {
-        // ❌ Kein Match
         setTimeout(() => {
           first.flipped = false;
           second.flipped = false;
           setCards([...newCards]);
           setFlippedCards([]);
           setLockBoard(false);
-        }, 800);
+        }, 700);
       }
     }
   };
 
-  // 🔹 Haupt-Render
   return (
     <div className={s.wrapper}>
       {selectedGame === "menu" && (
-        <div>
+        <div className={s.menu}>
           <h1>🎮 Spiele</h1>
           <p>Wähle ein Spiel, um dein Deutsch zu verbessern!</p>
 
