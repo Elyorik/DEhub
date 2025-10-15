@@ -15,6 +15,7 @@ const quellenListe: Quelle[] = [
   { name: "Hochschulkompass", url: "https://www.hochschulkompass.de", kategorie: "Studium" },
   { name: "Study in Germany", url: "https://www.study-in-germany.de", kategorie: "Studium" },
   { name: "BMBF Stipendienlotse", url: "https://www.stipendienlotse.de", kategorie: "Studium" },
+  { name: "PASCH", url: "https://www.pasch-net.de/de/index.html", kategorie: "Studium" },
 
   // 💼 Arbeit
   { name: "Bundesagentur für Arbeit", url: "https://www.arbeitsagentur.de", kategorie: "Arbeit" },
