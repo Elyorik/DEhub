@@ -11,7 +11,7 @@ interface Quelle {
 const quellenListe: Quelle[] = [
   // 🎓 Studium
   { name: "Uni-Assist", url: "https://www.uni-assist.de", kategorie: "Studium" },
-  { name: "DAAD – Deutscher Akademischer Austauschdienst", url: "https://daad.de", kategorie: "Studium" },
+  { name: "DAAD – Deutscher Akademischer Austauschdienst", url: "https://dehub.onrender.com/redirect?to=https%3A%2F%2Fwww.daad.de%2Fde", kategorie: "Studium" },
   { name: "Hochschulkompass", url: "https://www.hochschulkompass.de", kategorie: "Studium" },
   { name: "Study in Germany", url: "https://www.study-in-germany.de", kategorie: "Studium" },
   { name: "BMBF Stipendienlotse", url: "https://www.stipendienlotse.de", kategorie: "Studium" },
