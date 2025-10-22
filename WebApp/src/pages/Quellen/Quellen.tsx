@@ -9,7 +9,7 @@ interface Quelle {
 }
 
 const quellenListe: Quelle[] = [
-  // Studium
+  // 🎓 Studium
   { name: "Uni-Assist", url: "https://www.uni-assist.de", kategorie: "Studium" },
   { name: "DAAD – Deutscher Akademischer Austauschdienst", url: "https://www.daad.de/de", kategorie: "Studium" },
   { name: "Hochschulkompass", url: "https://www.hochschulkompass.de", kategorie: "Studium" },
@@ -17,21 +17,21 @@ const quellenListe: Quelle[] = [
   { name: "BMBF Stipendienlotse", url: "https://www.stipendienlotse.de", kategorie: "Studium" },
   { name: "PASCH", url: "https://www.pasch-net.de/de/index.html", kategorie: "Studium" },
 
-  // Arbeit
+  // 💼 Arbeit
   { name: "Bundesagentur für Arbeit", url: "https://www.arbeitsagentur.de", kategorie: "Arbeit" },
   { name: "Make it in Germany", url: "https://www.make-it-in-germany.com", kategorie: "Arbeit" },
   { name: "Anerkennung in Deutschland", url: "https://www.anerkennung-in-deutschland.de", kategorie: "Arbeit" },
   { name: "Ausbildung.de", url: "https://www.ausbildung.de", kategorie: "Arbeit" },
   { name: "Handwerkskammer", url: "https://www.handwerkskammer.de", kategorie: "Arbeit" },
 
-  // Finanzen
+  // 💶 Finanzen
   { name: "Expatrio (Sperrkonto)", url: "https://www.expatrio.com", kategorie: "Finanzen" },
   { name: "Fintiba (Sperrkonto)", url: "https://www.fintiba.com", kategorie: "Finanzen" },
   { name: "Deutsche Bank Sperrkonto", url: "https://www.deutsche-bank.de/sperrkonto", kategorie: "Finanzen" },
   { name: "Sparkasse International Students", url: "https://www.sparkasse.de", kategorie: "Finanzen" },
   { name: "Commerzbank International", url: "https://www.commerzbank.de", kategorie: "Finanzen" },
 
-  // Visa
+  // 🪪 Visa
   { name: "Auswärtiges Amt", url: "https://www.auswaertiges-amt.de", kategorie: "Visa" },
   { name: "BAMF – Migration und Flüchtlinge", url: "https://www.bamf.de", kategorie: "Visa" },
   { name: "Einreise nach Deutschland", url: "https://www.germany-visa.org", kategorie: "Visa" },
@@ -57,52 +57,9 @@ export default function Quellen() {
     q.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleOpen = async (url: string) => {
-    console.log("Try open link:", url);
-
-    try {
-      // 1) Telegram WebApp API (works inside Telegram mobile WebApp)
-      if ((window as any).Telegram?.WebApp?.openLink) {
-        console.log("Using Telegram.WebApp.openLink");
-        (window as any).Telegram.WebApp.openLink(url);
-        return;
-      }
-
-      // 2) Try window.open
-      const newWin = window.open(url, "_blank", "noopener,noreferrer");
-      if (newWin) {
-        console.log("Opened with window.open");
-        return;
-      }
-
-      // 3) Create anchor and click it (fallback)
-      const a = document.createElement("a");
-      a.href = url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      console.log("Opened by dynamic anchor click");
-      return;
-    } catch (err) {
-      console.error("Opening link failed (try direct location):", err);
-    }
-
-    // 4) Last resort — change location
-    try {
-      window.location.href = url;
-      console.log("Opened by location.href");
-    } catch (err) {
-      console.error("All open attempts failed:", err);
-      alert("Не удалось открыть ссылку. Попробуй открыть страницу в обычном браузере.");
-    }
-  };
-
   return (
     <div className={s.container}>
       <h1>📚 Nützliche Quellen</h1>
-
       <input
         type="text"
         placeholder="🔍 Quelle suchen..."
@@ -130,17 +87,15 @@ export default function Quellen() {
 
               <div className={`${s.list} ${open === kat.name ? s.show : ""}`}>
                 {items.map((q) => (
-                  <span
+                  <button
                     key={q.url}
-                    onClick={() => handleOpen(q.url)}
-                    className={s.link}
-                    role="link"
-                    tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === "Enter") handleOpen(q.url); }}
-                    style={{ cursor: "pointer", display: "block", padding: "6px 0" }}
+                    className={s.linkButton}
+                    onClick={() => {
+                      window.open(q.url, "_blank", "noopener,noreferrer");
+                    }}
                   >
                     {q.name}
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
