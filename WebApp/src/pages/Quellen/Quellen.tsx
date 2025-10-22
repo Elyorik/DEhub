@@ -11,7 +11,7 @@ interface Quelle {
 const quellenListe: Quelle[] = [
   // 🎓 Studium
   { name: "Uni-Assist", url: "https://www.uni-assist.de", kategorie: "Studium" },
-  { name: "DAAD – Deutscher Akademischer Austauschdienst", url: "https://dehub.onrender.com/redirect?to=https%3A%2F%2Fwww.daad.de%2Fde", kategorie: "Studium" },
+  { name: "DAAD – Deutscher Akademischer Austauschdienst", url: "https://www.daad.de/de", kategorie: "Studium" },
   { name: "Hochschulkompass", url: "https://www.hochschulkompass.de", kategorie: "Studium" },
   { name: "Study in Germany", url: "https://www.study-in-germany.de", kategorie: "Studium" },
   { name: "BMBF Stipendienlotse", url: "https://www.stipendienlotse.de", kategorie: "Studium" },
@@ -36,7 +36,6 @@ const quellenListe: Quelle[] = [
   { name: "BAMF – Migration und Flüchtlinge", url: "https://www.bamf.de", kategorie: "Visa" },
   { name: "Einreise nach Deutschland", url: "https://www.germany-visa.org", kategorie: "Visa" },
   { name: "Termin bei der Botschaft", url: "https://taschkent.diplo.de/uz-de", kategorie: "Visa" },
-
 ];
 
 const kategorien = [
@@ -58,9 +57,15 @@ export default function Quellen() {
     q.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleOpen = (url: string) => {
+    // 🔗 Открываем ссылку во внешнем браузере (важно для Telegram WebView)
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div className={s.container}>
       <h1>📚 Nützliche Quellen</h1>
+
       <input
         type="text"
         placeholder="🔍 Quelle suchen..."
@@ -87,19 +92,15 @@ export default function Quellen() {
               </button>
 
               <div className={`${s.list} ${open === kat.name ? s.show : ""}`}>
-{items.map((q) => (
-  <button
-    key={q.url}
-    className={s.linkButton}
-    onClick={() => {
-      // Открыть ссылку во внешнем браузере
-      window.open(q.url, "_blank", "noopener,noreferrer");
-    }}
-  >
-    {q.name}
-  </button>
-))}
-
+                {items.map((q) => (
+                  <span
+                    key={q.url}
+                    onClick={() => handleOpen(q.url)}
+                    className={s.link}
+                  >
+                    {q.name}
+                  </span>
+                ))}
               </div>
             </div>
           );

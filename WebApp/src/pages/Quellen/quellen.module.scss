@@ -1,102 +1,13 @@
-.container {
-  max-width: 750px;
-  margin: 2rem auto;
-  padding: 2rem;
-  color: #111;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-
-  h1 {
-    font-size: 1.9rem;
-    text-align: center;
-    margin-bottom: 1.5rem;
-    font-weight: 700;
-  }
-}
-
-.search {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  border: 1.5px solid #ccc;
-  border-radius: 10px;
-  font-size: 1rem;
-  margin-bottom: 2rem;
-  transition: 0.2s;
-
-  &:focus {
-    border-color: #007aff;
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
-    outline: none;
-  }
-}
-
-.folders {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.folder {
-  background: #f9f9f9;
-  border-radius: 10px;
-  overflow: hidden;
-  transition: 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.folderButton {
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 1rem 1.2rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #222;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  transition: background 0.3s;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.04);
-  }
-}
-
-.icon {
-  transition: transform 0.3s;
-}
-.open {
-  transform: rotate(180deg);
-}
-
-.list {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: all 0.3s ease;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  padding-left: 1rem;
-  background: #fff;
-}
-
-.show {
-  max-height: 400px;
-  opacity: 1;
-  padding: 0.7rem 1rem 1rem 1.5rem;
-}
-
-.list a {
-  text-decoration: none;
+.link {
   color: #007aff;
   font-weight: 500;
   margin: 0.3rem 0;
+  cursor: pointer;
+  display: inline-block;
   transition: color 0.2s;
 
   &:hover {
     color: #004aad;
+    text-decoration: underline;
   }
 }
