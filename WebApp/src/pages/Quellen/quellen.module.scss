@@ -100,3 +100,15 @@
     color: #004aad;
   }
 }
+.linkButton {
+  background: none;
+  border: none;
+  color: #007bff;
+  text-align: left;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  text-decoration: underline;
+}

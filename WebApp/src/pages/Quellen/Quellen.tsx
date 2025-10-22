@@ -87,11 +87,19 @@ export default function Quellen() {
               </button>
 
               <div className={`${s.list} ${open === kat.name ? s.show : ""}`}>
-                {items.map((q) => (
-                  <a key={q.url} href={q.url} target="_blank" rel="noopener noreferrer">
-                    {q.name}
-                  </a>
-                ))}
+{items.map((q) => (
+  <button
+    key={q.url}
+    className={s.linkButton}
+    onClick={() => {
+      // Открыть ссылку во внешнем браузере
+      window.open(q.url, "_blank", "noopener,noreferrer");
+    }}
+  >
+    {q.name}
+  </button>
+))}
+
               </div>
             </div>
           );

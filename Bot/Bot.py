@@ -19,34 +19,7 @@ flask_app = Flask(__name__)
 def home():
     return "✅ Telegram Bot läuft erfolgreich auf Render!"
 
-# ✅ Добавляем redirect-маршрут, чтобы DAAD и другие сайты открывались корректно на Handy
-@flask_app.route("/redirect")
-def redirect_to():
-    target = request.args.get("to")
-    if not target:
-        return "❌ Missing 'to' parameter", 400
-    if not target.startswith("http"):
-        target = "https://" + target
 
-    # 🧠 Добавляем HTML с мета-тегом, чтобы Telegram открыл ссылку во внешнем браузере
-    return f"""
-    <html>
-      <head>
-        <meta http-equiv="refresh" content="0; url={target}" />
-        <script>
-          // Попробуем явно открыть во внешнем браузере
-          window.location.replace("{target}");
-        </script>
-      </head>
-      <body>
-        <p>Weiterleitung zu <a href="{target}">{target}</a>...</p>
-      </body>
-    </html>
-    """, 200, {"Content-Type": "text/html"}
-
-
-
-# -------------------- News Sources --------------------
 NEWS_SITES = [
     {"type": "rss", "url": "https://www.tagesschau.de/xml/rss2"},
     {"type": "rss", "url": "https://rss.dw.com/xml/rss-de-all"},
