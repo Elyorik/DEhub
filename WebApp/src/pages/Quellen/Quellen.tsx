@@ -58,8 +58,13 @@ export default function Quellen() {
   );
 
   const handleOpen = (url: string) => {
-    // 🔗 Открываем ссылку во внешнем браузере (важно для Telegram WebView)
-    window.open(url, "_blank", "noopener,noreferrer");
+    // 🧠 Используем Telegram API, если доступен
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.openLink(url);
+    } else {
+      // fallback — обычное открытие в браузере
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
   };
 
   return (
