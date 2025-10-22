@@ -5,19 +5,29 @@ from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
 import os
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request, redirect   # ✅ добавили request и redirect
 import threading
 
 # -------------------- Load environment variables --------------------
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# Flask app (for Render health check)
+# -------------------- Flask app (for Render health check + redirects) --------------------
 flask_app = Flask(__name__)
 
 @flask_app.route("/")
 def home():
     return "✅ Telegram Bot läuft erfolgreich auf Render!"
+
+# ✅ Добавляем redirect-маршрут, чтобы DAAD и другие сайты открывались корректно на Handy
+@flask_app.route("/redirect")
+def redirect_to():
+    target = request.args.get("to")
+    if not target:
+        return "❌ Missing 'to' parameter", 400
+    if not target.startswith("http"):
+        target = "https://" + target
+    return redirect(target, code=302)
 
 
 # -------------------- News Sources --------------------
