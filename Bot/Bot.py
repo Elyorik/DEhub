@@ -8,19 +8,19 @@ from dotenv import load_dotenv
 from flask import Flask
 import threading
 
-# Load environment variables
+# -------------------- Load environment variables --------------------
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# Flask app for Render health check
+# Flask app (for Render health check)
 flask_app = Flask(__name__)
 
 @flask_app.route("/")
 def home():
-    return "✅ Telegram Bot is running on Render!"
+    return "✅ Telegram Bot läuft erfolgreich auf Render!"
 
 
-# --- News sources ---
+# -------------------- News Sources --------------------
 NEWS_SITES = [
     {"type": "rss", "url": "https://www.tagesschau.de/xml/rss2"},
     {"type": "rss", "url": "https://rss.dw.com/xml/rss-de-all"},
@@ -33,18 +33,20 @@ NEWS_SITES = [
 USER_INDEX = {}  # user_id → current news index
 
 
-# ---------- Telegram Bot Handlers ----------
+# -------------------- Telegram Handlers --------------------
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /start command"""
+async def starten(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /starten command"""
     webapp_button = KeyboardButton(
-        text="🚀 Open WebApp",
+        text="🚀 WebApp öffnen",
         web_app=WebAppInfo(url="https://dehub-webapp.vercel.app")
     )
     reply_markup = ReplyKeyboardMarkup([[webapp_button]], resize_keyboard=True)
 
     await update.message.reply_text(
-        "Hallo 👋!\nKlicke unten, um die WebApp zu öffnen.\n\nSchreib /news um die neuesten Nachrichten zu bekommen 📢",
+        "👋 Hallo!\n"
+        "Klicke unten, um die WebApp zu öffnen.\n\n"
+        "Schreib /neuigkeiten, um die neuesten Nachrichten zu sehen 🗞️",
         reply_markup=reply_markup
     )
 
@@ -104,16 +106,16 @@ def get_next_news(user_id):
         return None
 
 
-async def news(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /news command"""
+async def neuigkeiten(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /neuigkeiten command"""
     user_id = update.message.chat_id
     news_item = get_next_news(user_id)
 
     if not news_item:
-        await update.message.reply_text("Keine Nachrichten verfügbar ❌")
+        await update.message.reply_text("❌ Keine Nachrichten verfügbar.")
         return
 
-    caption = f"**{news_item['title']}**\n\n{news_item['summary']}\n\nQuelle: {news_item['link']}"
+    caption = f"**{news_item['title']}**\n\n{news_item['summary']}\n\n🔗 Quelle: {news_item['link']}"
 
     if news_item["image"]:
         await update.message.reply_photo(
@@ -125,23 +127,28 @@ async def news(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(caption, parse_mode="Markdown")
 
 
-# ---------- Run bot + Flask ----------
+# -------------------- Run Flask + Bot --------------------
 
 def run_flask():
+    """Run Flask for Render health checks"""
     flask_app.run(host="0.0.0.0", port=10000)
 
 
 def main():
-    print("🚀 Starting Telegram Bot...")
+    print("🚀 Telegram Bot startet...")
     app = Application.builder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("news", news))
-    # ✅ Updated for python-telegram-bot v21+
+
+    # Register commands
+    app.add_handler(CommandHandler("starten", starten))
+    app.add_handler(CommandHandler("neuigkeiten", neuigkeiten))
+
+    # Start bot
     app.run_polling()
 
 
 if __name__ == "__main__":
-    # Run Flask (for Render healthcheck)
+    # Run Flask in background
     threading.Thread(target=run_flask, daemon=True).start()
+
     # Run Telegram bot
     main()

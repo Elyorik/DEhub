@@ -35,7 +35,8 @@ const quellenListe: Quelle[] = [
   { name: "Auswärtiges Amt", url: "https://www.auswaertiges-amt.de", kategorie: "Visa" },
   { name: "BAMF – Migration und Flüchtlinge", url: "https://www.bamf.de", kategorie: "Visa" },
   { name: "Einreise nach Deutschland", url: "https://www.germany-visa.org", kategorie: "Visa" },
-  { name: "Termin bei der Botschaft", url: "https://service2.diplo.de", kategorie: "Visa" },
+  { name: "Termin bei der Botschaft", url: "https://taschkent.diplo.de/uz-de", kategorie: "Visa" },
+
 ];
 
 const kategorien = [

@@ -15,7 +15,7 @@ const Footer: React.FC = () => {
         </div>
         <div className={s.rightSection}>
           <a
-            href="https://t.me/dehub_bot" // <-- hier deinen Telegram Bot Link
+            href="https://t.me/DEhub_Schule60Bot" // <-- hier deinen Telegram Bot Link
             target="_blank"
             rel="noopener noreferrer"
           >
