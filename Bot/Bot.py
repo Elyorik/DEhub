@@ -27,7 +27,23 @@ def redirect_to():
         return "❌ Missing 'to' parameter", 400
     if not target.startswith("http"):
         target = "https://" + target
-    return redirect(target, code=302)
+
+    # 🧠 Добавляем HTML с мета-тегом, чтобы Telegram открыл ссылку во внешнем браузере
+    return f"""
+    <html>
+      <head>
+        <meta http-equiv="refresh" content="0; url={target}" />
+        <script>
+          // Попробуем явно открыть во внешнем браузере
+          window.location.replace("{target}");
+        </script>
+      </head>
+      <body>
+        <p>Weiterleitung zu <a href="{target}">{target}</a>...</p>
+      </body>
+    </html>
+    """, 200, {"Content-Type": "text/html"}
+
 
 
 # -------------------- News Sources --------------------
