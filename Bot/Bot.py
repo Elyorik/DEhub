@@ -1,31 +1,26 @@
+import os
+import threading
+import asyncio
 import requests
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+from flask import Flask, request
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
-import os
-from dotenv import load_dotenv
-from flask import Flask
-import threading
-import time
 
 # -------------------- Load environment variables --------------------
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# -------------------- Flask app (for Render health check + redirects) --------------------
+# -------------------- Flask app (для Render) --------------------
 flask_app = Flask(__name__)
 
 @flask_app.route("/")
 def home():
     return "✅ Telegram Bot läuft erfolgreich auf Render!"
 
-@flask_app.route("/health")
-def health():
-    return "OK", 200
-
-
-# -------------------- News sources --------------------
+# -------------------- Новости --------------------
 NEWS_SITES = [
     {"type": "rss", "url": "https://www.tagesschau.de/xml/rss2"},
     {"type": "rss", "url": "https://rss.dw.com/xml/rss-de-all"},
@@ -35,29 +30,10 @@ NEWS_SITES = [
     {"type": "rss", "url": "https://www.focus.de/rss/"},
 ]
 
-USER_INDEX = {}  # user_id → current news index
+USER_INDEX = {}  # user_id → текущий индекс новостей
 
-
-# -------------------- Telegram Handlers --------------------
-
-async def starten(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /starten command"""
-    webapp_button = KeyboardButton(
-        text="🚀 WebApp öffnen",
-        web_app=WebAppInfo(url="https://dehub-webapp.vercel.app")
-    )
-    reply_markup = ReplyKeyboardMarkup([[webapp_button]], resize_keyboard=True)
-
-    await update.message.reply_text(
-        "👋 Hallo!\n"
-        "Klicke unten, um die WebApp zu öffnen.\n\n"
-        "Schreib /neuigkeiten, um die neuesten Nachrichten zu sehen 🗞️",
-        reply_markup=reply_markup
-    )
-
-
+# -------------------- Парсеры --------------------
 def parse_rss(url):
-    """Parse RSS feed"""
     try:
         r = requests.get(url, timeout=5)
         r.raise_for_status()
@@ -74,9 +50,7 @@ def parse_rss(url):
     except Exception:
         return None
 
-
 def parse_zdf_heute(url):
-    """Parse ZDF Heute site"""
     try:
         r = requests.get(url, timeout=5)
         r.raise_for_status()
@@ -96,9 +70,7 @@ def parse_zdf_heute(url):
     except Exception:
         return None
 
-
 def get_next_news(user_id):
-    """Cycle through news sources"""
     index = USER_INDEX.get(user_id, 0)
     site = NEWS_SITES[index % len(NEWS_SITES)]
     USER_INDEX[user_id] = index + 1
@@ -110,9 +82,22 @@ def get_next_news(user_id):
     else:
         return None
 
+# -------------------- Telegram команды --------------------
+async def starten(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    webapp_button = KeyboardButton(
+        text="🚀 WebApp öffnen",
+        web_app=WebAppInfo(url="https://dehub-webapp.vercel.app")
+    )
+    reply_markup = ReplyKeyboardMarkup([[webapp_button]], resize_keyboard=True)
+
+    await update.message.reply_text(
+        "👋 Hallo!\n"
+        "Klicke unten, um die WebApp zu öffnen.\n\n"
+        "Schreib /neuigkeiten, um die neuesten Nachrichten zu sehen 🗞️",
+        reply_markup=reply_markup
+    )
 
 async def neuigkeiten(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /neuigkeiten command"""
     user_id = update.message.chat_id
     news_item = get_next_news(user_id)
 
@@ -121,52 +106,48 @@ async def neuigkeiten(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     caption = f"**{news_item['title']}**\n\n{news_item['summary']}\n\n🔗 Quelle: {news_item['link']}"
-
     if news_item["image"]:
-        await update.message.reply_photo(
-            photo=news_item["image"],
-            caption=caption,
-            parse_mode="Markdown"
-        )
+        await update.message.reply_photo(photo=news_item["image"], caption=caption, parse_mode="Markdown")
     else:
         await update.message.reply_text(caption, parse_mode="Markdown")
 
+# -------------------- Telegram Webhook --------------------
+WEBHOOK_URL = "https://dehub.onrender.com/webhook"
 
-# -------------------- Run Flask + Bot --------------------
-
-def run_flask():
-    """Run Flask for Render health checks"""
-    flask_app.run(host="0.0.0.0", port=10000)
-
-
-def keep_alive():
-    """Ping the app periodically to prevent Render from sleeping"""
-    while True:
-        try:
-            requests.get("https://dehub.onrender.com/health", timeout=10)
-        except:
-            pass
-        time.sleep(300)  # 5 minutes
-
-
-def main():
-    print("🚀 Telegram Bot startet...")
+async def setup_bot():
+    """Настройка бота и регистрация webhook"""
     app = Application.builder().token(BOT_TOKEN).build()
 
-    # Register commands
     app.add_handler(CommandHandler("starten", starten))
     app.add_handler(CommandHandler("neuigkeiten", neuigkeiten))
 
-    # Start bot
-    app.run_polling()
+    # Настраиваем webhook
+    await app.bot.set_webhook(WEBHOOK_URL)
+    print(f"✅ Webhook установлен на {WEBHOOK_URL}")
 
+    return app
 
-if __name__ == "__main__":
-    # Run Flask in background
+# -------------------- Flask endpoint для webhook --------------------
+telegram_app = None  # глобальная ссылка на приложение Telegram
+
+@flask_app.route("/webhook", methods=["POST"])
+def webhook():
+    global telegram_app
+    if telegram_app is None:
+        return "Bot not initialized", 503
+    update = Update.de_json(request.get_json(force=True), telegram_app.bot)
+    asyncio.run(telegram_app.process_update(update))
+    return "ok"
+
+# -------------------- Основной запуск --------------------
+def run_flask():
+    flask_app.run(host="0.0.0.0", port=10000)
+
+def main():
+    global telegram_app
+    print("🚀 Starte Telegram Bot mit Webhook...")
+    telegram_app = asyncio.run(setup_bot())
     threading.Thread(target=run_flask, daemon=True).start()
 
-    # Start keep-alive ping
-    threading.Thread(target=keep_alive, daemon=True).start()
-
-    # Run Telegram bot
+if __name__ == "__main__":
     main()
