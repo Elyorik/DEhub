@@ -5,8 +5,9 @@ from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
 import os
 from dotenv import load_dotenv
-from flask import Flask, request, redirect   # ✅ добавили request и redirect
+from flask import Flask
 import threading
+import time
 
 # -------------------- Load environment variables --------------------
 load_dotenv()
@@ -19,7 +20,12 @@ flask_app = Flask(__name__)
 def home():
     return "✅ Telegram Bot läuft erfolgreich auf Render!"
 
+@flask_app.route("/health")
+def health():
+    return "OK", 200
 
+
+# -------------------- News sources --------------------
 NEWS_SITES = [
     {"type": "rss", "url": "https://www.tagesschau.de/xml/rss2"},
     {"type": "rss", "url": "https://rss.dw.com/xml/rss-de-all"},
@@ -133,6 +139,16 @@ def run_flask():
     flask_app.run(host="0.0.0.0", port=10000)
 
 
+def keep_alive():
+    """Ping the app periodically to prevent Render from sleeping"""
+    while True:
+        try:
+            requests.get("https://dehub.onrender.com/health", timeout=10)
+        except:
+            pass
+        time.sleep(300)  # 5 minutes
+
+
 def main():
     print("🚀 Telegram Bot startet...")
     app = Application.builder().token(BOT_TOKEN).build()
@@ -148,6 +164,9 @@ def main():
 if __name__ == "__main__":
     # Run Flask in background
     threading.Thread(target=run_flask, daemon=True).start()
+
+    # Start keep-alive ping
+    threading.Thread(target=keep_alive, daemon=True).start()
 
     # Run Telegram bot
     main()
