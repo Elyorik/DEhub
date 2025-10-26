@@ -1,139 +1,92 @@
 import os
-import asyncio
-import requests
-import xml.etree.ElementTree as ET
-from bs4 import BeautifulSoup
-from dotenv import load_dotenv
+import logging
 from flask import Flask, request
-from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
+from dotenv import load_dotenv
+from telegram import Update, Bot
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-# -------------------- Load environment variables --------------------
+# === Настройки логов ===
+logging.basicConfig(
+    format="%(asctime)s [%(levelname)s]: %(message)s",
+    level=logging.INFO
+)
+
+# === Загружаем .env ===
 load_dotenv()
-BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# -------------------- Flask app --------------------
-flask_app = Flask(__name__)
+TOKEN = os.getenv("BOT_TOKEN") or "PASTE_YOUR_TOKEN_HERE"
+WEBHOOK_URL = os.getenv("WEBHOOK_URL") or "https://dehub.onrender.com/webhook"
 
-@flask_app.route("/")
-def home():
-    return "✅ Telegram Bot läuft erfolgreich auf Render!"
+# === Flask ===
+app = Flask(__name__)
 
+# === Telegram bot ===
+bot = Bot(token=TOKEN)
+application = Application.builder().token(TOKEN).build()
 
-# -------------------- Nachrichtenquellen --------------------
-NEWS_SITES = [
-    {"type": "rss", "url": "https://www.tagesschau.de/xml/rss2"},
-    {"type": "rss", "url": "https://rss.dw.com/xml/rss-de-all"},
-    {"type": "html", "url": "https://www.zdf.de/nachrichten/heute"},
-    {"type": "rss", "url": "https://www.n-tv.de/rss"},
-    {"type": "rss", "url": "https://www.stern.de/feed/"},
-    {"type": "rss", "url": "https://www.focus.de/rss/"},
-]
-USER_INDEX = {}
+# === Команды ===
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("👋 Hallo! Ich bin dein DEhub Bot.\nSchreibe /hilfe, um alle Befehle zu sehen.")
 
-def parse_rss(url):
-    try:
-        r = requests.get(url, timeout=5)
-        r.raise_for_status()
-        root = ET.fromstring(r.content)
-        item = root.find("./channel/item")
-        if not item:
-            return None
-        title = item.find("title").text
-        link = item.find("link").text
-        description = item.find("description").text
-        enclosure = item.find("enclosure")
-        image_url = enclosure.attrib["url"] if enclosure is not None else None
-        return {"title": title, "summary": description, "link": link, "image": image_url}
-    except Exception:
-        return None
-
-def parse_zdf_heute(url):
-    try:
-        r = requests.get(url, timeout=5)
-        r.raise_for_status()
-        soup = BeautifulSoup(r.text, "html.parser")
-        article = soup.find("article")
-        if not article:
-            return None
-        title_tag = article.find("h2")
-        title = title_tag.get_text(strip=True) if title_tag else "ZDF Heute"
-        summary_tag = article.find("p")
-        summary = summary_tag.get_text(strip=True) if summary_tag else ""
-        img_tag = article.find("img")
-        image_url = img_tag["src"] if img_tag and "src" in img_tag.attrs else None
-        link_tag = article.find("a", href=True)
-        link = "https://www.zdf.de" + link_tag["href"] if link_tag else url
-        return {"title": title, "summary": summary, "link": link, "image": image_url}
-    except Exception:
-        return None
-
-def get_next_news(user_id):
-    index = USER_INDEX.get(user_id, 0)
-    site = NEWS_SITES[index % len(NEWS_SITES)]
-    USER_INDEX[user_id] = index + 1
-    if site["type"] == "rss":
-        return parse_rss(site["url"])
-    elif site["type"] == "html" and "zdf" in site["url"]:
-        return parse_zdf_heute(site["url"])
-    return None
-
-
-# -------------------- Telegram Handlers --------------------
-async def starten(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    webapp_button = KeyboardButton(
-        text="🚀 WebApp öffnen",
-        web_app=WebAppInfo(url="https://dehub-webapp.vercel.app")
+async def hilfe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = (
+        "📋 **Verfügbare Befehle:**\n"
+        "/starten — den Bot starten\n"
+        "/hilfe — Liste der Befehle\n"
+        "/neuigkeiten — letzte Nachrichten\n"
+        "/kontakt — Kontaktinformation\n"
     )
-    reply_markup = ReplyKeyboardMarkup([[webapp_button]], resize_keyboard=True)
-    await update.message.reply_text(
-        "👋 Hallo!\n"
-        "Klicke unten, um die WebApp zu öffnen.\n\n"
-        "Schreib /neuigkeiten, um die neuesten Nachrichten zu sehen 🗞️",
-        reply_markup=reply_markup
-    )
+    await update.message.reply_text(text, parse_mode="Markdown")
 
 async def neuigkeiten(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.message.chat_id
-    news_item = get_next_news(user_id)
-    if not news_item:
-        await update.message.reply_text("❌ Keine Nachrichten verfügbar.")
-        return
+    await update.message.reply_text("📰 Aktuelle Nachrichten findest du hier: https://www.tagesschau.de")
 
-    caption = f"**{news_item['title']}**\n\n{news_item['summary']}\n\n🔗 Quelle: {news_item['link']}"
-    if news_item["image"]:
-        await update.message.reply_photo(photo=news_item["image"], caption=caption, parse_mode="Markdown")
-    else:
-        await update.message.reply_text(caption, parse_mode="Markdown")
+async def kontakt(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("📧 Kontakt: info@dehub.de")
 
-
-# -------------------- Telegram Webhook Setup --------------------
-WEBHOOK_URL = "https://dehub.onrender.com/webhook"
-application = Application.builder().token(BOT_TOKEN).build()
-application.add_handler(CommandHandler("starten", starten))
+# === Регистрируем обработчики ===
+application.add_handler(CommandHandler("start", start))
+application.add_handler(CommandHandler("starten", start))
+application.add_handler(CommandHandler("hilfe", hilfe))
 application.add_handler(CommandHandler("neuigkeiten", neuigkeiten))
+application.add_handler(CommandHandler("kontakt", kontakt))
 
+# === Обработка ошибок ===
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logging.error(f"⚠️ Exception: {context.error}")
+    if isinstance(update, Update) and update.effective_chat:
+        try:
+            await update.effective_chat.send_message("❌ Ein Fehler ist aufgetreten. Bitte versuche es später erneut.")
+        except Exception as e:
+            logging.error(f"⚠️ Fehler beim Senden der Fehlermeldung: {e}")
 
-@flask_app.route("/webhook", methods=["POST"])
+application.add_error_handler(error_handler)
+
+# === Flask маршруты ===
+@app.route("/", methods=["GET"])
+def home():
+    return "✅ Bot läuft auf Render!"
+
+@app.route("/webhook", methods=["POST"])
 async def webhook():
-    """Handle Telegram webhook updates asynchronously"""
-    update = Update.de_json(request.get_json(force=True), application.bot)
-    await application.process_update(update)
-    return "ok", 200
+    try:
+        update = Update.de_json(request.get_json(force=True), bot)
+        await application.process_update(update)
+    except Exception as e:
+        logging.exception(f"❌ Fehler im Webhook: {e}")
+        return "Error", 500
+    return "OK", 200
 
-
-# -------------------- Startup --------------------
-async def init_bot():
-    await application.initialize()
-    await application.bot.set_webhook(WEBHOOK_URL)
-    print(f"✅ Webhook gesetzt: {WEBHOOK_URL}")
-
-
-def main():
-    print("🚀 Starte Bot & Flask Server auf Render...")
-    asyncio.run(init_bot())
-    flask_app.run(host="0.0.0.0", port=10000)
-
-
+# === Запуск ===
 if __name__ == "__main__":
-    main()
+    logging.info("🚀 Starte Bot & Flask Server auf Render...")
+
+    try:
+        bot.delete_webhook()
+        bot.set_webhook(url=WEBHOOK_URL)
+        logging.info(f"✅ Webhook gesetzt: {WEBHOOK_URL}")
+    except Exception as e:
+        logging.error(f"❌ Fehler beim Setzen des Webhooks: {e}")
+
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
