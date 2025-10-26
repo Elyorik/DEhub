@@ -13,13 +13,14 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # -------------------- Flask app --------------------
-app = Flask(__name__)
+flask_app = Flask(__name__)
 
-@app.route("/")
+@flask_app.route("/")
 def home():
     return "✅ Telegram Bot läuft erfolgreich auf Render!"
 
-# -------------------- Новости --------------------
+
+# -------------------- Nachrichtenquellen --------------------
 NEWS_SITES = [
     {"type": "rss", "url": "https://www.tagesschau.de/xml/rss2"},
     {"type": "rss", "url": "https://rss.dw.com/xml/rss-de-all"},
@@ -77,6 +78,7 @@ def get_next_news(user_id):
         return parse_zdf_heute(site["url"])
     return None
 
+
 # -------------------- Telegram Handlers --------------------
 async def starten(update: Update, context: ContextTypes.DEFAULT_TYPE):
     webapp_button = KeyboardButton(
@@ -84,7 +86,6 @@ async def starten(update: Update, context: ContextTypes.DEFAULT_TYPE):
         web_app=WebAppInfo(url="https://dehub-webapp.vercel.app")
     )
     reply_markup = ReplyKeyboardMarkup([[webapp_button]], resize_keyboard=True)
-
     await update.message.reply_text(
         "👋 Hallo!\n"
         "Klicke unten, um die WebApp zu öffnen.\n\n"
@@ -95,7 +96,6 @@ async def starten(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def neuigkeiten(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.chat_id
     news_item = get_next_news(user_id)
-
     if not news_item:
         await update.message.reply_text("❌ Keine Nachrichten verfügbar.")
         return
@@ -106,40 +106,34 @@ async def neuigkeiten(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text(caption, parse_mode="Markdown")
 
-# -------------------- Webhook setup --------------------
+
+# -------------------- Telegram Webhook Setup --------------------
 WEBHOOK_URL = "https://dehub.onrender.com/webhook"
-bot_app = None
+application = Application.builder().token(BOT_TOKEN).build()
+application.add_handler(CommandHandler("starten", starten))
+application.add_handler(CommandHandler("neuigkeiten", neuigkeiten))
 
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    if bot_app is None:
-        return "Bot not ready", 503
 
-    update = Update.de_json(request.get_json(force=True), bot_app.bot)
+@flask_app.route("/webhook", methods=["POST"])
+async def webhook():
+    """Handle Telegram webhook updates asynchronously"""
+    update = Update.de_json(request.get_json(force=True), application.bot)
+    await application.process_update(update)
+    return "ok", 200
 
-    # Используем уже готовый event loop
-    loop = asyncio.get_event_loop()
-    loop.create_task(bot_app.process_update(update))
-    return "ok"
 
+# -------------------- Startup --------------------
 async def init_bot():
-    global bot_app
-    bot_app = Application.builder().token(BOT_TOKEN).build()
-    bot_app.add_handler(CommandHandler("starten", starten))
-    bot_app.add_handler(CommandHandler("neuigkeiten", neuigkeiten))
-
-    # ✅ Обязательная инициализация
-    await bot_app.initialize()
-    await bot_app.bot.set_webhook(WEBHOOK_URL)
+    await application.initialize()
+    await application.bot.set_webhook(WEBHOOK_URL)
     print(f"✅ Webhook gesetzt: {WEBHOOK_URL}")
 
 
-# -------------------- Main --------------------
 def main():
     print("🚀 Starte Bot & Flask Server auf Render...")
     asyncio.run(init_bot())
-    # ⚡ Flask блокирует поток — Render видит активный процесс и не завершает
-    app.run(host="0.0.0.0", port=10000)
+    flask_app.run(host="0.0.0.0", port=10000)
+
 
 if __name__ == "__main__":
     main()
