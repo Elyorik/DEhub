@@ -114,8 +114,12 @@ bot_app = None
 def webhook():
     if bot_app is None:
         return "Bot not ready", 503
+
     update = Update.de_json(request.get_json(force=True), bot_app.bot)
-    asyncio.run(bot_app.process_update(update))
+
+    # Используем уже готовый event loop
+    loop = asyncio.get_event_loop()
+    loop.create_task(bot_app.process_update(update))
     return "ok"
 
 async def init_bot():
@@ -124,8 +128,11 @@ async def init_bot():
     bot_app.add_handler(CommandHandler("starten", starten))
     bot_app.add_handler(CommandHandler("neuigkeiten", neuigkeiten))
 
+    # ✅ Обязательная инициализация
+    await bot_app.initialize()
     await bot_app.bot.set_webhook(WEBHOOK_URL)
     print(f"✅ Webhook gesetzt: {WEBHOOK_URL}")
+
 
 # -------------------- Main --------------------
 def main():
