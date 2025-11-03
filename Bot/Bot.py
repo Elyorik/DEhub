@@ -130,24 +130,22 @@ async def neuigkeiten(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def run_flask():
     """Run Flask for Render health checks"""
-    flask_app.run(host="0.0.0.0", port=10000)
+    port = int(os.getenv("PORT", 10000))
+    flask_app.run(host="0.0.0.0", port=port)
 
-
-def main():
+def run_bot():
     print("🚀 Telegram Bot startet...")
     app = Application.builder().token(BOT_TOKEN).build()
 
-    # Register commands
     app.add_handler(CommandHandler("starten", starten))
     app.add_handler(CommandHandler("neuigkeiten", neuigkeiten))
 
-    # Start bot
     app.run_polling()
 
-
 if __name__ == "__main__":
-    # Run Flask in background
-    threading.Thread(target=run_flask, daemon=True).start()
+    # Запускаем Telegram бота параллельно
+    threading.Thread(target=run_bot, daemon=True).start()
 
-    # Run Telegram bot
-    main()
+    # Flask держит приложение живым (главный процесс)
+    run_flask()
+
