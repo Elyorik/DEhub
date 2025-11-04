@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 from flask import Flask, request
 from telegram import Update, Bot, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
+from dotenv import load_dotenv
+load_dotenv()  # <-- это загрузит переменные из .env
 
 # ======== Настройки окружения ========
 BOT_TOKEN = os.getenv("BOT_TOKEN")
