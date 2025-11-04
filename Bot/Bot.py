@@ -126,12 +126,20 @@ async def setup_webhook():
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
 
-if "localhost" in RENDER_URL:
-    print("✅ Local mode — polling")
-    application.run_polling()
-else:
-    if __name__ == "__main__":
-        import asyncio
+if __name__ == "__main__":
+    import asyncio
+
+    if "localhost" in RENDER_URL:
+        print("✅ Local mode — polling")
+        asyncio.run(application.initialize())
+        asyncio.run(application.start())
+        application.run_polling()
+    else:
+        print("✅ Production mode — webhook")
+        asyncio.run(application.initialize())
         asyncio.run(setup_webhook())
-        print(f"✅ Webhook: {WEBHOOK_URL}")
+        asyncio.run(application.start())
+
+        # Запуск Flask
         app.run(host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
+
