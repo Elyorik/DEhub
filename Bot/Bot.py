@@ -1,31 +1,24 @@
-import os
 import requests
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
-from flask import Flask, request
-from telegram import Update, Bot, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
+from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
+import os
 from dotenv import load_dotenv
-load_dotenv()  # <-- это загрузит переменные из .env
+from flask import Flask, request, redirect   # ✅ добавили request и redirect
+import threading
 
-# ======== Настройки окружения ========
+# -------------------- Load environment variables --------------------
+load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-RENDER_URL = os.getenv("RENDER_URL")
-PORT = int(os.getenv("PORT", 10000))
 
-if not BOT_TOKEN:
-    raise Exception("❌ BOT_TOKEN не найден")
-if not RENDER_URL:
-    raise Exception("❌ RENDER_URL не найден")
+# -------------------- Flask app (for Render health check + redirects) --------------------
+flask_app = Flask(__name__)
 
-WEBHOOK_URL = f"{RENDER_URL}/{BOT_TOKEN}"
+@flask_app.route("/")
+def home():
+    return "✅ Telegram Bot läuft erfolgreich auf Render!"
 
-# ======== Flask для webhook ========
-app = Flask(__name__)
-bot = Bot(BOT_TOKEN)
-application = Application.builder().token(BOT_TOKEN).build()
-
-# ======== ТВОЙ ИСХОДНЫЙ КОД БЕЗ ИЗМЕНЕНИЙ ========
 
 NEWS_SITES = [
     {"type": "rss", "url": "https://www.tagesschau.de/xml/rss2"},
@@ -36,21 +29,29 @@ NEWS_SITES = [
     {"type": "rss", "url": "https://www.focus.de/rss/"},
 ]
 
-USER_INDEX = {}
+USER_INDEX = {}  # user_id → current news index
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+# -------------------- Telegram Handlers --------------------
+
+async def starten(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /starten command"""
     webapp_button = KeyboardButton(
-        text="🚀 Open WebApp",
+        text="🚀 WebApp öffnen",
         web_app=WebAppInfo(url="https://dehub-webapp.vercel.app")
     )
     reply_markup = ReplyKeyboardMarkup([[webapp_button]], resize_keyboard=True)
 
     await update.message.reply_text(
-        "Hallo 👋!\nClick below to open the WebApp.\n\nSchreib /news um die neuesten Nachrichten zu bekommen 📢",
+        "👋 Hallo!\n"
+        "Klicke unten, um die WebApp zu öffnen.\n\n"
+        "Schreib /neuigkeiten, um die neuesten Nachrichten zu sehen 🗞️",
         reply_markup=reply_markup
     )
 
+
 def parse_rss(url):
+    """Parse RSS feed"""
     try:
         r = requests.get(url, timeout=5)
         r.raise_for_status()
@@ -62,12 +63,14 @@ def parse_rss(url):
         link = item.find("link").text
         description = item.find("description").text
         enclosure = item.find("enclosure")
-        image_url = enclosure.attrib["url"] if enclosure else None
+        image_url = enclosure.attrib["url"] if enclosure is not None else None
         return {"title": title, "summary": description, "link": link, "image": image_url}
-    except:
+    except Exception:
         return None
 
+
 def parse_zdf_heute(url):
+    """Parse ZDF Heute site"""
     try:
         r = requests.get(url, timeout=5)
         r.raise_for_status()
@@ -84,13 +87,16 @@ def parse_zdf_heute(url):
         link_tag = article.find("a", href=True)
         link = "https://www.zdf.de" + link_tag["href"] if link_tag else url
         return {"title": title, "summary": summary, "link": link, "image": image_url}
-    except:
+    except Exception:
         return None
 
+
 def get_next_news(user_id):
+    """Cycle through news sources"""
     index = USER_INDEX.get(user_id, 0)
     site = NEWS_SITES[index % len(NEWS_SITES)]
     USER_INDEX[user_id] = index + 1
+
     if site["type"] == "rss":
         return parse_rss(site["url"])
     elif site["type"] == "html" and "zdf" in site["url"]:
@@ -98,48 +104,50 @@ def get_next_news(user_id):
     else:
         return None
 
-async def news(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def neuigkeiten(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /neuigkeiten command"""
     user_id = update.message.chat_id
     news_item = get_next_news(user_id)
+
     if not news_item:
-        await update.message.reply_text("Keine Nachrichten verfügbar ❌")
+        await update.message.reply_text("❌ Keine Nachrichten verfügbar.")
         return
+
+    caption = f"**{news_item['title']}**\n\n{news_item['summary']}\n\n🔗 Quelle: {news_item['link']}"
+
     if news_item["image"]:
         await update.message.reply_photo(
             photo=news_item["image"],
-            caption=f"**{news_item['title']}**\n\n{news_item['summary']}\n\nQuelle: {news_item['link']}",
+            caption=caption,
             parse_mode="Markdown"
         )
     else:
-        await update.message.reply_text(
-            f"**{news_item['title']}**\n\n{news_item['summary']}\n\nQuelle: {news_item['link']}",
-            parse_mode="Markdown"
-        )
+        await update.message.reply_text(caption, parse_mode="Markdown")
 
-# ======== Регистрируем команды ========
-application.add_handler(CommandHandler("start", start))
-application.add_handler(CommandHandler("news", news))
 
-# ======== Flask route для webhook ========
-@app.post(f"/{BOT_TOKEN}")
-def webhook():
-    update = Update.de_json(request.get_json(force=True), bot)
-    application.update_queue.put(update)
-    return "ok"
+# -------------------- Run Flask + Bot --------------------
 
-@app.get("/")
-def home():
-    return "✅ Bot running on Render"
+def run_flask():
+    """Run Flask for Render health checks"""
+    flask_app.run(host="0.0.0.0", port=10000)
 
-# ======== Запуск webhook на Render ========
-async def setup_webhook():
-    await bot.delete_webhook()
-    await bot.set_webhook(WEBHOOK_URL)
-    print(f"✅ Webhook установлен: {WEBHOOK_URL}")
+
+def main():
+    print("🚀 Telegram Bot startet...")
+    app = Application.builder().token(BOT_TOKEN).build()
+
+    # Register commands
+    app.add_handler(CommandHandler("starten", starten))
+    app.add_handler(CommandHandler("neuigkeiten", neuigkeiten))
+
+    # Start bot
+    app.run_polling()
+
 
 if __name__ == "__main__":
-    import asyncio
-    # Устанавливаем webhook
-    asyncio.run(setup_webhook())
-    # Запускаем Flask на Render
-    app.run(host="0.0.0.0", port=PORT)
+    # Run Flask in background
+    threading.Thread(target=run_flask, daemon=True).start()
+
+    # Run Telegram bot
+    main()
