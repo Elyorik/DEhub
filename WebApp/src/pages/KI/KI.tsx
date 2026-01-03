@@ -8,9 +8,7 @@ type Msg = {
 };
 
 export default function KI() {
-  const [messages, setMessages] = useState<Msg[]>([
-    { role: "ai", text: "👋 Hallo! Frag mich etwas." },
-  ]);
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +17,7 @@ export default function KI() {
   async function send() {
     if (!input.trim() || loading) return;
 
-    // 🔒 LIMIT CHECK (5 pro Tag)
+    // 🔒 LIMIT 5 / день
     if (!canUseAI()) {
       setMessages((m) => [
         ...m,
@@ -32,7 +30,6 @@ export default function KI() {
     }
 
     const userText = input;
-
     setMessages((m) => [...m, { role: "user", text: userText }]);
     setInput("");
     setLoading(true);
@@ -41,11 +38,11 @@ export default function KI() {
 
     try {
       if (!isProd) {
-        // LOCAL DEV → mock
+        // DEV → mock
         const { mockAI } = await import("./aiMock");
         answer = await mockAI(userText);
       } else {
-        // VERCEL PROD → REAL AI
+        // PROD → real AI
         const res = await fetch("/api/ai", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -68,8 +65,6 @@ export default function KI() {
   return (
     <div className={s.page}>
       <div className={s.chat}>
-        <div className={s.header}>🤖 DEhub KI</div>
-
         <div className={s.messages}>
           {messages.map((m, i) => (
             <div key={i} className={s[m.role]}>
@@ -92,4 +87,3 @@ export default function KI() {
     </div>
   );
 }
-  
