@@ -1,23 +1,71 @@
+import { useState } from "react";
 import s from "./ki.module.scss";
 
-function KI() {
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+export default function KI() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
+
+    const userMessage: Message = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMessage.content }),
+      });
+
+      const data: { answer?: string } = await res.json();
+
+      const aiMessage: Message = {
+        role: "assistant",
+        content: data.answer ?? "❌ Keine Antwort",
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "❌ Server nicht erreichbar" },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={s.page}>
-      <h1>KI Werkzeuge</h1>
-      <div className={s.tools}>
-        <a href="https://chat.openai.com/" target="_blank" rel="noopener noreferrer">
-          ChatGPT
-        </a>
-        <a href="https://chat.deepseek.com/" target="_blank" rel="noopener noreferrer">
-          DeepSeek
-        </a>
-        <a href="https://aitester.de/" target="_blank" rel="noopener noreferrer">
-          AITester
-        </a>
+      <h1 className={s.title}>🤖 DEhub KI</h1>
+
+      <div className={s.chat}>
+        {messages.map((m, i) => (
+          <div key={i} className={m.role === "user" ? s.user : s.ai}>
+            {m.content}
+          </div>
+        ))}
+        {loading && <div className={s.ai}>💭 KI denkt…</div>}
       </div>
-      <h1>Die Seite befindet sich derzeit im Aufbau.😁</h1>
+
+      <div className={s.inputBox}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Frag mich etwas…"
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        />
+        <button onClick={sendMessage}>Senden</button>
+      </div>
     </div>
   );
 }
-
-export default KI;
