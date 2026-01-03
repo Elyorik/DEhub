@@ -1,60 +1,68 @@
 .page {
-  width: 100vw;
-  height: 100vh;
-  background: white;
   display: flex;
+  justify-content: center;
+  padding: 40px;
+  background: white;
 }
 
-.chat {
-  flex: 1;
+.chatBox {
+  width: 100%;
+  max-width: 720px;
+  height: 70vh;
+
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+
   display: flex;
   flex-direction: column;
+  background: #fff;
 }
 
 .messages {
   flex: 1;
-  padding: 24px;
+  padding: 20px;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .user {
   align-self: flex-end;
-  background: #2563eb;
+  background: #007bff;
   color: white;
   padding: 10px 14px;
-  border-radius: 14px 14px 0 14px;
-  max-width: 70%;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  max-width: 80%;
 }
 
 .ai {
   align-self: flex-start;
-  background: #f1f5f9;
-  color: #000;
+  background: #f2f2f2;
+  color: black;
   padding: 10px 14px;
-  border-radius: 14px 14px 14px 0;
-  max-width: 70%;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  max-width: 80%;
 }
 
-.input {
+.inputRow {
   display: flex;
-  border-top: 1px solid #e5e7eb;
+  padding: 14px;
+  border-top: 1px solid #e0e0e0;
+  gap: 10px;
+}
 
-  input {
-    flex: 1;
-    padding: 16px;
-    border: none;
-    outline: none;
-    font-size: 15px;
-  }
+.inputRow input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
 
-  button {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 0 24px;
-    cursor: pointer;
-  }
+.inputRow button {
+  padding: 0 18px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }

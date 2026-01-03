@@ -1,6 +1,5 @@
 import { useState } from "react";
 import s from "./ki.module.scss";
-import { canUseAI } from "./aiLimit";
 
 type Msg = {
   role: "user" | "ai";
@@ -12,76 +11,56 @@ export default function KI() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const isProd = import.meta.env.PROD;
-
   async function send() {
     if (!input.trim() || loading) return;
 
-    // 🔒 LIMIT 5 / день
-    if (!canUseAI()) {
-      setMessages((m) => [
-        ...m,
-        {
-          role: "ai",
-          text: "Ich bin ein kostenloses KI-Modell, komm morgen wieder 🙂",
-        },
-      ]);
-      return;
-    }
-
-    const userText = input;
-    setMessages((m) => [...m, { role: "user", text: userText }]);
+    const userMsg = { role: "user", text: input };
+    setMessages((m) => [...m, userMsg]);
     setInput("");
     setLoading(true);
 
-    let answer = "";
-
     try {
-      if (!isProd) {
-        // DEV → mock
-        const { mockAI } = await import("./aiMock");
-        answer = await mockAI(userText);
-      } else {
-        // PROD → real AI
-        const res = await fetch("/api/ai", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: userText }),
-        });
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMsg.text }),
+      });
 
-        if (!res.ok) throw new Error("Server error");
+      const data = await res.json();
 
-        const data = await res.json();
-        answer = data.answer;
-      }
+      setMessages((m) => [...m, { role: "ai", text: data.reply }]);
     } catch {
-      answer = "❌ Server nicht erreichbar";
+      setMessages((m) => [
+        ...m,
+        { role: "ai", text: "❌ Server nicht erreichbar" },
+      ]);
+    } finally {
+      setLoading(false);
     }
-
-    setMessages((m) => [...m, { role: "ai", text: answer }]);
-    setLoading(false);
   }
 
   return (
     <div className={s.page}>
-      <div className={s.chat}>
+      <div className={s.chatBox}>
         <div className={s.messages}>
           {messages.map((m, i) => (
-            <div key={i} className={s[m.role]}>
+            <div
+              key={i}
+              className={m.role === "user" ? s.user : s.ai}
+            >
               {m.text}
             </div>
           ))}
-          {loading && <div className={s.ai}>⏳ Ich denke…</div>}
         </div>
 
-        <div className={s.input}>
+        <div className={s.inputRow}>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Frag mich etwas…"
+            placeholder="Frag DEhub KI etwas…"
             onKeyDown={(e) => e.key === "Enter" && send()}
           />
-          <button onClick={send}>Senden</button>
+          <button onClick={send}>{loading ? "…" : "Senden"}</button>
         </div>
       </div>
     </div>
