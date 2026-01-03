@@ -1,71 +1,95 @@
 import { useState } from "react";
 import s from "./ki.module.scss";
+import { canUseAI } from "./aiLimit";
 
-type Message = {
-  role: "user" | "assistant";
-  content: string;
+type Msg = {
+  role: "user" | "ai";
+  text: string;
 };
 
 export default function KI() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Msg[]>([
+    { role: "ai", text: "👋 Hallo! Frag mich etwas." },
+  ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const sendMessage = async () => {
+  const isProd = import.meta.env.PROD;
+
+  async function send() {
     if (!input.trim() || loading) return;
 
-    const userMessage: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    // 🔒 LIMIT CHECK (5 pro Tag)
+    if (!canUseAI()) {
+      setMessages((m) => [
+        ...m,
+        {
+          role: "ai",
+          text: "Ich bin ein kostenloses KI-Modell, komm morgen wieder 🙂",
+        },
+      ]);
+      return;
+    }
+
+    const userText = input;
+
+    setMessages((m) => [...m, { role: "user", text: userText }]);
     setInput("");
     setLoading(true);
 
+    let answer = "";
+
     try {
-      const res = await fetch("/api/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.content }),
-      });
+      if (!isProd) {
+        // LOCAL DEV → mock
+        const { mockAI } = await import("./aiMock");
+        answer = await mockAI(userText);
+      } else {
+        // VERCEL PROD → REAL AI
+        const res = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userText }),
+        });
 
-      const data: { answer?: string } = await res.json();
+        if (!res.ok) throw new Error("Server error");
 
-      const aiMessage: Message = {
-        role: "assistant",
-        content: data.answer ?? "❌ Keine Antwort",
-      };
-
-      setMessages((prev) => [...prev, aiMessage]);
+        const data = await res.json();
+        answer = data.answer;
+      }
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "❌ Server nicht erreichbar" },
-      ]);
-    } finally {
-      setLoading(false);
+      answer = "❌ Server nicht erreichbar";
     }
-  };
+
+    setMessages((m) => [...m, { role: "ai", text: answer }]);
+    setLoading(false);
+  }
 
   return (
     <div className={s.page}>
-      <h1 className={s.title}>🤖 DEhub KI</h1>
-
       <div className={s.chat}>
-        {messages.map((m, i) => (
-          <div key={i} className={m.role === "user" ? s.user : s.ai}>
-            {m.content}
-          </div>
-        ))}
-        {loading && <div className={s.ai}>💭 KI denkt…</div>}
-      </div>
+        <div className={s.header}>🤖 DEhub KI</div>
 
-      <div className={s.inputBox}>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Frag mich etwas…"
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-        />
-        <button onClick={sendMessage}>Senden</button>
+        <div className={s.messages}>
+          {messages.map((m, i) => (
+            <div key={i} className={s[m.role]}>
+              {m.text}
+            </div>
+          ))}
+          {loading && <div className={s.ai}>⏳ Ich denke…</div>}
+        </div>
+
+        <div className={s.input}>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Frag mich etwas…"
+            onKeyDown={(e) => e.key === "Enter" && send()}
+          />
+          <button onClick={send}>Senden</button>
+        </div>
       </div>
     </div>
   );
 }
+  
