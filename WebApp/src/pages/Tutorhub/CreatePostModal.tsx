@@ -40,7 +40,7 @@ export default function CreatePostModal({ onClose, onCreated }: Props) {
   };
 
   const handleSubmit = async () => {
-    if (password !== "1234") {
+    if (password !== "DEhub_Admin2026") {
       alert("Falsches Passwort");
       return;
     }
