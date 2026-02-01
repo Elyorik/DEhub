@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import { useUser } from "../../store/UserContext";
 import {
   auth,
   googleProvider,
@@ -26,6 +27,7 @@ import FacebookIcon from "../../assets/FacebookIcon.png";
 
 const Account: React.FC = () => {
   const reduxUser = useSelector((state: RootState) => state.user.currentUser);
+  const { user, login, logout } = useUser();
   const [localUser, setLocalUser] = useState<any>(null);
   const [userName, setUserName] = useState<string>("");
 
@@ -139,6 +141,14 @@ const Account: React.FC = () => {
         displayName: cred.user.displayName,
       });
       setUserName(cred.user.displayName || name);
+      
+      // Also update UserContext
+      login({ 
+        id: cred.user.uid, 
+        name: cred.user.displayName || name,
+        avatar: cred.user.photoURL || undefined
+      });
+      
       setMessage("✅ Login erfolgreich!");
     } catch (err: any) {
       if (
@@ -175,6 +185,14 @@ const Account: React.FC = () => {
         displayName: cred.user.displayName,
       });
       setUserName(cred.user.displayName || "");
+      
+      // Also update UserContext
+      login({ 
+        id: cred.user.uid, 
+        name: cred.user.displayName || "",
+        avatar: cred.user.photoURL || undefined
+      });
+      
       setMessage("✅ Erfolgreich über Google eingeloggt!");
     } catch (err: any) {
       setMessage("❌ Google-Login fehlgeschlagen: " + err.message);
@@ -189,6 +207,14 @@ const Account: React.FC = () => {
         displayName: cred.user.displayName,
       });
       setUserName(cred.user.displayName || "");
+      
+      // Also update UserContext
+      login({ 
+        id: cred.user.uid, 
+        name: cred.user.displayName || "",
+        avatar: cred.user.photoURL || undefined
+      });
+      
       setMessage("✅ Erfolgreich über GitHub eingeloggt!");
     } catch (err: any) {
       setMessage("❌ GitHub-Login fehlgeschlagen: " + err.message);
@@ -203,6 +229,14 @@ const Account: React.FC = () => {
         displayName: cred.user.displayName,
       });
       setUserName(cred.user.displayName || "");
+      
+      // Also update UserContext
+      login({ 
+        id: cred.user.uid, 
+        name: cred.user.displayName || "",
+        avatar: cred.user.photoURL || undefined
+      });
+      
       setMessage("✅ Erfolgreich über Facebook eingeloggt!");
     } catch (err: any) {
       setMessage("❌ Facebook-Login fehlgeschlagen: " + err.message);
@@ -214,6 +248,10 @@ const Account: React.FC = () => {
     await signOut(auth);
     setLocalUser(null);
     setUserName("");
+    
+    // Also update UserContext
+    logout();
+    
     setMessage("👋 Du wurdest abgemeldet.");
   };
 

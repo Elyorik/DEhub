@@ -7,6 +7,7 @@ import {
   FacebookAuthProvider,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage"; // ✅ ВАЖНО
 
 const firebaseConfig = {
   apiKey: "AIzaSyDiovhAE0fMBC9BYTc0qnUd9h9KbkDnCcI",
@@ -18,23 +19,25 @@ const firebaseConfig = {
   measurementId: "G-Q315BQNCNR",
 };
 
-// 🔥 Firebase App initialisieren
-const app = initializeApp(firebaseConfig);
+// 🔥 Firebase App
+export const app = initializeApp(firebaseConfig);
 
-// 📦 Firebase Dienste
+// 🔐 Auth
 export const auth = getAuth(app);
+
+// 🗄 Firestore
 export const db = getFirestore(app);
 
-// 🌐 Provider für Social Logins
+// 📦 Storage
+export const storage = getStorage(app);
+
+// 🌐 Providers
 export const googleProvider = new GoogleAuthProvider();
 export const githubProvider = new GithubAuthProvider();
 export const facebookProvider = new FacebookAuthProvider();
 
-// 📩 Einstellungen für E-Mail-Link-Verifizierung
+// 📩 Email link
 export const actionCodeSettings = {
   url: "https://dehub.vercel.app/verify",
   handleCodeInApp: true,
 };
-
-// ✅ Добавь это в самый конец:
-export { app };

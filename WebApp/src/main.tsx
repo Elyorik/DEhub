@@ -9,7 +9,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { login, logout } from "./store/userSlice";
 import { UserProvider } from "./store/UserContext";
-import VisitorTracker from "./components/VisitorsCounter/VisitorCounter"; // ⚡ только трекинг
+// import VisitorTracker from "./components/VisitorsCounter/VisitorCounter"; // ⚡ только трекинг
 
 onAuthStateChanged(auth, (firebaseUser) => {
   if (firebaseUser) {
@@ -18,6 +18,7 @@ onAuthStateChanged(auth, (firebaseUser) => {
         id: firebaseUser.uid,
         name: firebaseUser.displayName || "User",
         email: firebaseUser.email || "",
+        avatar: firebaseUser.photoURL || undefined,
       })
     );
   } else {
@@ -29,7 +30,7 @@ createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <Provider store={store}>
         <UserProvider>
-          <VisitorTracker />  {/* работает в фоне, каждые 10 сек */}
+          {/* <VisitorTracker />  работает в фоне, каждые 10 сек */}
           <RouterProvider router={routers} />
         </UserProvider>
       </Provider>

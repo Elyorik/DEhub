@@ -81,6 +81,7 @@ function BurgerMenu({ onClose, isOpen }: BurgerMenuProps) {
               <span className={`${s.arrow} ${openFolder === "freizeit" ? s.openArrow : ""}`}>▾</span>
             </button>
             <ul className={`${s.submenu} ${openFolder === "freizeit" ? s.show : ""}`}>
+              <li><Link to="/tutorhub" onClick={handleNavClick}>Tutorhub</Link></li>
               <li><Link to="/forum" onClick={handleNavClick}>Forum</Link></li>
               <li><Link to="/spiele" onClick={handleNavClick}>Spiele</Link></li>
             </ul>

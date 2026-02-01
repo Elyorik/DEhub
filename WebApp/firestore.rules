@@ -1,10 +1,45 @@
 rules_version = '2';
 service cloud.firestore {
+  function getCurrentUserId() {
+    return request.auth.uid;
+  }
+
+  function isAuthenticated() {
+    return request.auth != null;
+  }
+
   match /databases/{database}/documents {
-    
-    // Nur authentifizierte User dürfen zugreifen
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    match /visitors/{docId} {
+      allow create: if true;
+      allow read: if false;
+    }
+
+    match /tutorhub_posts/{docId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.authorId == getCurrentUserId();
+      allow delete: if isAuthenticated() && resource.data.authorId == getCurrentUserId();
+    }
+
+    match /tutorhub_users/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && docId == getCurrentUserId();
+    }
+
+    match /tutorhub_likes/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /tutorhub_comments/{docId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow delete: if isAuthenticated() && resource.data.authorId == getCurrentUserId();
+    }
+
+    match /tutorhub_notifications/{docId} {
+      allow read: if isAuthenticated() && docId == getCurrentUserId();
+      allow create: if true;
     }
   }
 }

@@ -1,11 +1,12 @@
 // src/UserContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 
 // 🔹 Benutzer-Typ
 interface User {
   id: string;
   name: string;
   email?: string;
+  avatar?: string;
 }
 
 interface UserContextType {

@@ -1,0 +1,77 @@
+.carousel {
+  position: relative;
+  width: 100%;
+  margin-top: 8px;
+
+  img,
+  video {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    object-fit: cover;
+  }
+
+  a {
+    display: block;
+    padding: 1rem;
+    background: #363636;
+    border-radius: 12px;
+    text-align: center;
+    color: #0095f6;
+    text-decoration: none;
+    font-weight: 500;
+  }
+}
+
+.prev,
+.next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  border: none;
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+}
+
+.prev {
+  left: 8px;
+}
+
+.next {
+  right: 8px;
+}
+
+/* Pagination dots */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #363636;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &.active {
+    background: #0095f6;
+  }
+}
