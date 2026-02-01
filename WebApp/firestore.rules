@@ -41,5 +41,21 @@ service cloud.firestore {
       allow read: if isAuthenticated() && docId == getCurrentUserId();
       allow create: if true;
     }
+
+    // Forum collections
+    match /forumMessages/{docId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+    }
+
+    match /devMessages/{docId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+    }
+
+    match /devOnline/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
   }
 }
