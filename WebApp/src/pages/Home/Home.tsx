@@ -13,6 +13,7 @@ interface FeatureCard {
   image: string;
   link: string;
   bgColor: string;
+  isSpecial?: boolean;
 }
 
 const featureCards: FeatureCard[] = [
@@ -30,10 +31,32 @@ const featureCards: FeatureCard[] = [
     link: "/suchen",
     bgColor: "#e3f2fd",
   },
+  {
+    title: "Meine Schule 60",
+    description: "Entdecke alles über unsere Schule",
+    image: newSuchmaschiene, // Replace with schule60 image when available
+    link: "/schule60",
+    bgColor: "#e8f5e9",
+    isSpecial: true,
+  },
 ];
 
 // ===== Reusable Feature Card Component =====
 function FeatureCard({ card }: { card: FeatureCard }) {
+  if (card.isSpecial) {
+    return (
+      <Link to={card.link} className={s.specialCard}>
+        <div className={s.specialCardContent}>
+          <h2>{card.title}</h2>
+          <p>{card.description}</p>
+        </div>
+        <div className={s.specialCardImage}>
+          <img src={card.image} alt={card.title} />
+        </div>
+      </Link>
+    );
+  }
+
   return (
     <Link to={card.link} className={s.featureCard} style={{ background: card.bgColor }}>
       <h2>{card.title}</h2>

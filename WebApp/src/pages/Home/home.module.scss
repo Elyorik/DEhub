@@ -124,6 +124,100 @@
   }
 }
 
+/* ===== Special Animated Card (Meine Schule 60) ===== */
+.specialCard {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  padding: 3rem;
+  text-decoration: none;
+  color: inherit;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+  position: relative;
+  overflow: hidden;
+
+  // Floating particles effect
+  &::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: float 15s ease-in-out infinite;
+  }
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.6);
+
+    .specialCardImage img {
+      transform: scale(1.1) rotate(2deg);
+    }
+
+    h2 {
+      transform: translateX(10px);
+    }
+  }
+}
+
+.specialCardContent {
+  flex: 1;
+  text-align: left;
+  z-index: 1;
+
+  h2 {
+    font-size: 2.5rem;
+    color: #fff;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+  }
+
+  p {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 400px;
+  }
+}
+
+.specialCardImage {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  z-index: 1;
+
+  img {
+    width: 100%;
+    max-width: 350px;
+    height: auto;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.5s ease;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(20px, 20px) rotate(5deg);
+  }
+  50% {
+    transform: translate(0, 40px) rotate(0deg);
+  }
+  75% {
+    transform: translate(-20px, 20px) rotate(-5deg);
+  }
+}
+
 /* ===== 📱 Tablet Anpassung ===== */
 @media (max-width: 900px) {
   .containers {
@@ -148,6 +242,25 @@
 
   .landing h2 {
     font-size: 1.6rem;
+  }
+
+  .specialCard {
+    flex-direction: column;
+    text-align: center;
+    gap: 2rem;
+    padding: 2rem;
+  }
+
+  .specialCardContent {
+    text-align: center;
+
+    h2 {
+      font-size: 2rem;
+    }
+  }
+
+  .specialCardImage img {
+    max-width: 280px;
   }
 }
 
@@ -186,5 +299,22 @@
       width: 100%;
       max-width: 300px;
     }
+  }
+
+  .specialCard {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .specialCardContent h2 {
+    font-size: 1.6rem;
+  }
+
+  .specialCardContent p {
+    font-size: 1rem;
+  }
+
+  .specialCardImage img {
+    max-width: 220px;
   }
 }

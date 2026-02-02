@@ -35,6 +35,14 @@ export const routers = createBrowserRouter([
         element: <KI />,
       },
       {
+        path: "schule60",
+        element: <NotFound />,
+      },
+      {
+        path: "übersetzer",
+        element: <NotFound />,
+      },
+      {
         path: "uber-uns",
         element: <Überuns />,
       },
