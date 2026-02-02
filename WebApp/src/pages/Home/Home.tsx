@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import s from "./home.module.scss";
 import newSuchmaschiene from "../../assets/UpdatesImg/newSuchmaschiene.png";
 import newKIWerkzeuge from "../../assets/UpdatesImg/newKIWerkzeuge.png";
+import newSchule60 from "..\..\assets\UpdatesImg\newSchule60.png";
 import counterStyle from "../../components/VisitorsCounter/visitorCounter.module.scss";
 
 // ===== Feature Card Configuration =====
@@ -34,7 +35,7 @@ const featureCards: FeatureCard[] = [
   {
     title: "Meine Schule 60",
     description: "Entdecke alles über unsere Schule",
-    image: newSuchmaschiene, // Replace with schule60 image when available
+    image: newSchule60, // Replace with schule60 image when available
     link: "/schule60",
     bgColor: "#e8f5e9",
     isSpecial: true,

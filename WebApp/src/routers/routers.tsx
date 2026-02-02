@@ -11,6 +11,7 @@ import Forum from "../pages/Forum/Forum";
 import Spiele from "../pages/Spiele/Spiele";
 import TutorHub from "../pages/Tutorhub/Tutorhub";
 import StudentProfile from "../pages/Tutorhub/StudentProfile";
+import Schule60 from "../Schule60/Schule60";
 import NotFound from "../pages/NotFound/NotFound";
 
 export const routers = createBrowserRouter([
@@ -36,7 +37,7 @@ export const routers = createBrowserRouter([
       },
       {
         path: "schule60",
-        element: <NotFound />,
+        element: <Schule60 />,
       },
       {
         path: "übersetzer",
