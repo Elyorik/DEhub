@@ -175,9 +175,7 @@ export default function Schule60() {
       {/* Language Toggle Button */}
       <button className={s.langToggle} onClick={toggleLanguage}>
         <span className={`${s.langOption} ${language === "de" ? s.active : ""}`}>DE</span>
-        <div className={s.langSlider}>
-          <span className={s.sliderIcon}>{language === "de" ? "🇩🇪" : "🇷🇺"}</span>
-        </div>
+        <div className={s.langSlider}></div>
         <span className={`${s.langOption} ${language === "ru" ? s.active : ""}`}>RU</span>
       </button>
 

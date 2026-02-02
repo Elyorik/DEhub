@@ -45,7 +45,12 @@
   z-index: 1;
 
   &:not(.active) {
-    opacity: 0.4;
+    color: #667eea;
+    opacity: 0.5;
+  }
+
+  &.active {
+    color: white;
   }
 }
 
@@ -66,10 +71,6 @@
 
 .ruLang .langSlider {
   transform: translateX(56px);
-}
-
-.sliderIcon {
-  font-size: 1.2rem;
 }
 
 /* ===== Hero Section ===== */
