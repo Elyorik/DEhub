@@ -171,13 +171,14 @@ export default function Schule60() {
   };
 
   return (
-    <div className={`${s.schule60} ${isAnimating ? s.fadeOut : ""} ${isVisible ? s.visible : ""}`}>
+    <div className={`${s.schule60} ${isAnimating ? s.fadeOut : ""} ${isVisible ? s.visible : ""} ${language === "ru" ? s.ruLang : ""}`}>
       {/* Language Toggle Button */}
       <button className={s.langToggle} onClick={toggleLanguage}>
-        <span className={s.langIcon}>🌐</span>
-        <span className={s.langLabel}>DE</span>
-        <span className={s.langDivider}>→</span>
-        <span className={s.langLabel}>RU</span>
+        <span className={`${s.langOption} ${language === "de" ? s.active : ""}`}>DE</span>
+        <div className={s.langSlider}>
+          <span className={s.sliderIcon}>{language === "de" ? "🇩🇪" : "🇷🇺"}</span>
+        </div>
+        <span className={`${s.langOption} ${language === "ru" ? s.active : ""}`}>RU</span>
       </button>
 
       {/* Hero Section */}
