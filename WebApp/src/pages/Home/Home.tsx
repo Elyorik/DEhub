@@ -3,7 +3,45 @@ import { Link } from "react-router-dom";
 import s from "./home.module.scss";
 import newSuchmaschiene from "../../assets/UpdatesImg/newSuchmaschiene.png";
 import newKIWerkzeuge from "../../assets/UpdatesImg/newKIWerkzeuge.png";
-import counterStyle from "../../components/VisitorsCounter/visitorCounter.module.scss"; // 🔹 твои стили
+import counterStyle from "../../components/VisitorsCounter/visitorCounter.module.scss";
+
+// ===== Feature Card Configuration =====
+// Easy to add, remove, or change cards here
+interface FeatureCard {
+  title: string;
+  description: string;
+  image: string;
+  link: string;
+  bgColor: string;
+}
+
+const featureCards: FeatureCard[] = [
+  {
+    title: "Neue Funktionen",
+    description: "Entdecke unsere neuesten Funktionen, die dir helfen, dein Deutschlernen zu optimieren...",
+    image: newKIWerkzeuge,
+    link: "/ki",
+    bgColor: "#ffebee",
+  },
+  {
+    title: "Verbesserung der Suchmaschine",
+    description: "Unsere Suchmaschine wurde verbessert...",
+    image: newSuchmaschiene,
+    link: "/suchen",
+    bgColor: "#e3f2fd",
+  },
+];
+
+// ===== Reusable Feature Card Component =====
+function FeatureCard({ card }: { card: FeatureCard }) {
+  return (
+    <Link to={card.link} className={s.featureCard} style={{ background: card.bgColor }}>
+      <h2>{card.title}</h2>
+      <p>{card.description}</p>
+      <img src={card.image} alt={card.title} />
+    </Link>
+  );
+}
 
 function Home() {
   const [online, setOnline] = useState<number>(0);
@@ -54,20 +92,9 @@ function Home() {
       </section>
 
       <div className={s.containers}>
-        <section className={s.newFeatures}>
-          <h2>Neue Funktionen</h2>
-          <p>
-            Entdecke unsere neuesten Funktionen, die dir helfen, dein
-            Deutschlernen zu optimieren...
-          </p>
-          <img src={newKIWerkzeuge} alt="Neue Funktionen" />
-        </section>
-
-        <section className={s.searchImprovement}>
-          <h2>Verbesserung der Suchmaschine</h2>
-          <p>Unsere Suchmaschine wurde verbessert...</p>
-          <img src={newSuchmaschiene} alt="Suchverbesserung" />
-        </section>
+        {featureCards.map((card, index) => (
+          <FeatureCard key={index} card={card} />
+        ))}
       </div>
 
       {/* 👇 Онлайн счётчик с твоим дизайном */}
