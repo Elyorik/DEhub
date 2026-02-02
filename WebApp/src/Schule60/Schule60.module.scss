@@ -200,15 +200,21 @@
 }
 
 .schoolImage {
-  width: 100%;
-  max-width: 450px;
-  height: auto;
-  border-radius: 20px;
+  width: 350px;
+  height: 350px;
+  object-fit: cover;
+  border-radius: 50%;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
+  animation: float 6s ease-in-out infinite;
+  border: 8px solid white;
+}
 
-  &:hover {
-    transform: scale(1.02);
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
   }
 }
 
@@ -527,7 +533,8 @@
     justify-content: center;
   }
 
-  .schoolIcon {
+  .schoolIcon,
+  .schoolImage {
     width: 250px;
     height: 250px;
     margin-top: 2rem;
