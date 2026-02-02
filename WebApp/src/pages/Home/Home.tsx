@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import s from "./home.module.scss";
 import newSuchmaschiene from "../../assets/UpdatesImg/newSuchmaschiene.png";
 import newKIWerkzeuge from "../../assets/UpdatesImg/newKIWerkzeuge.png";
-import newSchule60 from "..\..\assets\UpdatesImg\newSchule60.png";
+import newSchule60 from "../../assets/UpdatesImg/newSchule60.png";
 import counterStyle from "../../components/VisitorsCounter/visitorCounter.module.scss";
 
 // ===== Feature Card Configuration =====
