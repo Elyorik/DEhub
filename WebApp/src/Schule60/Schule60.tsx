@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import s from "./Schule60.module.scss";
-import schuleImage from "../../assets/Schule60/60-schule-modified.png";
-import img1 from "../../assets/Schule60/taschkent1-formatkey-webp-w800r.webp";
-import img2 from "../../assets/Schule60/Schule.jpg";
-import img3 from "../../assets/Schule60/L_height.webp";
-import img4 from "../../assets/Schule60/images (7).jpg";
+import schuleImage from "../assets/Schule60/60-schule-modified.png";
+import img1 from "../assets/Schule60/taschkent1-formatkey-webp-w800r.webp";
+import img2 from "../assets/Schule60/Schule.jpg";
+import img3 from "../assets/Schule60/L_height.webp";
+import img4 from "../assets/Schule60/images (7).jpg";
 
 type Language = "de" | "ru";
 
