@@ -1,3 +1,13 @@
+import React, { useState } from "react";
+import s from "./quellen.module.scss";
+import { ChevronDown } from "lucide-react";
+
+interface Quelle {
+  name: string;
+  url: string;
+  kategorie: string;
+}
+
 const quellenListe: Quelle[] = [
   // 🎓 Studium / Studienkolleg / Deutsch
   { name: "Studienkollegs Deutschland (Übersicht)", url: "https://studienkollegs.de/", kategorie: "Studium" },
@@ -31,3 +41,116 @@ const quellenListe: Quelle[] = [
   { name: "Hochschulkompass – Studienplatzbörse", url: "https://www.hochschulkompass.de/studium/studienplatzboerse.html", kategorie: "Studium" },
   { name: "Studieren ohne Abitur", url: "https://studieren-ohne-abitur.de/", kategorie: "Studium" },
 ];
+
+const kategorien = [
+  { name: "Studium", icon: "🎓" },
+  { name: "Arbeit", icon: "💼" },
+  { name: "Finanzen", icon: "💶" },
+  { name: "Visa", icon: "🪪" },
+];
+
+export default function Quellen() {
+  const [open, setOpen] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const toggle = (kat: string) => {
+    setOpen(open === kat ? null : kat);
+  };
+
+  const gefilterteQuellen = quellenListe.filter((q) =>
+    q.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleOpen = async (url: string) => {
+    console.log("Try open link:", url);
+
+    try {
+      // 1) Telegram WebApp API (works inside Telegram mobile WebApp)
+      if ((window as any).Telegram?.WebApp?.openLink) {
+        console.log("Using Telegram.WebApp.openLink");
+        (window as any).Telegram.WebApp.openLink(url);
+        return;
+      }
+
+      // 2) Try window.open
+      const newWin = window.open(url, "_blank", "noopener,noreferrer");
+      if (newWin) {
+        console.log("Opened with window.open");
+        return;
+      }
+
+      // 3) Create anchor and click it (fallback)
+      const a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      console.log("Opened by dynamic anchor click");
+      return;
+    } catch (err) {
+      console.error("Opening link failed (try direct location):", err);
+    }
+
+    // 4) Last resort — change location
+    try {
+      window.location.href = url;
+      console.log("Opened by location.href");
+    } catch (err) {
+      console.error("All open attempts failed:", err);
+      alert("Не удалось открыть ссылку. Попробуй открыть страницу в обычном браузере.");
+    }
+  };
+
+  return (
+    <div className={s.container}>
+      <h1>📚 Nützliche Quellen</h1>
+
+      <input
+        type="text"
+        placeholder="🔍 Quelle suchen..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className={s.search}
+      />
+
+      <div className={s.folders}>
+        {kategorien.map((kat) => {
+          const items = gefilterteQuellen.filter((q) => q.kategorie === kat.name);
+          if (items.length === 0) return null;
+
+          return (
+            <div key={kat.name} className={s.folder}>
+              <button className={s.folderButton} onClick={() => toggle(kat.name)}>
+                <span>
+                  {kat.icon} {kat.name}
+                </span>
+                <ChevronDown
+                  className={`${s.icon} ${open === kat.name ? s.open : ""}`}
+                  size={20}
+                />
+              </button>
+
+              <div className={`${s.list} ${open === kat.name ? s.show : ""}`}>
+                {items.map((q) => (
+                  <span
+                    key={q.url}
+                    onClick={() => handleOpen(q.url)}
+                    className={s.link}
+                    role="link"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleOpen(q.url); }}
+                    style={{ cursor: "pointer", display: "block", padding: "6px 0" }}
+                  >
+                    {q.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
