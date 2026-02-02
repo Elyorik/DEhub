@@ -20,11 +20,11 @@
   right: 20px;
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 20px;
   background: white;
   border: 2px solid #667eea;
   border-radius: 50px;
-  padding: 3px 8px;
+  padding: 3px 6px;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
@@ -32,7 +32,7 @@
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
   transition: all 0.3s ease;
   z-index: 1000;
-  min-width: 120px;
+  min-width: 100px;
 
   &:hover {
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
@@ -40,7 +40,7 @@
 }
 
 .langOption {
-  padding: 0.35rem 0.5rem;
+  padding: 0.35rem 0.4rem;
   border-radius: 50px;
   transition: all 0.3s ease;
   z-index: 1;
@@ -57,9 +57,9 @@
 
 .langSlider {
   position: absolute;
-  left: 8px;
-  width: 28px;
-  height: 28px;
+  left: 6px;
+  width: 26px;
+  height: 26px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
   display: flex;
@@ -71,7 +71,7 @@
 }
 
 .ruLang .langSlider {
-  transform: translateX(60px);
+  transform: translateX(42px);
 }
 
 /* ===== Hero Section ===== */
@@ -607,22 +607,22 @@
   .langToggle {
     top: 70px;
     right: 10px;
-    padding: 3px 6px;
+    padding: 3px 5px;
     font-size: 0.8rem;
-    gap: 25px;
-    min-width: 100px;
+    gap: 15px;
+    min-width: 85px;
   }
 
   .langOption {
-    padding: 0.3rem 0.4rem;
+    padding: 0.25rem 0.3rem;
   }
 
   .langSlider {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
   }
 
   .ruLang .langSlider {
-    transform: translateX(50px);
+    transform: translateX(35px);
   }
 }
