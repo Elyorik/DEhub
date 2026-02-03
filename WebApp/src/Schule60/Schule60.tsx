@@ -1,38 +1,48 @@
 import { useEffect, useRef, useState } from "react";
-import styles from "./App.module.scss";
+import styles from "./Schule60.module.scss";
 
-const sections = ["Hero", "About", "Programs", "Gallery", "Contact"];
+const sections = [
+  { id: "hero", title: "Hero" },
+  { id: "about", title: "About" },
+  { id: "programs", title: "Programs" },
+  { id: "gallery", title: "Gallery" },
+  { id: "contact", title: "Contact" },
+];
 
-export default function App() {
+export default function Schule60() {
   const sectionRefs = useRef<HTMLElement[]>([]);
   const [active, setActive] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     let ticking = false;
 
     const onScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const scrollTop = window.scrollY;
-          const docHeight =
+        requestAnimationFrame(() => {
+          const y = window.scrollY;
+          const doc =
             document.documentElement.scrollHeight - window.innerHeight;
 
-          setProgress((scrollTop / docHeight) * 100);
+          setScrollY(y);
+          setProgress((y / doc) * 100);
 
-          for (let i = 0; i < sectionRefs.current.length; i++) {
-            const rect =
-              sectionRefs.current[i].getBoundingClientRect();
-            if (
-              rect.top <= window.innerHeight * 0.55 &&
-              rect.bottom >= 0
-            ) {
-              setActive(i);
-              break;
+          // active section (center based)
+          const center = window.innerHeight / 2;
+          let min = Infinity;
+          let index = 0;
+
+          sectionRefs.current.forEach((sec, i) => {
+            const r = sec.getBoundingClientRect();
+            const dist = Math.abs(r.top + r.height / 2 - center);
+            if (dist < min) {
+              min = dist;
+              index = i;
             }
-          }
+          });
 
-          reveal();
+          setActive(index);
           ticking = false;
         });
         ticking = true;
@@ -40,33 +50,30 @@ export default function App() {
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    reveal();
-
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const reveal = () => {
-    document.querySelectorAll("[data-reveal]").forEach((el) => {
-      const rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight * 0.85) {
-        el.classList.add(styles.visible);
-      }
-    });
-  };
 
   const scrollTo = (i: number) => {
     sectionRefs.current[i]?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const sectionProgress = (i: number) => {
+    const sec = sectionRefs.current[i];
+    if (!sec) return 0;
+
+    const start = sec.offsetTop - window.innerHeight;
+    const end = sec.offsetTop + sec.offsetHeight;
+    const raw = (scrollY - start) / (end - start);
+
+    return Math.min(1, Math.max(0, raw));
+  };
+
   return (
     <div className={styles.app}>
-      {/* Progress bar */}
-      <div
-        className={styles.progress}
-        style={{ width: `${progress}%` }}
-      />
+      {/* progress */}
+      <div className={styles.progress} style={{ width: `${progress}%` }} />
 
-      {/* Nav dots */}
+      {/* nav */}
       <nav className={styles.nav}>
         {sections.map((_, i) => (
           <button
@@ -78,31 +85,55 @@ export default function App() {
         ))}
       </nav>
 
-      {sections.map((title, i) => (
-        <section
-          key={title}
-          ref={(el) => {
-            if (el) sectionRefs.current[i] = el;
-          }}
-          className={styles.section}
-        >
-          <div className={styles.inner}>
-            <h1 data-reveal>{title}</h1>
-            <p data-reveal>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-              Architecto, voluptas.
-            </p>
+      {sections.map((sec, i) => {
+        const p = sectionProgress(i);
 
-            <div className={styles.cards}>
-              {[1, 2, 3].map((c) => (
-                <div key={c} className={styles.card} data-reveal>
-                  Card {c}
-                </div>
-              ))}
+        return (
+          <section
+            key={sec.id}
+            ref={(el) => el && (sectionRefs.current[i] = el)}
+            className={`${styles.section} ${styles[sec.id]}`}
+          >
+            <div className={styles.inner}>
+              <h1
+                style={{
+                  transform: `translateY(${60 - p * 60}px)`,
+                  opacity: p,
+                }}
+              >
+                {sec.title}
+              </h1>
+
+              <p
+                style={{
+                  transform: `translateY(${40 - p * 40}px)`,
+                  opacity: p * 0.9,
+                }}
+              >
+                Scroll-driven animation. Not reveal. Not fake.
+              </p>
+
+              <div className={styles.cards}>
+                {[1, 2, 3].map((c, idx) => (
+                  <div
+                    key={c}
+                    className={styles.card}
+                    style={{
+                      transform: `
+                        translateY(${80 - p * 80}px)
+                        scale(${0.95 + p * 0.05})
+                      `,
+                      opacity: Math.max(0, p - idx * 0.15),
+                    }}
+                  >
+                    Card {c}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      ))}
+          </section>
+        );
+      })}
     </div>
   );
 }

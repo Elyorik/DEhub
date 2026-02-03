@@ -51,47 +51,54 @@
 
 .inner {
   max-width: 900px;
-  padding: 60px;
+  padding: 80px 40px;
   text-align: center;
 }
 
 h1 {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(3rem, 6vw, 5rem);
   margin-bottom: 20px;
+  will-change: transform, opacity;
 }
 
 p {
-  opacity: 0.8;
+  opacity: 0.85;
+  will-change: transform, opacity;
 }
 
 .cards {
-  margin-top: 50px;
+  margin-top: 60px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 28px;
 }
 
 .card {
-  padding: 40px;
-  border-radius: 20px;
+  padding: 48px;
+  border-radius: 24px;
   background: #14141a;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  transition: transform 0.4s, box-shadow 0.4s;
-
-  &:hover {
-    transform: translateY(-10px) scale(1.05);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
-  }
+  will-change: transform, opacity;
 }
 
-/* Scroll reveal */
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(60px) scale(0.95);
-  transition: all 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+/* section flavors */
+
+.hero {
+  background: radial-gradient(circle at top, #121237, #0b0b0e);
 }
 
-.visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
+.about {
+  background: #0f1016;
+}
+
+.programs {
+  background: #0c0c12;
+}
+
+.gallery {
+  background: #0f1016;
+}
+
+.contact {
+  background: #0b0b0e;
 }
