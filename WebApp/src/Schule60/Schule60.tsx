@@ -151,19 +151,27 @@ const content = {
   },
 };
 
-// Scroll reveal hook
-function useScrollReveal() {
-  const [revealed, setRevealed] = useState<Set<string>>(new Set());
+export default function Schule60() {
+  const [language, setLanguage] = useState<Language>("de");
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [revealedSections, setRevealedSections] = useState<Set<string>>(new Set());
   const observerRef = useRef<IntersectionObserver | null>(null);
 
+  const t = content[language];
+
   useEffect(() => {
+    setIsVisible(true);
+
+    // Setup intersection observer
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const id = entry.target.getAttribute("data-scroll-id");
             if (id) {
-              setRevealed((prev) => new Set(prev).add(id));
+              setRevealedSections((prev) => new Set(prev).add(id));
             }
           }
         });
@@ -174,37 +182,16 @@ function useScrollReveal() {
       }
     );
 
-    return () => observerRef.current?.disconnect();
-  }, []);
-
-  const observe = (id: string) => {
-    useEffect(() => {
+    // Observe all sections
+    const sections = ["about", "programs", "gallery", "contact"];
+    sections.forEach((id) => {
       const element = document.querySelector(`[data-scroll-id="${id}"]`);
       if (element && observerRef.current) {
         observerRef.current.observe(element);
       }
-      return () => {
-        if (element && observerRef.current) {
-          observerRef.current.unobserve(element);
-        }
-      };
-    }, [id]);
-  };
+    });
 
-  return { revealed, observe };
-}
-
-export default function Schule60() {
-  const [language, setLanguage] = useState<Language>("de");
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const { revealed, observe } = useScrollReveal();
-
-  const t = content[language];
-
-  useEffect(() => {
-    setIsVisible(true);
+    return () => observerRef.current?.disconnect();
   }, []);
 
   // Scroll progress tracking
@@ -227,14 +214,6 @@ export default function Schule60() {
       setIsAnimating(false);
     }, 300);
   };
-
-  // Observe sections for scroll reveal
-  useEffect(() => {
-    observe("about");
-    observe("programs");
-    observe("gallery");
-    observe("contact");
-  }, [observe]);
 
   return (
     <div className={`${s.schule60} ${isAnimating ? s.fadeOut : ""} ${isVisible ? s.visible : ""} ${language === "ru" ? s.ruLang : ""}`}>
@@ -304,7 +283,7 @@ export default function Schule60() {
       </section>
 
       {/* About Section */}
-      <section data-scroll-id="about" className={`${s.about} ${revealed.has("about") ? s.revealed : ""}`}>
+      <section data-scroll-id="about" className={`${s.about} ${revealedSections.has("about") ? s.revealed : ""}`}>
         <div className={s.sectionHeader}>
           <h2>{t.about.title}</h2>
           <div className={s.underline}></div>
@@ -321,7 +300,7 @@ export default function Schule60() {
       </section>
 
       {/* Programs Section */}
-      <section data-scroll-id="programs" className={`${s.programs} ${revealed.has("programs") ? s.revealed : ""}`}>
+      <section data-scroll-id="programs" className={`${s.programs} ${revealedSections.has("programs") ? s.revealed : ""}`}>
         <div className={s.sectionHeader}>
           <h2>{t.programs.title}</h2>
           <div className={s.underline}></div>
@@ -344,7 +323,7 @@ export default function Schule60() {
       </section>
 
       {/* Gallery Section */}
-      <section data-scroll-id="gallery" className={`${s.gallery} ${revealed.has("gallery") ? s.revealed : ""}`}>
+      <section data-scroll-id="gallery" className={`${s.gallery} ${revealedSections.has("gallery") ? s.revealed : ""}`}>
         <div className={s.sectionHeader}>
           <h2>Unsere Schule in Bildern</h2>
           <div className={s.underline}></div>
@@ -366,7 +345,7 @@ export default function Schule60() {
       </section>
 
       {/* Contact Section */}
-      <section data-scroll-id="contact" className={`${s.contact} ${revealed.has("contact") ? s.revealed : ""}`}>
+      <section data-scroll-id="contact" className={`${s.contact} ${revealedSections.has("contact") ? s.revealed : ""}`}>
         <div className={s.contactContainer}>
           <div className={s.contactInfo}>
             <h2>{t.contact.title}</h2>
