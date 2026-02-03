@@ -72,6 +72,8 @@ export default function KI() {
               👋 Hallo! Ich bin DEhub KI.
               <br />
               Ich kann dir bei Fragen helfen, Texte erklären oder beim Lernen unterstützen.
+              <br /><br />
+              <small>Probiere: "Hallo", "Hilfe", "Wer bist du?"</small>
             </div>
           )}
           {messages.map((m, i) => (

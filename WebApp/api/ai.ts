@@ -3,14 +3,75 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 const LIMIT = 5;
 const usage = new Map<string, { count: number; date: string }>();
 
-// Mock AI для разработки без API ключа
-async function mockAI(message: string): Promise<string> {
-  await new Promise(r => setTimeout(r, 600));
-  return `🧪 Test-Modus (DEV)
+// Google Gemini AI - Free tier available
+async function getGeminiReply(message: string): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY || "";
+  
+  // If no API key, use a simple local response
+  if (!apiKey) {
+    return simpleLocalAI(message);
+  }
 
-Du hast geschrieben: "${message}"
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `Du bist DEhub KI, ein hilfreicher Assistent auf Deutsch. Antworte kurz und klar auf Deutsch.
 
-⚠️ Die echte KI ist nicht konfiguriert. Bitte OPENROUTER_API_KEY in den Umgebungsvariablen hinzufügen.`;
+Benutzerfrage: ${message}`
+          }]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || "❌ Keine Antwort von KI";
+  } catch (err) {
+    console.error("Gemini API error:", err);
+    return simpleLocalAI(message);
+  }
+}
+
+// Simple local AI fallback - works without API key
+function simpleLocalAI(message: string): string {
+  const lowerMsg = message.toLowerCase();
+  
+  // Simple keyword-based responses for common questions
+  if (lowerMsg.includes("hallo") || lowerMsg.includes("hello")) {
+    return "👋 Hallo! Ich bin DEhub KI. Ich bin ein einfacher Assistent, der dir bei allgemeinen Fragen helfen kann. Was möchtest du wissen?";
+  }
+  
+  if (lowerMsg.includes("wer") && lowerMsg.includes("du")) {
+    return "Ich bin DEhub KI, ein KI-Assistent für diese Webseite. Ich wurde entwickelt, um Schülern und Studenten bei Fragen zu helfen.";
+  }
+  
+  if (lowerMsg.includes("hilfe") || lowerMsg.includes("help")) {
+    return "💡 Ich kann dir bei folgenden Themen helfen: Fragen beantworten, Texte erklaeren, Bei Hausaufgaben unterstuetzen, Deutsche Sprache ueben. Was moechtest du wissen?";
+  }
+  
+  if (lowerMsg.includes("danke")) {
+    return "Gerne geschehen! 😊 Ich helfe dir gerne bei weiteren Fragen.";
+  }
+  
+  if (lowerMsg.includes("zeit") || lowerMsg.includes("uhr")) {
+    return `Aktuelle Zeit: ${new Date().toLocaleTimeString("de-DE")}`;
+  }
+  
+  if (lowerMsg.includes("datum") || lowerMsg.includes("datum")) {
+    return `Heute ist: ${new Date().toLocaleDateString("de-DE")}`;
+  }
+  
+  // Default response
+  return `📝 Ich habe deine Nachricht erhalten: "${message}"
+
+⚠️ Für detailliertere Antworten kannst du eine vollständige KI wie Google Gemini mit einem API-Key konfigurieren.
+
+Aber ich kann dir bei einfachen Fragen helfen. Was möchtest du wissen?`;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -35,43 +96,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { message } = req.body;
   if (!message) return res.status(400).json({ error: "No message" });
 
-  // Проверка наличия API ключа
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey || apiKey === "your_api_key_here") {
-    const reply = await mockAI(message);
-    return res.json({ reply });
-  }
-
-  try {
-    const aiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "HTTP-Referer": "https://dehub-webapp.vercel.app",
-        "X-Title": "DEhub KI",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "nex-agi/deepseek-v3.1-nex-n1:free",
-        messages: [
-          {
-            role: "system",
-            content: "Du bist DEhub KI. Antworte kurz, klar und auf Deutsch."
-          },
-          { role: "user", content: message }
-        ],
-      }),
-    });
-
-    const data = await aiRes.json();
-
-    const reply = data?.choices?.[0]?.message?.content ?? "❌ Keine Antwort von KI";
-
-    return res.json({ reply });
-  } catch (err) {
-    console.error(err);
-    // Fallback на mock при ошибке
-    const reply = await mockAI(message);
-    return res.json({ reply });
-  }
+  // Get response from Gemini or local fallback
+  const reply = await getGeminiReply(message);
+  
+  return res.json({ reply });
 }
