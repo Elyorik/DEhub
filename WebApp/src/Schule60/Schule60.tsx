@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import s from "./Schule60.module.scss";
 import schuleImage from "../assets/Schule60/60-schule-modified.png";
@@ -155,56 +155,13 @@ export default function Schule60() {
   const [language, setLanguage] = useState<Language>("de");
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [revealedSections, setRevealedSections] = useState<Set<string>>(new Set());
-  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const t = content[language];
 
+  // Simple fade-in on mount
   useEffect(() => {
-    setIsVisible(true);
-
-    // Setup intersection observer
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const id = entry.target.getAttribute("data-scroll-id");
-            if (id) {
-              setRevealedSections((prev) => new Set(prev).add(id));
-            }
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: "0px 0px -50px 0px",
-      }
-    );
-
-    // Observe all sections
-    const sections = ["about", "programs", "gallery", "contact"];
-    sections.forEach((id) => {
-      const element = document.querySelector(`[data-scroll-id="${id}"]`);
-      if (element && observerRef.current) {
-        observerRef.current.observe(element);
-      }
-    });
-
-    return () => observerRef.current?.disconnect();
-  }, []);
-
-  // Scroll progress tracking
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = scrollTop / docHeight;
-      setScrollProgress(progress);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
   }, []);
 
   const toggleLanguage = () => {
@@ -217,24 +174,6 @@ export default function Schule60() {
 
   return (
     <div className={`${s.schule60} ${isAnimating ? s.fadeOut : ""} ${isVisible ? s.visible : ""} ${language === "ru" ? s.ruLang : ""}`}>
-      {/* Scroll Progress Bar */}
-      <div className={s.scrollProgress} style={{ transform: `scaleX(${scrollProgress})` }} />
-
-      {/* Floating Particles Background */}
-      <div className={s.particles}>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={i}
-            className={s.particle}
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${15 + Math.random() * 20}s`,
-            }}
-          />
-        ))}
-      </div>
-
       {/* Language Toggle Button */}
       <button className={s.langToggle} onClick={toggleLanguage}>
         <span className={`${s.langOption} ${language === "de" ? s.active : ""}`}>DE</span>
@@ -242,55 +181,58 @@ export default function Schule60() {
         <span className={`${s.langOption} ${language === "ru" ? s.active : ""}`}>RU</span>
       </button>
 
-      {/* Hero Section */}
-      <section className={`${s.hero} ${isVisible ? s.visible : ""}`}>
-        <div className={s.heroContent}>
-          <div className={s.heroBadge}>{t.hero.badge}</div>
-          <h1>{t.hero.title}</h1>
-          <h2>{t.hero.subtitle}</h2>
-          <p className={s.heroTagline}>{t.hero.tagline}</p>
-          <div className={s.heroStats}>
-            <div className={s.statItem}>
-              <span className={s.statNumber}>{stats.year}</span>
-              <span className={s.statLabel}>{t.hero.founded}</span>
-            </div>
-            <div className={s.statItem}>
-              <span className={s.statNumber}>+{stats.students}</span>
-              <span className={s.statLabel}>{t.hero.students}</span>
-            </div>
-            <div className={s.statItem}>
-              <span className={s.statNumber}>{stats.teachers}</span>
-              <span className={s.statLabel}>{t.hero.teachers}</span>
-            </div>
-            <div className={s.statItem}>
-              <span className={s.statNumber}>{stats.languages}</span>
-              <span className={s.statLabel}>{t.hero.languages}</span>
-            </div>
+      {/* Parallax Hero Section */}
+      <div className={s.parallaxWrapper}>
+        <div className={s.parallaxGroup}>
+          <div className={`${s.parallaxLayer} ${s.parallaxLayerBack}`}>
+            <div className={s.heroBackground} />
           </div>
-          <a href="https://www.pasch-net.de/de/pasch-schulen/schulportraets/asien/uzb/schule-nr-60-taschkent.html" target="_blank" rel="noopener noreferrer" className={s.heroButton}>
-            {t.hero.cta}
-          </a>
+          <div className={`${s.parallaxLayer} ${s.parallaxLayerBase}`}>
+            <section className={s.hero}>
+              <div className={s.heroContent}>
+                <div className={s.heroBadge}>{t.hero.badge}</div>
+                <h1>{t.hero.title}</h1>
+                <h2>{t.hero.subtitle}</h2>
+                <p className={s.heroTagline}>{t.hero.tagline}</p>
+                <div className={s.heroStats}>
+                  <div className={s.statItem}>
+                    <span className={s.statNumber}>{stats.year}</span>
+                    <span className={s.statLabel}>{t.hero.founded}</span>
+                  </div>
+                  <div className={s.statItem}>
+                    <span className={s.statNumber}>+{stats.students}</span>
+                    <span className={s.statLabel}>{t.hero.students}</span>
+                  </div>
+                  <div className={s.statItem}>
+                    <span className={s.statNumber}>{stats.teachers}</span>
+                    <span className={s.statLabel}>{t.hero.teachers}</span>
+                  </div>
+                  <div className={s.statItem}>
+                    <span className={s.statNumber}>{stats.languages}</span>
+                    <span className={s.statLabel}>{t.hero.languages}</span>
+                  </div>
+                </div>
+                <a href="https://www.pasch-net.de/de/pasch-schulen/schulportraets/asien/uzb/schule-nr-60-taschkent.html" target="_blank" rel="noopener noreferrer" className={s.heroButton}>
+                  {t.hero.cta}
+                </a>
+              </div>
+              <div className={s.heroVisual}>
+                <img src={schuleImage} alt="Schule Nr. 60" className={s.schoolImage} />
+              </div>
+            </section>
+          </div>
         </div>
-        <div className={s.heroVisual}>
-          <img src={schuleImage} alt="Schule Nr. 60" className={s.schoolImage} />
-        </div>
-        {/* Hero decorative elements */}
-        <div className={s.heroOrbs}>
-          <div className={s.orb} style={{ animationDelay: "0s" }} />
-          <div className={s.orb} style={{ animationDelay: "2s" }} />
-          <div className={s.orb} style={{ animationDelay: "4s" }} />
-        </div>
-      </section>
+      </div>
 
       {/* About Section */}
-      <section data-scroll-id="about" className={`${s.about} ${revealedSections.has("about") ? s.revealed : ""}`}>
+      <section className={s.about}>
         <div className={s.sectionHeader}>
           <h2>{t.about.title}</h2>
           <div className={s.underline}></div>
         </div>
         <div className={s.aboutGrid}>
           {t.about.cards.map((card, index) => (
-            <div key={index} className={s.aboutCard} style={{ transitionDelay: `${index * 0.1}s` }}>
+            <div key={index} className={s.aboutCard}>
               <div className={s.cardIcon}>{card.icon}</div>
               <h3>{card.title}</h3>
               <p>{card.desc}</p>
@@ -300,14 +242,14 @@ export default function Schule60() {
       </section>
 
       {/* Programs Section */}
-      <section data-scroll-id="programs" className={`${s.programs} ${revealedSections.has("programs") ? s.revealed : ""}`}>
+      <section className={s.programs}>
         <div className={s.sectionHeader}>
           <h2>{t.programs.title}</h2>
           <div className={s.underline}></div>
         </div>
         <div className={s.programsGrid}>
           {t.programs.items.map((program, index) => (
-            <div key={index} className={s.programCard} style={{ transitionDelay: `${index * 0.1}s` }}>
+            <div key={index} className={s.programCard}>
               <div className={s.programHeader}>
                 <span className={s.programIcon}>{program.icon}</span>
                 <h3>{program.title}</h3>
@@ -323,7 +265,7 @@ export default function Schule60() {
       </section>
 
       {/* Gallery Section */}
-      <section data-scroll-id="gallery" className={`${s.gallery} ${revealedSections.has("gallery") ? s.revealed : ""}`}>
+      <section className={s.gallery}>
         <div className={s.sectionHeader}>
           <h2>Unsere Schule in Bildern</h2>
           <div className={s.underline}></div>
@@ -345,7 +287,7 @@ export default function Schule60() {
       </section>
 
       {/* Contact Section */}
-      <section data-scroll-id="contact" className={`${s.contact} ${revealedSections.has("contact") ? s.revealed : ""}`}>
+      <section className={s.contact}>
         <div className={s.contactContainer}>
           <div className={s.contactInfo}>
             <h2>{t.contact.title}</h2>
@@ -375,8 +317,6 @@ export default function Schule60() {
             </div>
           </div>
         </div>
-        {/* Contact background glow */}
-        <div className={s.contactGlow} />
       </section>
 
       {/* Footer */}
