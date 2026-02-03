@@ -3,6 +3,16 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 const LIMIT = 5;
 const usage = new Map<string, { count: number; date: string }>();
 
+// Mock AI для разработки без API ключа
+async function mockAI(message: string): Promise<string> {
+  await new Promise(r => setTimeout(r, 600));
+  return `🧪 Test-Modus (DEV)
+
+Du hast geschrieben: "${message}"
+
+⚠️ Die echte KI ist nicht konfiguriert. Bitte OPENROUTER_API_KEY in den Umgebungsvariablen hinzufügen.`;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
@@ -25,13 +35,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { message } = req.body;
   if (!message) return res.status(400).json({ error: "No message" });
 
+  // Проверка наличия API ключа
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey || apiKey === "your_api_key_here") {
+    const reply = await mockAI(message);
+    return res.json({ reply });
+  }
+
   try {
     const aiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://dehub-webapp.vercel.app", // твой сайт
-        "X-Title": "DEhub KI", // название твоего проекта
+        "Authorization": `Bearer ${apiKey}`,
+        "HTTP-Referer": "https://dehub-webapp.vercel.app",
+        "X-Title": "DEhub KI",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -53,6 +70,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.json({ reply });
   } catch (err) {
     console.error(err);
-    return res.json({ reply: "❌ Fehler beim Verbinden mit der KI" });
+    // Fallback на mock при ошибке
+    const reply = await mockAI(message);
+    return res.json({ reply });
   }
 }

@@ -23,3 +23,15 @@ export function canUseAI(): boolean {
   localStorage.setItem("ai_limit", JSON.stringify(data));
   return true;
 }
+
+export function getRemainingRequests(): number {
+  const today = new Date().toISOString().slice(0, 10);
+  const raw = localStorage.getItem("ai_limit");
+  const data = raw ? JSON.parse(raw) : null;
+
+  if (!data || data.date !== today) {
+    return LIMIT;
+  }
+
+  return Math.max(0, LIMIT - data.count);
+}

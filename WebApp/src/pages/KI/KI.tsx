@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import s from "./ki.module.scss";
+import { canUseAI, getRemainingRequests } from "./aiLimit";
 
 type Msg = {
   role: "user" | "ai";
@@ -10,14 +11,27 @@ export default function KI() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [limitError, setLimitError] = useState(false);
+  const [remaining, setRemaining] = useState(0);
+
+  useEffect(() => {
+    setRemaining(getRemainingRequests());
+  }, []);
 
   async function send() {
     if (!input.trim() || loading) return;
 
-    const userMsg = { role: "user", text: input };
+    // Check limit
+    if (!canUseAI()) {
+      setLimitError(true);
+      return;
+    }
+
+    const userMsg: Msg = { role: "user", text: input };
     setMessages((m) => [...m, userMsg]);
     setInput("");
     setLoading(true);
+    setLimitError(false);
 
     try {
       const res = await fetch("/api/ai", {
@@ -28,12 +42,12 @@ export default function KI() {
 
       const data = await res.json();
 
-      setMessages((m) => [...m, { role: "ai", text: data.reply }]);
+      const aiMsg: Msg = { role: "ai", text: data.reply };
+      setMessages((m) => [...m, aiMsg]);
+      setRemaining(getRemainingRequests());
     } catch {
-      setMessages((m) => [
-        ...m,
-        { role: "ai", text: "❌ Server nicht erreichbar" },
-      ]);
+      const errorMsg: Msg = { role: "ai", text: "❌ Server nicht erreichbar" };
+      setMessages((m) => [...m, errorMsg]);
     } finally {
       setLoading(false);
     }
@@ -41,8 +55,25 @@ export default function KI() {
 
   return (
     <div className={s.page}>
+      <div className={s.limitInfo}>
+        💡 Kostenlos • Max. 5 Anfragen pro Tag • Noch {remaining} verfügbar
+      </div>
+      
+      {limitError && (
+        <div className={s.limitError}>
+          ❌ Tageslimit erreicht (5/5). Komm morgen wieder 🙂
+        </div>
+      )}
+
       <div className={s.chatBox}>
         <div className={s.messages}>
+          {messages.length === 0 && (
+            <div className={s.welcome}>
+              👋 Hallo! Ich bin DEhub KI.
+              <br />
+              Ich kann dir bei Fragen helfen, Texte erklären oder beim Lernen unterstützen.
+            </div>
+          )}
           {messages.map((m, i) => (
             <div
               key={i}
@@ -59,8 +90,11 @@ export default function KI() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Frag DEhub KI etwas…"
             onKeyDown={(e) => e.key === "Enter" && send()}
+            disabled={loading || limitError}
           />
-          <button onClick={send}>{loading ? "…" : "Senden"}</button>
+          <button onClick={send} disabled={loading || limitError}>
+            {loading ? "…" : "Senden"}
+          </button>
         </div>
       </div>
     </div>
