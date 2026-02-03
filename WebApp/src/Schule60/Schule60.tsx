@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import s from "./Schule60.module.scss";
 import schuleImage from "../assets/Schule60/60-schule-modified.png";
@@ -151,15 +151,73 @@ const content = {
   },
 };
 
+// Scroll reveal hook
+function useScrollReveal() {
+  const [revealed, setRevealed] = useState<Set<string>>(new Set());
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute("data-scroll-id");
+            if (id) {
+              setRevealed((prev) => new Set(prev).add(id));
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px",
+      }
+    );
+
+    return () => observerRef.current?.disconnect();
+  }, []);
+
+  const observe = (id: string) => {
+    useEffect(() => {
+      const element = document.querySelector(`[data-scroll-id="${id}"]`);
+      if (element && observerRef.current) {
+        observerRef.current.observe(element);
+      }
+      return () => {
+        if (element && observerRef.current) {
+          observerRef.current.unobserve(element);
+        }
+      };
+    }, [id]);
+  };
+
+  return { revealed, observe };
+}
+
 export default function Schule60() {
   const [language, setLanguage] = useState<Language>("de");
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const { revealed, observe } = useScrollReveal();
 
   const t = content[language];
 
   useEffect(() => {
     setIsVisible(true);
+  }, []);
+
+  // Scroll progress tracking
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollTop / docHeight;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleLanguage = () => {
@@ -170,8 +228,34 @@ export default function Schule60() {
     }, 300);
   };
 
+  // Observe sections for scroll reveal
+  useEffect(() => {
+    observe("about");
+    observe("programs");
+    observe("gallery");
+    observe("contact");
+  }, [observe]);
+
   return (
     <div className={`${s.schule60} ${isAnimating ? s.fadeOut : ""} ${isVisible ? s.visible : ""} ${language === "ru" ? s.ruLang : ""}`}>
+      {/* Scroll Progress Bar */}
+      <div className={s.scrollProgress} style={{ transform: `scaleX(${scrollProgress})` }} />
+
+      {/* Floating Particles Background */}
+      <div className={s.particles}>
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={i}
+            className={s.particle}
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${15 + Math.random() * 20}s`,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Language Toggle Button */}
       <button className={s.langToggle} onClick={toggleLanguage}>
         <span className={`${s.langOption} ${language === "de" ? s.active : ""}`}>DE</span>
@@ -211,17 +295,23 @@ export default function Schule60() {
         <div className={s.heroVisual}>
           <img src={schuleImage} alt="Schule Nr. 60" className={s.schoolImage} />
         </div>
+        {/* Hero decorative elements */}
+        <div className={s.heroOrbs}>
+          <div className={s.orb} style={{ animationDelay: "0s" }} />
+          <div className={s.orb} style={{ animationDelay: "2s" }} />
+          <div className={s.orb} style={{ animationDelay: "4s" }} />
+        </div>
       </section>
 
       {/* About Section */}
-      <section className={s.about}>
+      <section data-scroll-id="about" className={`${s.about} ${revealed.has("about") ? s.revealed : ""}`}>
         <div className={s.sectionHeader}>
           <h2>{t.about.title}</h2>
           <div className={s.underline}></div>
         </div>
         <div className={s.aboutGrid}>
           {t.about.cards.map((card, index) => (
-            <div key={index} className={s.aboutCard}>
+            <div key={index} className={s.aboutCard} style={{ transitionDelay: `${index * 0.1}s` }}>
               <div className={s.cardIcon}>{card.icon}</div>
               <h3>{card.title}</h3>
               <p>{card.desc}</p>
@@ -231,14 +321,14 @@ export default function Schule60() {
       </section>
 
       {/* Programs Section */}
-      <section className={s.programs}>
+      <section data-scroll-id="programs" className={`${s.programs} ${revealed.has("programs") ? s.revealed : ""}`}>
         <div className={s.sectionHeader}>
           <h2>{t.programs.title}</h2>
           <div className={s.underline}></div>
         </div>
         <div className={s.programsGrid}>
           {t.programs.items.map((program, index) => (
-            <div key={index} className={s.programCard}>
+            <div key={index} className={s.programCard} style={{ transitionDelay: `${index * 0.1}s` }}>
               <div className={s.programHeader}>
                 <span className={s.programIcon}>{program.icon}</span>
                 <h3>{program.title}</h3>
@@ -254,7 +344,7 @@ export default function Schule60() {
       </section>
 
       {/* Gallery Section */}
-      <section className={s.gallery}>
+      <section data-scroll-id="gallery" className={`${s.gallery} ${revealed.has("gallery") ? s.revealed : ""}`}>
         <div className={s.sectionHeader}>
           <h2>Unsere Schule in Bildern</h2>
           <div className={s.underline}></div>
@@ -276,7 +366,7 @@ export default function Schule60() {
       </section>
 
       {/* Contact Section */}
-      <section className={s.contact}>
+      <section data-scroll-id="contact" className={`${s.contact} ${revealed.has("contact") ? s.revealed : ""}`}>
         <div className={s.contactContainer}>
           <div className={s.contactInfo}>
             <h2>{t.contact.title}</h2>
@@ -306,6 +396,8 @@ export default function Schule60() {
             </div>
           </div>
         </div>
+        {/* Contact background glow */}
+        <div className={s.contactGlow} />
       </section>
 
       {/* Footer */}

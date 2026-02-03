@@ -3,6 +3,7 @@
   background: #f8fafc;
   font-family: 'Segoe UI', system-ui, sans-serif;
   transition: opacity 0.3s ease;
+  overflow-x: hidden;
 
   &.fadeOut {
     opacity: 0;
@@ -11,6 +12,95 @@
   &.visible {
     opacity: 1;
   }
+}
+
+/* ===== Scroll Progress Bar ===== */
+.scrollProgress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+  transform-origin: left;
+  z-index: 9999;
+  transition: transform 0.1s ease-out;
+}
+
+/* ===== Floating Particles ===== */
+.particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 50%;
+  animation: particleFloat linear infinite;
+  filter: blur(1px);
+
+  &:nth-child(odd) {
+    background: rgba(118, 75, 162, 0.3);
+  }
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(90vh) scale(1);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10vh) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* ===== Scroll Reveal Animation ===== */
+.revealed {
+  .aboutCard,
+  .programCard,
+  .galleryItem {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.about,
+.programs,
+.gallery,
+.contact {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.aboutCard,
+.programCard,
+.galleryItem {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ===== Language Toggle Button ===== */
@@ -81,6 +171,7 @@
     height: 600px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 50%;
+    animation: orbPulse 8s ease-in-out infinite;
   }
 
   &::after {
@@ -92,6 +183,7 @@
     height: 400px;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 50%;
+    animation: orbPulse 10s ease-in-out infinite reverse;
   }
 
   &.visible {
@@ -103,6 +195,71 @@
       opacity: 1;
       transform: scale(1);
     }
+  }
+}
+
+/* Hero floating orbs */
+.heroOrbs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.orb {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: orbFloat 20s ease-in-out infinite;
+
+  &:nth-child(1) {
+    top: 10%;
+    right: 10%;
+  }
+  &:nth-child(2) {
+    bottom: 20%;
+    left: 20%;
+    width: 200px;
+    height: 200px;
+    animation-delay: -5s;
+  }
+  &:nth-child(3) {
+    top: 50%;
+    left: 50%;
+    width: 150px;
+    height: 150px;
+    animation-delay: -10s;
+  }
+}
+
+@keyframes orbPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+@keyframes orbFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  50% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  75% {
+    transform: translate(20px, 10px) scale(1.05);
   }
 }
 
@@ -206,8 +363,22 @@
   object-fit: cover;
   border-radius: 50%;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: float 6s ease-in-out infinite;
-  border: 8px solid white;
+  animation: float 6s ease-in-out infinite, glowPulse 4s ease-in-out infinite;
+  border: 8px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 1;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%);
+    z-index: -1;
+  }
 }
 
 @keyframes float {
@@ -216,6 +387,15 @@
   }
   50% {
     transform: translateY(-20px);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 30px rgba(102, 126, 234, 0.3);
+  }
+  50% {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 50px rgba(102, 126, 234, 0.5);
   }
 }
 
@@ -255,14 +435,43 @@
   padding: 2.5rem;
   border-radius: 20px;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
 
   &:hover {
-    transform: translateY(-10px);
+    transform: translateY(-10px) scale(1.02);
     box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
     border-color: #667eea;
+
+    &::before {
+      opacity: 1;
+    }
+
+    .cardIcon {
+      transform: scale(1.1) rotate(5deg);
+    }
   }
+}
+
+.cardIcon {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+  transition: transform 0.4s ease;
+  display: inline-block;
 }
 
 .cardIcon {
@@ -298,15 +507,32 @@
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    transform: scale(1.02);
-    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+    transform: scale(1.03) translateY(-5px);
+    box-shadow: 0 20px 50px rgba(102, 126, 234, 0.25);
 
     img {
-      transform: scale(1.1);
+      transform: scale(1.15);
     }
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(102, 126, 234, 0.3) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
   }
 
   img {
@@ -334,12 +560,24 @@
   padding: 2rem;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 
   &:hover {
-    transform: translateY(-8px);
+    transform: translateY(-8px) scale(1.02);
     box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.3);
+
+    .programIcon {
+      transform: scale(1.2) rotate(10deg);
+    }
   }
+}
+
+.programIcon {
+  font-size: 2.5rem;
+  transition: transform 0.4s ease;
+  display: inline-block;
 }
 
 .programHeader {
@@ -387,6 +625,29 @@
   padding: 6rem 8%;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.contactGlow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
+  animation: glowRotate 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes glowRotate {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 .contactContainer {
@@ -484,6 +745,17 @@
   background: #0f0f23;
   padding: 3rem 8%;
   color: white;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(102, 126, 234, 0.5) 50%, transparent 100%);
+  }
 }
 
 .footerContent {
@@ -505,10 +777,27 @@
   a {
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 5px 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s ease;
+    }
 
     &:hover {
       color: white;
+
+      &::after {
+        width: 100%;
+      }
     }
   }
 }
