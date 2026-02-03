@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import s from "./Schule60.module.scss";
 import schuleImage from "../assets/Schule60/60-schule-modified.png";
@@ -8,13 +8,6 @@ import img3 from "../assets/Schule60/L_height.webp";
 import img4 from "../assets/Schule60/images (7).jpg";
 
 type Language = "de" | "ru";
-
-interface SchoolStats {
-  students: number;
-  teachers: number;
-  year: number;
-  languages: number;
-}
 
 const content = {
   de: {
@@ -153,162 +146,201 @@ const content = {
 
 export default function Schule60() {
   const [language, setLanguage] = useState<Language>("de");
-  const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeSection, setActiveSection] = useState(0);
+  
   const t = content[language];
+  const sectionsRef = useRef<HTMLElement[]>([]);
 
-  // Simple fade-in on mount
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
+    setIsVisible(true);
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Track scroll progress
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(scrollTop / docHeight);
+
+      // Determine active section
+      sectionsRef.current.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= window.innerHeight * 0.5 && rect.bottom >= 0) {
+          setActiveSection(index);
+        }
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleLanguage = () => {
-    setIsAnimating(true);
-    setTimeout(() => {
-      setLanguage((prev) => (prev === "de" ? "ru" : "de"));
-      setIsAnimating(false);
-    }, 300);
+    setLanguage((prev) => (prev === "de" ? "ru" : "de"));
+  };
+
+  const scrollToSection = (index: number) => {
+    sectionsRef.current[index]?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <div className={`${s.schule60} ${isAnimating ? s.fadeOut : ""} ${isVisible ? s.visible : ""} ${language === "ru" ? s.ruLang : ""}`}>
-      {/* Language Toggle Button */}
+    <div className={`${s.schule60} ${isVisible ? s.visible : ""}`}>
+      {/* Progress Bar */}
+      <div className={s.progressBar} style={{ transform: `scaleX(${scrollProgress})` }} />
+
+      {/* Navigation Dots */}
+      <nav className={s.navDots}>
+        {["Hero", "About", "Programs", "Gallery", "Contact"].map((_, index) => (
+          <button
+            key={index}
+            className={`${s.navDot} ${activeSection === index ? s.active : ""}`}
+            onClick={() => scrollToSection(index)}
+            aria-label={`Go to section ${index + 1}`}
+          />
+        ))}
+      </nav>
+
+      {/* Language Toggle */}
       <button className={s.langToggle} onClick={toggleLanguage}>
         <span className={`${s.langOption} ${language === "de" ? s.active : ""}`}>DE</span>
-        <div className={s.langSlider}></div>
         <span className={`${s.langOption} ${language === "ru" ? s.active : ""}`}>RU</span>
       </button>
 
-      {/* Parallax Hero Section */}
-      <div className={s.parallaxWrapper}>
-        <div className={s.parallaxGroup}>
-          <div className={`${s.parallaxLayer} ${s.parallaxLayerBack}`}>
-            <div className={s.heroBackground} />
+      {/* Hero Section */}
+      <section 
+        ref={(el) => { sectionsRef.current[0] = el!; }} 
+        className={`${s.hero} ${s.section}`}
+      >
+        <div className={s.heroBackground} />
+        <div className={s.heroContent}>
+          <div className={s.heroBadge}>{t.hero.badge}</div>
+          <h1 className={s.heroTitle}>{t.hero.title}</h1>
+          <h2 className={s.heroSubtitle}>{t.hero.subtitle}</h2>
+          <p className={s.heroTagline}>{t.hero.tagline}</p>
+          <div className={s.heroStats}>
+            <div className={s.statItem}>
+              <span className={s.statNumber}>{1961}</span>
+              <span className={s.statLabel}>{t.hero.founded}</span>
+            </div>
+            <div className={s.statItem}>
+              <span className={s.statNumber}>+1250</span>
+              <span className={s.statLabel}>{t.hero.students}</span>
+            </div>
+            <div className={s.statItem}>
+              <span className={s.statNumber}>85</span>
+              <span className={s.statLabel}>{t.hero.teachers}</span>
+            </div>
           </div>
-          <div className={`${s.parallaxLayer} ${s.parallaxLayerBase}`}>
-            <section className={s.hero}>
-              <div className={s.heroContent}>
-                <div className={s.heroBadge}>{t.hero.badge}</div>
-                <h1>{t.hero.title}</h1>
-                <h2>{t.hero.subtitle}</h2>
-                <p className={s.heroTagline}>{t.hero.tagline}</p>
-                <div className={s.heroStats}>
-                  <div className={s.statItem}>
-                    <span className={s.statNumber}>{stats.year}</span>
-                    <span className={s.statLabel}>{t.hero.founded}</span>
-                  </div>
-                  <div className={s.statItem}>
-                    <span className={s.statNumber}>+{stats.students}</span>
-                    <span className={s.statLabel}>{t.hero.students}</span>
-                  </div>
-                  <div className={s.statItem}>
-                    <span className={s.statNumber}>{stats.teachers}</span>
-                    <span className={s.statLabel}>{t.hero.teachers}</span>
-                  </div>
-                  <div className={s.statItem}>
-                    <span className={s.statNumber}>{stats.languages}</span>
-                    <span className={s.statLabel}>{t.hero.languages}</span>
-                  </div>
-                </div>
-                <a href="https://www.pasch-net.de/de/pasch-schulen/schulportraets/asien/uzb/schule-nr-60-taschkent.html" target="_blank" rel="noopener noreferrer" className={s.heroButton}>
-                  {t.hero.cta}
-                </a>
-              </div>
-              <div className={s.heroVisual}>
-                <img src={schuleImage} alt="Schule Nr. 60" className={s.schoolImage} />
-              </div>
-            </section>
+          <a href="https://www.pasch-net.de/" target="_blank" rel="noopener noreferrer" className={s.heroButton}>
+            {t.hero.cta}
+          </a>
+        </div>
+        <div className={s.heroVisual}>
+          <div className={s.heroImageWrapper}>
+            <img src={schuleImage} alt="Schule Nr. 60" className={s.heroImage} />
           </div>
         </div>
-      </div>
+      </section>
 
       {/* About Section */}
-      <section className={s.about}>
-        <div className={s.sectionHeader}>
-          <h2>{t.about.title}</h2>
-          <div className={s.underline}></div>
-        </div>
-        <div className={s.aboutGrid}>
-          {t.about.cards.map((card, index) => (
-            <div key={index} className={s.aboutCard}>
-              <div className={s.cardIcon}>{card.icon}</div>
-              <h3>{card.title}</h3>
-              <p>{card.desc}</p>
-            </div>
-          ))}
+      <section 
+        ref={(el) => { sectionsRef.current[1] = el!; }} 
+        className={`${s.about} ${s.section}`}
+      >
+        <div className={s.container}>
+          <div className={s.sectionHeader}>
+            <h2>{t.about.title}</h2>
+            <div className={s.underline}></div>
+          </div>
+          <div className={s.aboutGrid}>
+            {t.about.cards.map((card, index) => (
+              <div key={index} className={s.aboutCard}>
+                <div className={s.cardIcon}>{card.icon}</div>
+                <h3>{card.title}</h3>
+                <p>{card.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Programs Section */}
-      <section className={s.programs}>
-        <div className={s.sectionHeader}>
-          <h2>{t.programs.title}</h2>
-          <div className={s.underline}></div>
-        </div>
-        <div className={s.programsGrid}>
-          {t.programs.items.map((program, index) => (
-            <div key={index} className={s.programCard}>
-              <div className={s.programHeader}>
-                <span className={s.programIcon}>{program.icon}</span>
-                <h3>{program.title}</h3>
+      <section 
+        ref={(el) => { sectionsRef.current[2] = el!; }} 
+        className={`${s.programs} ${s.section}`}
+      >
+        <div className={s.container}>
+          <div className={s.sectionHeader}>
+            <h2>{t.programs.title}</h2>
+            <div className={s.underline}></div>
+          </div>
+          <div className={s.programsGrid}>
+            {t.programs.items.map((program, index) => (
+              <div key={index} className={s.programCard}>
+                <div className={s.programHeader}>
+                  <span className={s.programIcon}>{program.icon}</span>
+                  <h3>{program.title}</h3>
+                </div>
+                <ul className={s.programList}>
+                  {program.list.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
               </div>
-              <ul className={s.programList}>
-                {program.list.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Gallery Section */}
-      <section className={s.gallery}>
-        <div className={s.sectionHeader}>
-          <h2>Unsere Schule in Bildern</h2>
-          <div className={s.underline}></div>
-        </div>
-        <div className={s.galleryGrid}>
-          <div className={s.galleryItem}>
-            <img src={img1} alt="Schule 60" />
+      <section 
+        ref={(el) => { sectionsRef.current[3] = el!; }} 
+        className={`${s.gallery} ${s.section}`}
+      >
+        <div className={s.container}>
+          <div className={s.sectionHeader}>
+            <h2>Unsere Schule in Bildern</h2>
+            <div className={s.underline}></div>
           </div>
-          <div className={s.galleryItem}>
-            <img src={img2} alt="Schule 60" />
-          </div>
-          <div className={s.galleryItem}>
-            <img src={img3} alt="Schule 60" />
-          </div>
-          <div className={s.galleryItem}>
-            <img src={img4} alt="Schule 60" />
+          <div className={s.galleryGrid}>
+            {[img1, img2, img3, img4].map((img, index) => (
+              <div key={index} className={s.galleryItem}>
+                <img src={img} alt={`Schule ${index + 1}`} />
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section className={s.contact}>
-        <div className={s.contactContainer}>
-          <div className={s.contactInfo}>
+      <section 
+        ref={(el) => { sectionsRef.current[4] = el!; }} 
+        className={`${s.contact} ${s.section}`}
+      >
+        <div className={s.container}>
+          <div className={s.contactContent}>
             <h2>{t.contact.title}</h2>
             <p>{t.contact.desc}</p>
-            <div className={s.contactDetails}>
+            <div className={s.contactInfo}>
               <div className={s.contactItem}>
-                <span className={s.contactIcon}>📍</span>
+                <span>📍</span>
                 <div>
                   <strong>Adresse</strong>
                   <p>{t.contact.address}</p>
                 </div>
               </div>
               <div className={s.contactItem}>
-                <span className={s.contactIcon}>📞</span>
+                <span>📞</span>
                 <div>
                   <strong>Telefon</strong>
                   <p>{t.contact.phone}</p>
                 </div>
               </div>
               <div className={s.contactItem}>
-                <span className={s.contactIcon}>✉️</span>
+                <span>✉️</span>
                 <div>
                   <strong>E-Mail</strong>
                   <p>{t.contact.email}</p>
@@ -336,10 +368,3 @@ export default function Schule60() {
     </div>
   );
 }
-
-const stats = {
-  students: 1250,
-  teachers: 85,
-  year: 1961,
-  languages: 5,
-};
