@@ -9,8 +9,8 @@ import Account from "../pages/Account/Account";
 import Quellen from "../pages/Quellen/Quellen";
 import Forum from "../pages/Forum/Forum";
 import Spiele from "../pages/Spiele/Spiele";
-import TutorHub from "../pages/Tutorhub/Tutorhub";
-import StudentProfile from "../pages/Tutorhub/StudentProfile";
+import DEBlick from "../pages/DEBlick/DEBlick";
+import StudentProfile from "../pages/DEBlick/StudentProfile";
 import Schule60 from "../Schule60/Schule60";
 import NotFound from "../pages/NotFound/NotFound";
 
@@ -55,11 +55,11 @@ export const routers = createBrowserRouter([
         path: "quellen",
         element: <Quellen />,
       },
-      { path: "tutorhub",
-        element: <TutorHub />, 
+      { path: "DEBlick",
+        element: <DEBlick />, 
       },
-      { path: "tutorhub/user/:userId",
-        element: <TutorHub />, 
+      { path: "DEBlick/user/:userId",
+        element: <DEBlick />, 
       },
       { path: "student/:id",
         element: <StudentProfile />,
