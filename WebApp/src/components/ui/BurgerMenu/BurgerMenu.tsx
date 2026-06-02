@@ -59,7 +59,8 @@ function BurgerMenu({ onClose, isOpen }: BurgerMenuProps) {
             <ul className={`${s.submenu} ${openFolder === "wissen" ? s.show : ""}`}>
               <li><Link to="/suchen" onClick={handleNavClick}>Suchen</Link></li>
               <li><Link to="/neuigkeiten" onClick={handleNavClick}>Neuigkeiten</Link></li>
-              <li><Link to="/quellen" onClick={handleNavClick}>Quellen</Link></li>
+              <li><Link to="/tutorhub" onClick={handleNavClick}>Tutorhub</Link></li>
+              <li><Link to="/quellen" onClick={handleNavClick}>Quellen</Link></li>              
             </ul>
           </li>
 

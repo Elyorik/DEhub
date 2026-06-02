@@ -49,23 +49,23 @@
 }
 
 .menuContent a {
-  text-decoration: none;
-  color: #222;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  display: inline-block;
-  transition: background 0.25s ease, transform 0.2s ease;
-  user-select: none; /* 🚫 текст нельзя выделять */
+   text-decoration: none;
+   color: #000;
+   padding: 0.6rem 1rem;
+   border-radius: 8px;
+   display: inline-block;
+   transition: background 0.25s ease, transform 0.2s ease;
+   user-select: none; /* 🚫 текст нельзя выделять */
 
-  &:hover {
-    background: rgba(0, 0, 0, 0.05);
-    transform: translateX(6px);
-  }
+   &:hover {
+     background: rgba(0, 0, 0, 0.05);
+     transform: translateX(6px);
+   }
 
-  &:active {
-    transform: translateX(3px);
-  }
-}
+   &:active {
+     transform: translateX(3px);
+   }
+ }
 
 /* === FOLDER BUTTON === */
 .folderButton {

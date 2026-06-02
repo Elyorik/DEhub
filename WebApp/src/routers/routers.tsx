@@ -13,7 +13,7 @@ import DEBlick from "../pages/DEBlick/DEBlick";
 import StudentProfile from "../pages/DEBlick/StudentProfile";
 import Schule60 from "../Schule60/Schule60";
 import NotFound from "../pages/NotFound/NotFound";
-
+import Tutorhub from '../pages/Tutorhub/Tutorhub';
 export const routers = createBrowserRouter([
   {
     element: <Layout />,
@@ -54,6 +54,10 @@ export const routers = createBrowserRouter([
       {
         path: "quellen",
         element: <Quellen />,
+      },
+      {
+        path: "Tutorhub",
+        element: <Tutorhub />,
       },
       { path: "DEBlick",
         element: <DEBlick />, 
