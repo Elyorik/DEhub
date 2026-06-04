@@ -8,6 +8,11 @@ service cloud.firestore {
     return request.auth != null;
   }
 
+  function isTutorhubAdmin() {
+    return isAuthenticated() &&
+      exists(/databases/$(database)/documents/tutorhub_admins/$(getCurrentUserId()));
+  }
+
   match /databases/{database}/documents {
     match /visitors/{docId} {
       allow create: if true;
@@ -40,6 +45,63 @@ service cloud.firestore {
     match /tutorhub_notifications/{docId} {
       allow read: if isAuthenticated() && docId == getCurrentUserId();
       allow create: if true;
+    }
+
+    match /tutorhub_admins/{docId} {
+      allow read: if isAuthenticated() && docId == getCurrentUserId();
+      allow create, update, delete: if false;
+    }
+
+    match /tutorhub_app_users/{docId} {
+      allow read: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
+      allow create, update: if isAuthenticated() && docId == getCurrentUserId();
+      allow update: if isTutorhubAdmin();
+    }
+
+    match /tutorhub_student_profiles/{docId} {
+      allow read: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
+      allow create, update: if isAuthenticated() && docId == getCurrentUserId();
+      allow update: if isTutorhubAdmin();
+      allow delete: if isAuthenticated() && docId == getCurrentUserId();
+    }
+
+    match /tutorhub_teacher_profiles/{docId} {
+      allow read: if isAuthenticated() && (
+        resource.data.status == "approved" ||
+        docId == getCurrentUserId() ||
+        isTutorhubAdmin()
+      );
+      allow create, update: if isAuthenticated() && docId == getCurrentUserId();
+      allow update: if isTutorhubAdmin();
+      allow delete: if isAuthenticated() && docId == getCurrentUserId();
+    }
+
+    match /tutorhub_wallets/{docId} {
+      allow read: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
+      allow create, update: if isAuthenticated() && docId == getCurrentUserId();
+      allow update: if isTutorhubAdmin();
+    }
+
+    match /tutorhub_wallet_transactions/{docId} {
+      allow read: if isAuthenticated() && (
+        resource.data.uid == getCurrentUserId() || isTutorhubAdmin()
+      );
+      allow create: if isAuthenticated() && request.resource.data.uid == getCurrentUserId();
+      allow create: if isTutorhubAdmin();
+    }
+
+    match /tutorhub_bookings/{docId} {
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == getCurrentUserId() ||
+        resource.data.teacherId == getCurrentUserId() ||
+        isTutorhubAdmin()
+      );
+      allow create: if isAuthenticated() && request.resource.data.studentId == getCurrentUserId();
+      allow update: if isAuthenticated() && (
+        resource.data.studentId == getCurrentUserId() ||
+        resource.data.teacherId == getCurrentUserId() ||
+        isTutorhubAdmin()
+      );
     }
 
     // Forum collections

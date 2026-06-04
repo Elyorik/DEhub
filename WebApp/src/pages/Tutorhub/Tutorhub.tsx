@@ -1,8 +1,16 @@
-import { useState, useEffect } from "react";
-import s from "./tutorhub.module.scss";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
+import { getWallet } from "./services/tutorhubWallet";
+import s from "./Tutorhub.module.scss";
 
 export default function Tutorhub() {
+  const navigate = useNavigate();
+  const user = useSelector((state: RootState) => state.user.currentUser);
+
   const [scrollY, setScrollY] = useState(0);
+  const [balance, setBalance] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,24 +23,52 @@ export default function Tutorhub() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-const progress = Math.min(Math.max(scrollY, 0), 800) / 800;
+  useEffect(() => {
+    if (!user) {
+      setBalance(0);
+      return;
+    }
 
-const textOpacity = progress;
-const cardHeightScale = 1 + progress * 0.4;
-const detailsMove = progress * 90;
-const detailsOpacity = 1 - progress * 0.6;
+    getWallet(user.id)
+      .then((wallet) => setBalance(wallet.balance))
+      .catch(console.error);
+  }, [user]);
 
-const yellowX = progress * -360;
-const yellowY = progress * 620;
-const yellowRotate = -4 + progress * 4;
+  function startAsStudent() {
+    if (!user) {
+      navigate("/account");
+      return;
+    }
 
-const pinkX = 0;
-const pinkY = progress * 620;
-const pinkRotate = 2 - progress * 2;
+    navigate("/Tutorhub/student-setup");
+  }
 
-const purpleX = progress * 360;
-const purpleY = progress * 620;
-const purpleRotate = 4 - progress * 4;
+  function startAsTeacher() {
+    if (!user) {
+      navigate("/account");
+      return;
+    }
+
+    navigate("/Tutorhub/teacher-setup");
+  }
+
+  const progress = Math.min(Math.max(scrollY, 0), 800) / 800;
+
+  const textOpacity = progress;
+  const detailsMove = progress * 90;
+  const detailsOpacity = 1 - progress * 0.6;
+
+  const yellowX = progress * -360;
+  const yellowY = progress * 620;
+  const yellowRotate = -4 + progress * 4;
+
+  const pinkX = 0;
+  const pinkY = progress * 620;
+  const pinkRotate = 2 - progress * 2;
+
+  const purpleX = progress * 360;
+  const purpleY = progress * 620;
+  const purpleRotate = 4 - progress * 4;
 
   return (
     <div className={s.container}>
@@ -48,8 +84,10 @@ const purpleRotate = 4 - progress * 4;
         </nav>
 
         <div className={s.actions}>
-          <button className={s.login}>Log in</button>
-          <button className={s.blackBtn}>Starten</button>
+          <div className={s.walletBadge}>
+            <span>Guthaben</span>
+            <strong>{balance} Credits</strong>
+          </div>
         </div>
       </header>
 
@@ -61,8 +99,12 @@ const purpleRotate = 4 - progress * 4;
         </h1>
 
         <div className={s.heroButtons}>
-          <button className={s.purpleBtn}>Starten als Schüler</button>
-          <button className={s.whiteBtn}>Starten als Lehrer</button>
+          <button className={s.purpleBtn} type="button" onClick={startAsStudent}>
+            Starten als Schueler
+          </button>
+          <button className={s.whiteBtn} type="button" onClick={startAsTeacher}>
+            Starten als Lehrer
+          </button>
         </div>
       </div>
 
@@ -85,7 +127,10 @@ const purpleRotate = 4 - progress * 4;
               }}
             >
               <h3>Erfahrene Tutoren</h3>
-              <p>Unsere Tutorinnen und Tutoren sind Studierende, die selbst erfolgreich an unserer DSD Schule gelernt haben.</p>
+              <p>
+                Unsere Tutorinnen und Tutoren sind Studierende, die selbst erfolgreich
+                an unserer DSD Schule gelernt haben.
+              </p>
             </div>
           </div>
 
@@ -106,7 +151,10 @@ const purpleRotate = 4 - progress * 4;
               }}
             >
               <h3>Persönliche Förderung</h3>
-              <p>Ob Einzel- oder Gruppenunterricht – unsere erfahrenen studentischen Tutorinnen und Tutoren helfen dir, deine Ziele zu erreichen. </p>
+              <p>
+                Ob Einzel- oder Gruppenunterricht, unsere erfahrenen Tutorinnen und
+                Tutoren helfen dir, deine Ziele zu erreichen.
+              </p>
             </div>
           </div>
 
@@ -175,14 +223,17 @@ const purpleRotate = 4 - progress * 4;
               }}
             >
               <h3>Gemeinsam zum Erfolg</h3>
-              <p>Wir helfen Schülerinnen und Schülern, Wissen aufzubauen, Selbstvertrauen zu stärken und bessere Ergebnisse zu erzielen.</p>
+              <p>
+                Wir helfen Schülerinnen und Schülern, Wissen aufzubauen,
+                Selbstvertrauen zu stärken und bessere Ergebnisse zu erzielen.
+              </p>
             </div>
           </div>
         </div>
       </div>
 
       <section className={s.fakeSection}>
-        <h2>Следующий раздел</h2>
+        <h2>Naechster Bereich</h2>
       </section>
     </div>
   );

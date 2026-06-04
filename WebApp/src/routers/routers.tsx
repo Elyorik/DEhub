@@ -14,6 +14,18 @@ import StudentProfile from "../pages/DEBlick/StudentProfile";
 import Schule60 from "../Schule60/Schule60";
 import NotFound from "../pages/NotFound/NotFound";
 import Tutorhub from '../pages/Tutorhub/Tutorhub';
+import TutorhubProtected from '../pages/Tutorhub/components/TutorhubProtected';
+import TutorhubMain from '../pages/Tutorhub/pages/TutorhubMain';
+import StudentProfileSetup from '../pages/Tutorhub/pages/StudentProfileSetup';
+import TeacherProfileSetup from '../pages/Tutorhub/pages/TeacherProfileSetup';
+import TeachersList from '../pages/Tutorhub/pages/TeachersList';
+import TeacherDetails from '../pages/Tutorhub/pages/TeacherDetails';
+import Wallet from '../pages/Tutorhub/pages/Wallet';
+import Bookings from '../pages/Tutorhub/pages/Bookings';
+import TutorhubAdminProtected from '../pages/Tutorhub/components/TutorhubAdminProtected';
+import AdminDashboard from '../pages/Tutorhub/pages/AdminDashboard';
+
+
 export const routers = createBrowserRouter([
   {
     element: <Layout />,
@@ -59,6 +71,70 @@ export const routers = createBrowserRouter([
         path: "Tutorhub",
         element: <Tutorhub />,
       },
+      {
+  path: "Tutorhub/main",
+  element: (
+    <TutorhubProtected>
+      <TutorhubMain />
+    </TutorhubProtected>
+  ),
+},
+{
+  path: "Tutorhub/student-setup",
+  element: (
+    <TutorhubProtected>
+      <StudentProfileSetup />
+    </TutorhubProtected>
+  ),
+},
+{
+  path: "Tutorhub/teacher-setup",
+  element: (
+    <TutorhubProtected>
+      <TeacherProfileSetup />
+    </TutorhubProtected>
+  ),
+},
+{
+  path: "Tutorhub/teachers",
+  element: (
+    <TutorhubProtected>
+      <TeachersList />
+    </TutorhubProtected>
+  ),
+},
+{
+  path: "Tutorhub/teachers/:id",
+  element: (
+    <TutorhubProtected>
+      <TeacherDetails />
+    </TutorhubProtected>
+  ),
+},
+{
+  path: "Tutorhub/wallet",
+  element: (
+    <TutorhubProtected>
+      <Wallet />
+    </TutorhubProtected>
+  ),
+},
+{
+  path: "Tutorhub/bookings",
+  element: (
+    <TutorhubProtected>
+      <Bookings />
+    </TutorhubProtected>
+  ),
+},
+{
+  path: "Tutorhub/admin",
+  element: (
+    <TutorhubAdminProtected>
+      <AdminDashboard />
+    </TutorhubAdminProtected>
+  ),
+},
       { path: "DEBlick",
         element: <DEBlick />, 
       },

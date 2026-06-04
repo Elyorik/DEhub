@@ -1,0 +1,131 @@
+.page {
+  min-height: 100vh;
+  padding: 96px 24px 64px;
+  background: #f6f8fb;
+  color: #101828;
+}
+
+.header {
+  max-width: 1100px;
+  margin: 0 auto 28px;
+
+  h1 {
+    margin: 8px 0 10px;
+    font-size: 40px;
+    line-height: 1.1;
+  }
+
+  p {
+    max-width: 720px;
+    margin: 0;
+    color: #475467;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+}
+
+.eyebrow {
+  margin: 0;
+  color: #4014d8;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card,
+.primaryCard {
+  min-height: 190px;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  padding: 22px;
+  background: #ffffff;
+  color: #101828;
+  text-decoration: none;
+  box-shadow: 0 16px 40px rgba(16, 24, 40, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+
+  span {
+    width: fit-content;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: #f2f4f7;
+    color: #344054;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  strong {
+    margin-top: 18px;
+    display: block;
+    font-size: 22px;
+    line-height: 1.2;
+  }
+
+  p {
+    margin: 10px 0 0;
+    color: #667085;
+    line-height: 1.5;
+  }
+}
+
+.card:hover,
+.primaryCard:hover {
+  transform: translateY(-3px);
+  border-color: #b9c0cc;
+  box-shadow: 0 20px 46px rgba(16, 24, 40, 0.1);
+}
+
+.primaryCard {
+  grid-column: span 2;
+  background: #101828;
+  color: #ffffff;
+
+  span {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.72);
+  }
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .primaryCard {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 620px) {
+  .page {
+    padding: 80px 16px 40px;
+  }
+
+  .header h1 {
+    font-size: 30px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card,
+  .primaryCard {
+    min-height: 160px;
+  }
+}
