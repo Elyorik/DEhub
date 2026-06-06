@@ -8,12 +8,12 @@ service cloud.firestore {
     return request.auth != null;
   }
 
-  function isTutorhubAdmin() {
-    return isAuthenticated() &&
-      exists(/databases/$(database)/documents/tutorhub_admins/$(getCurrentUserId()));
-  }
-
   match /databases/{database}/documents {
+    function isTutorhubAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/tutorhub_admins/$(getCurrentUserId()));
+    }
+
     match /visitors/{docId} {
       allow create: if true;
       allow read: if false;
@@ -49,19 +49,20 @@ service cloud.firestore {
 
     match /tutorhub_admins/{docId} {
       allow read: if isAuthenticated() && docId == getCurrentUserId();
-      allow create, update, delete: if false;
+      allow write: if false;
     }
 
     match /tutorhub_app_users/{docId} {
       allow read: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
-      allow create, update: if isAuthenticated() && docId == getCurrentUserId();
-      allow update: if isTutorhubAdmin();
+      allow create: if isAuthenticated() && docId == getCurrentUserId();
+      allow update: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
+      allow delete: if false;
     }
 
     match /tutorhub_student_profiles/{docId} {
       allow read: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
-      allow create, update: if isAuthenticated() && docId == getCurrentUserId();
-      allow update: if isTutorhubAdmin();
+      allow create: if isAuthenticated() && docId == getCurrentUserId();
+      allow update: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
       allow delete: if isAuthenticated() && docId == getCurrentUserId();
     }
 
@@ -71,23 +72,26 @@ service cloud.firestore {
         docId == getCurrentUserId() ||
         isTutorhubAdmin()
       );
-      allow create, update: if isAuthenticated() && docId == getCurrentUserId();
-      allow update: if isTutorhubAdmin();
+      allow create: if isAuthenticated() && docId == getCurrentUserId();
+      allow update: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
       allow delete: if isAuthenticated() && docId == getCurrentUserId();
     }
 
     match /tutorhub_wallets/{docId} {
       allow read: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
-      allow create, update: if isAuthenticated() && docId == getCurrentUserId();
-      allow update: if isTutorhubAdmin();
+      allow create: if isAuthenticated() && docId == getCurrentUserId();
+      allow update: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
+      allow delete: if false;
     }
 
     match /tutorhub_wallet_transactions/{docId} {
       allow read: if isAuthenticated() && (
         resource.data.uid == getCurrentUserId() || isTutorhubAdmin()
       );
-      allow create: if isAuthenticated() && request.resource.data.uid == getCurrentUserId();
-      allow create: if isTutorhubAdmin();
+      allow create: if isAuthenticated() && (
+        request.resource.data.uid == getCurrentUserId() || isTutorhubAdmin()
+      );
+      allow update, delete: if false;
     }
 
     match /tutorhub_bookings/{docId} {
@@ -102,9 +106,9 @@ service cloud.firestore {
         resource.data.teacherId == getCurrentUserId() ||
         isTutorhubAdmin()
       );
+      allow delete: if isTutorhubAdmin();
     }
 
-    // Forum collections
     match /forumMessages/{docId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated();

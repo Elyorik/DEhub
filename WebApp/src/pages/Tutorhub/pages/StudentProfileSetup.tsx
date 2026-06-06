@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
-import { saveStudentProfile } from "../services/tutorhubUsers";
+import { getStudentProfile, saveStudentProfile } from "../services/tutorhubUsers";
 import s from "./StudentProfileSetup.module.scss";
+
+function isValidPhone(value: string) {
+  return value.replace(/\D/g, "").length >= 7;
+}
 
 export default function StudentProfileSetup() {
   const user = useSelector((state: RootState) => state.user.currentUser);
@@ -16,11 +20,44 @@ export default function StudentProfileSetup() {
   const [preferredFormat, setPreferredFormat] = useState<"individual" | "group" | "both">("both");
   const [availability, setAvailability] = useState("");
   const [notes, setNotes] = useState("");
+  const [currentStatus, setCurrentStatus] = useState<"missing" | "pending" | "approved" | "rejected">("missing");
+  const [rejectionReason, setRejectionReason] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const subjectList = subjects.split(",").map((item) => item.trim()).filter(Boolean);
+
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    getStudentProfile(user.id)
+      .then((profile) => {
+        if (!profile) {
+          setCurrentStatus("missing");
+          return;
+        }
+
+        setPhone(profile.phone || "");
+        setAge(profile.age || "");
+        setClassLevel(profile.classLevel || "");
+        setSubjects(profile.subjects.join(", "));
+        setLearningGoal(profile.learningGoal || "");
+        setPreferredFormat(profile.preferredFormat || "both");
+        setAvailability(profile.availability || "");
+        setNotes(profile.notes || "");
+        setCurrentStatus(profile.profileStatus || "pending");
+        setRejectionReason(profile.rejectionReason || "");
+      })
+      .catch(() => {
+        setError("Deine gespeicherte Ankete konnte nicht geladen werden.");
+      })
+      .finally(() => setLoading(false));
+  }, [user]);
 
   async function handleSave() {
     setMessage("");
@@ -31,8 +68,18 @@ export default function StudentProfileSetup() {
       return;
     }
 
+    if (!user.email) {
+      setError("Deine E-Mail fehlt im Konto. Bitte melde dich neu an.");
+      return;
+    }
+
     if (!phone.trim() || subjectList.length === 0 || !learningGoal.trim()) {
       setError("Bitte fuelle Telefonnummer, Faecher und Lernziel aus.");
+      return;
+    }
+
+    if (!isValidPhone(phone)) {
+      setError("Bitte gib eine gueltige Telefonnummer ein.");
       return;
     }
 
@@ -42,7 +89,7 @@ export default function StudentProfileSetup() {
       await saveStudentProfile({
         uid: user.id,
         name: user.name,
-        email: user.email || "",
+        email: user.email,
         phone: phone.trim(),
         age: age.trim(),
         classLevel: classLevel.trim(),
@@ -51,12 +98,15 @@ export default function StudentProfileSetup() {
         preferredFormat,
         availability: availability.trim(),
         notes: notes.trim(),
+        profileStatus: "pending",
+        rejectionReason: "",
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        profileStatus: "pending",
       });
 
-      setMessage("Dein Schuelerprofil wurde gespeichert.");
+      setCurrentStatus("pending");
+      setRejectionReason("");
+      setMessage("Dein Schuelerprofil wurde eingereicht und wartet auf Pruefung.");
     } catch (err) {
       console.error(err);
       setError("Profil konnte nicht gespeichert werden. Bitte versuche es nochmal.");
@@ -65,19 +115,42 @@ export default function StudentProfileSetup() {
     }
   }
 
+  if (loading) {
+    return <section className={s.page}>Schuelerprofil wird geladen...</section>;
+  }
+
   return (
     <section className={s.page}>
       <div className={s.header}>
         <p className={s.eyebrow}>TutorHub Schuelerbereich</p>
         <h1>Schueler-Infoblatt</h1>
         <p>
-          Sag uns, wobei du Hilfe brauchst. Danach kannst du passende Lehrer suchen
-          und Unterricht buchen.
+          Sag uns, wobei du Hilfe brauchst. Du kannst deine Ankete spaeter bearbeiten.
+          Nach jeder Aenderung wird sie erneut geprueft.
         </p>
       </div>
 
       <div className={s.layout}>
         <form className={s.form} onSubmit={(e) => e.preventDefault()}>
+          {currentStatus === "pending" && (
+            <p className={s.success}>Deine Ankete wartet aktuell auf Pruefung.</p>
+          )}
+
+          {currentStatus === "approved" && (
+            <p className={s.success}>Deine Ankete ist freigegeben. Aenderungen werden erneut geprueft.</p>
+          )}
+
+          {currentStatus === "rejected" && (
+            <p className={s.error}>
+              Deine Ankete wurde abgelehnt. Grund: {rejectionReason || "Bitte ueberarbeiten."}
+            </p>
+          )}
+
+          <label>
+            E-Mail aus deinem Konto
+            <input value={user?.email || ""} disabled />
+          </label>
+
           <div className={s.row}>
             <label>
               Telefonnummer
@@ -176,12 +249,12 @@ export default function StudentProfileSetup() {
           {message && (
             <div className={s.success}>
               <p>{message}</p>
-              <Link to="/Tutorhub/teachers">Lehrer suchen</Link>
+              <Link to="/Tutorhub/main">Zum Dashboard</Link>
             </div>
           )}
 
           <button className={s.submit} type="button" onClick={handleSave} disabled={saving}>
-            {saving ? "Speichern..." : "Profil speichern"}
+            {saving ? "Speichern..." : "Zur Pruefung einreichen"}
           </button>
         </form>
 
@@ -210,8 +283,8 @@ export default function StudentProfileSetup() {
           </div>
 
           <div className={s.infoBox}>
-            <span>Niveau</span>
-            <strong>{classLevel || "Noch offen"}</strong>
+            <span>Status</span>
+            <strong>{currentStatus}</strong>
           </div>
         </aside>
       </div>

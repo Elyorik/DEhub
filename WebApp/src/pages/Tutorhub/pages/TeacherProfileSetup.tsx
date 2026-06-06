@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
-import { saveTeacherProfile } from "../services/tutorhubTeachers";
+import { getTeacherProfile, saveTeacherProfile } from "../services/tutorhubTeachers";
 import s from "./TeacherProfileSetup.module.scss";
+
+function isValidPhone(value: string) {
+  return value.replace(/\D/g, "").length >= 7;
+}
 
 export default function TeacherProfileSetup() {
   const user = useSelector((state: RootState) => state.user.currentUser);
 
+  const [phone, setPhone] = useState("");
   const [subjects, setSubjects] = useState("");
   const [languages, setLanguages] = useState("Deutsch");
   const [shortDescription, setShortDescription] = useState("");
@@ -16,8 +22,11 @@ export default function TeacherProfileSetup() {
   const [offersGroup, setOffersGroup] = useState(false);
   const [availability, setAvailability] = useState("");
   const [curriculumImageUrl, setCurriculumImageUrl] = useState("");
+  const [currentStatus, setCurrentStatus] = useState<"missing" | "pending" | "approved" | "rejected">("missing");
+  const [rejectionReason, setRejectionReason] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const subjectList = subjects.split(",").map((item) => item.trim()).filter(Boolean);
@@ -25,12 +34,54 @@ export default function TeacherProfileSetup() {
   const priceNumber = Number(price);
   const groupPriceNumber = Number(groupPrice);
 
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    getTeacherProfile(user.id)
+      .then((profile) => {
+        if (!profile) {
+          setCurrentStatus("missing");
+          return;
+        }
+
+        setPhone(profile.phone || "");
+        setSubjects(profile.subjects.join(", "));
+        setLanguages(profile.languages.join(", "));
+        setShortDescription(profile.shortDescription || "");
+        setDescription(profile.description || "");
+        setPrice(String(profile.individualPrice || 20));
+        setGroupPrice(profile.groupPrice ? String(profile.groupPrice) : "");
+        setOffersGroup(Boolean(profile.offersGroup));
+        setAvailability(profile.availability || "");
+        setCurriculumImageUrl(profile.curriculumImageUrl || "");
+        setCurrentStatus(profile.status || "pending");
+        setRejectionReason(profile.rejectionReason || "");
+      })
+      .catch(() => {
+        setError("Dein gespeichertes Lehrerprofil konnte nicht geladen werden.");
+      })
+      .finally(() => setLoading(false));
+  }, [user]);
+
   async function handleSave() {
     setMessage("");
     setError("");
 
     if (!user) {
       setError("Bitte melde dich zuerst an.");
+      return;
+    }
+
+    if (!user.email) {
+      setError("Deine E-Mail fehlt im Konto. Bitte melde dich neu an.");
+      return;
+    }
+
+    if (!phone.trim() || !isValidPhone(phone)) {
+      setError("Bitte gib eine gueltige Telefonnummer ein.");
       return;
     }
 
@@ -55,7 +106,8 @@ export default function TeacherProfileSetup() {
       await saveTeacherProfile({
         uid: user.id,
         name: user.name,
-        email: user.email || "",
+        email: user.email,
+        phone: phone.trim(),
         avatar: user.avatar,
         subjects: subjectList,
         languages: languageList.length > 0 ? languageList : ["Deutsch"],
@@ -68,11 +120,14 @@ export default function TeacherProfileSetup() {
         curriculumImageUrl: curriculumImageUrl.trim(),
         availability: availability.trim(),
         status: "pending",
+        rejectionReason: "",
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
 
-      setMessage("Dein Lehrerprofil wurde gespeichert und wartet auf Freigabe.");
+      setCurrentStatus("pending");
+      setRejectionReason("");
+      setMessage("Dein Lehrerprofil wurde eingereicht und wartet auf Freigabe.");
     } catch (err) {
       console.error(err);
       setError("Profil konnte nicht gespeichert werden. Bitte versuche es nochmal.");
@@ -81,19 +136,51 @@ export default function TeacherProfileSetup() {
     }
   }
 
+  if (loading) {
+    return <section className={s.page}>Lehrerprofil wird geladen...</section>;
+  }
+
   return (
     <section className={s.page}>
       <div className={s.header}>
         <p className={s.eyebrow}>TutorHub Lehrerbereich</p>
         <h1>Lehrer-Infoblatt</h1>
         <p>
-          Erstelle dein Lehrerprofil. Nach der Pruefung kann dein Profil in der Lehrerliste
-          angezeigt werden.
+          Erstelle oder bearbeite dein Lehrerprofil. Nach jeder Aenderung wird es
+          erneut geprueft, bevor es in der Lehrerliste erscheint.
         </p>
       </div>
 
       <div className={s.layout}>
         <form className={s.form} onSubmit={(e) => e.preventDefault()}>
+          {currentStatus === "pending" && (
+            <p className={s.success}>Dein Lehrerprofil wartet aktuell auf Pruefung.</p>
+          )}
+
+          {currentStatus === "approved" && (
+            <p className={s.success}>Dein Lehrerprofil ist freigegeben. Aenderungen werden erneut geprueft.</p>
+          )}
+
+          {currentStatus === "rejected" && (
+            <p className={s.error}>
+              Dein Lehrerprofil wurde abgelehnt. Grund: {rejectionReason || "Bitte ueberarbeiten."}
+            </p>
+          )}
+
+          <label>
+            E-Mail aus deinem Konto
+            <input value={user?.email || ""} disabled />
+          </label>
+
+          <label>
+            Telefonnummer
+            <input
+              placeholder="+998 ..."
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </label>
+
           <div className={s.row}>
             <label>
               Faecher
@@ -186,7 +273,12 @@ export default function TeacherProfileSetup() {
           </label>
 
           {error && <p className={s.error}>{error}</p>}
-          {message && <p className={s.success}>{message}</p>}
+          {message && (
+            <div className={s.success}>
+              <p>{message}</p>
+              <Link to="/Tutorhub/main">Zum Dashboard</Link>
+            </div>
+          )}
 
           <button className={s.submit} type="button" onClick={handleSave} disabled={saving}>
             {saving ? "Speichern..." : "Zur Pruefung einreichen"}

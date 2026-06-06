@@ -33,7 +33,7 @@ const featureCards: FeatureCard[] = [
     bgColor: "#e3f2fd",
   },
   {
-    title: "Meine Schule 60",
+    title: "Goethe-Schule Nr. 60",
     description: "Entdecke alles über unsere Schule",
     image: newSchule60, // Replace with schule60 image when available
     link: "/schule60",
