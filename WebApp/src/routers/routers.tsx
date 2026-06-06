@@ -24,6 +24,7 @@ import Wallet from '../pages/Tutorhub/pages/Wallet';
 import Bookings from '../pages/Tutorhub/pages/Bookings';
 import TutorhubAdminProtected from '../pages/Tutorhub/components/TutorhubAdminProtected';
 import AdminDashboard from '../pages/Tutorhub/pages/AdminDashboard';
+import TutorhubApprovedProtected from '../pages/Tutorhub/components/TutorhubApprovedProtected';
 
 
 export const routers = createBrowserRouter([
@@ -98,25 +99,31 @@ export const routers = createBrowserRouter([
 {
   path: "Tutorhub/teachers",
   element: (
-    <TutorhubProtected>
-      <TeachersList />
-    </TutorhubProtected>
+ <TutorhubProtected>
+  <TutorhubApprovedProtected>
+    <TeachersList />
+  </TutorhubApprovedProtected>
+</TutorhubProtected>
   ),
 },
 {
   path: "Tutorhub/teachers/:id",
   element: (
-    <TutorhubProtected>
-      <TeacherDetails />
-    </TutorhubProtected>
+<TutorhubProtected>
+  <TutorhubApprovedProtected>
+    <TeacherDetails />
+  </TutorhubApprovedProtected>
+</TutorhubProtected>
   ),
 },
 {
   path: "Tutorhub/wallet",
   element: (
-    <TutorhubProtected>
-      <Wallet />
-    </TutorhubProtected>
+<TutorhubProtected>
+  <TutorhubApprovedProtected>
+    <Wallet />
+  </TutorhubApprovedProtected>
+</TutorhubProtected>
   ),
 },
 {

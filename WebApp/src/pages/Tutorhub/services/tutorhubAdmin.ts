@@ -17,9 +17,27 @@ const USERS_COLLECTION = "tutorhub_app_users";
 const STUDENTS_COLLECTION = "tutorhub_student_profiles";
 const TEACHERS_COLLECTION = "tutorhub_teacher_profiles";
 
+export type AdminProfileStatus = "all" | "pending" | "approved" | "rejected";
+
 export async function isTutorhubAdmin(uid: string): Promise<boolean> {
   const snap = await getDoc(doc(db, ADMINS_COLLECTION, uid));
   return snap.exists();
+}
+
+export async function getAllStudents(): Promise<StudentProfile[]> {
+  const snap = await getDocs(collection(db, STUDENTS_COLLECTION));
+
+  return snap.docs
+    .map((studentDoc) => studentDoc.data() as StudentProfile)
+    .sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+}
+
+export async function getAllTeachers(): Promise<TeacherProfile[]> {
+  const snap = await getDocs(collection(db, TEACHERS_COLLECTION));
+
+  return snap.docs
+    .map((teacherDoc) => teacherDoc.data() as TeacherProfile)
+    .sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
 }
 
 export async function getPendingStudents(): Promise<StudentProfile[]> {
@@ -56,6 +74,7 @@ export async function updateStudentApproval(
   await setDoc(
     doc(db, USERS_COLLECTION, uid),
     {
+      role: "student",
       profileStatus: status,
       rejectionReason,
       updatedAt: now,
@@ -80,6 +99,7 @@ export async function updateTeacherApproval(
   await setDoc(
     doc(db, USERS_COLLECTION, uid),
     {
+      role: "teacher",
       profileStatus: status,
       rejectionReason,
       updatedAt: now,
