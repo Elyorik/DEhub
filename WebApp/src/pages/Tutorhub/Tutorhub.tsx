@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import { getTeacherProfile } from "./services/tutorhubTeachers";
+import { getStudentProfile, getTutorhubUser } from "./services/tutorhubUsers";
 import { getWallet } from "./services/tutorhubWallet";
 import s from "./Tutorhub.module.scss";
 
@@ -11,6 +13,8 @@ export default function Tutorhub() {
 
   const [scrollY, setScrollY] = useState(0);
   const [balance, setBalance] = useState(0);
+  const [roleMessage, setRoleMessage] = useState("");
+  const [checkingRole, setCheckingRole] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,25 +35,97 @@ export default function Tutorhub() {
 
     getWallet(user.id)
       .then((wallet) => setBalance(wallet.balance))
-      .catch(console.error);
+      .catch(() => setBalance(0));
   }, [user]);
 
-  function startAsStudent() {
+  async function startAsStudent() {
+    setRoleMessage("");
+
     if (!user) {
       navigate("/account");
       return;
     }
 
-    navigate("/Tutorhub/student-setup");
+    setCheckingRole(true);
+
+    try {
+      const [tutorhubUser, studentProfile, teacherProfile] = await Promise.all([
+        getTutorhubUser(user.id),
+        getStudentProfile(user.id),
+        getTeacherProfile(user.id),
+      ]);
+
+      const isTeacherAccount = tutorhubUser?.role === "teacher" || Boolean(teacherProfile);
+
+      if (isTeacherAccount) {
+        setRoleMessage("Dieses Konto ist bereits als Lehrer registriert. Du kannst nicht zusaetzlich Schueler werden.");
+        navigate("/Tutorhub/main");
+        return;
+      }
+
+      if (!studentProfile) {
+        navigate("/Tutorhub/student-setup");
+        return;
+      }
+
+      if (studentProfile.profileStatus === "rejected") {
+        navigate("/Tutorhub/student-setup");
+        return;
+      }
+
+      navigate("/Tutorhub/main");
+    } catch (err) {
+      console.error(err);
+      setRoleMessage("TutorHub-Status konnte nicht geladen werden.");
+      navigate("/Tutorhub/main");
+    } finally {
+      setCheckingRole(false);
+    }
   }
 
-  function startAsTeacher() {
+  async function startAsTeacher() {
+    setRoleMessage("");
+
     if (!user) {
       navigate("/account");
       return;
     }
 
-    navigate("/Tutorhub/teacher-setup");
+    setCheckingRole(true);
+
+    try {
+      const [tutorhubUser, studentProfile, teacherProfile] = await Promise.all([
+        getTutorhubUser(user.id),
+        getStudentProfile(user.id),
+        getTeacherProfile(user.id),
+      ]);
+
+      const isStudentAccount = tutorhubUser?.role === "student" || Boolean(studentProfile);
+
+      if (isStudentAccount) {
+        setRoleMessage("Dieses Konto ist bereits als Schueler registriert. Du kannst nicht zusaetzlich Lehrer werden.");
+        navigate("/Tutorhub/main");
+        return;
+      }
+
+      if (!teacherProfile) {
+        navigate("/Tutorhub/teacher-setup");
+        return;
+      }
+
+      if (teacherProfile.status === "rejected") {
+        navigate("/Tutorhub/teacher-setup");
+        return;
+      }
+
+      navigate("/Tutorhub/main");
+    } catch (err) {
+      console.error(err);
+      setRoleMessage("TutorHub-Status konnte nicht geladen werden.");
+      navigate("/Tutorhub/main");
+    } finally {
+      setCheckingRole(false);
+    }
   }
 
   const progress = Math.min(Math.max(scrollY, 0), 800) / 800;
@@ -99,13 +175,29 @@ export default function Tutorhub() {
         </h1>
 
         <div className={s.heroButtons}>
-          <button className={s.purpleBtn} type="button" onClick={startAsStudent}>
-            Starten als Schueler
+          <button
+            className={s.purpleBtn}
+            type="button"
+            onClick={startAsStudent}
+            disabled={checkingRole}
+          >
+            {checkingRole ? "Pruefen..." : "Starten als Schueler"}
           </button>
-          <button className={s.whiteBtn} type="button" onClick={startAsTeacher}>
-            Starten als Lehrer
+          <button
+            className={s.whiteBtn}
+            type="button"
+            onClick={startAsTeacher}
+            disabled={checkingRole}
+          >
+            {checkingRole ? "Pruefen..." : "Starten als Lehrer"}
           </button>
         </div>
+
+        {roleMessage && (
+          <p style={{ marginTop: 14, color: "#b42318", fontWeight: 800 }}>
+            {roleMessage}
+          </p>
+        )}
       </div>
 
       <div className={s.cardsWrapper}>
@@ -150,7 +242,7 @@ export default function Tutorhub() {
                 transform: `translateY(${20 - progress * 20}px)`,
               }}
             >
-              <h3>Persönliche Förderung</h3>
+              <h3>Persoenliche Foerderung</h3>
               <p>
                 Ob Einzel- oder Gruppenunterricht, unsere erfahrenen Tutorinnen und
                 Tutoren helfen dir, deine Ziele zu erreichen.
@@ -224,8 +316,8 @@ export default function Tutorhub() {
             >
               <h3>Gemeinsam zum Erfolg</h3>
               <p>
-                Wir helfen Schülerinnen und Schülern, Wissen aufzubauen,
-                Selbstvertrauen zu stärken und bessere Ergebnisse zu erzielen.
+                Wir helfen Schuelerinnen und Schuelern, Wissen aufzubauen,
+                Selbstvertrauen zu staerken und bessere Ergebnisse zu erzielen.
               </p>
             </div>
           </div>

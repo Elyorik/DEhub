@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
-import { getStudentProfile, saveStudentProfile } from "../services/tutorhubUsers";
+import { getTeacherProfile } from "../services/tutorhubTeachers";
+import { getStudentProfile, getTutorhubUser, saveStudentProfile } from "../services/tutorhubUsers";
 import s from "./StudentProfileSetup.module.scss";
 
 function isValidPhone(value: string) {
@@ -22,6 +23,7 @@ export default function StudentProfileSetup() {
   const [notes, setNotes] = useState("");
   const [currentStatus, setCurrentStatus] = useState<"missing" | "pending" | "approved" | "rejected">("missing");
   const [rejectionReason, setRejectionReason] = useState("");
+  const [roleError, setRoleError] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -35,28 +37,45 @@ export default function StudentProfileSetup() {
       return;
     }
 
-    getStudentProfile(user.id)
-      .then((profile) => {
-        if (!profile) {
+    async function loadProfile() {
+      if (!user) return;
+
+      try {
+        const [tutorhubUser, studentProfile, teacherProfile] = await Promise.all([
+          getTutorhubUser(user.id),
+          getStudentProfile(user.id),
+          getTeacherProfile(user.id),
+        ]);
+
+        if (tutorhubUser?.role === "teacher" || teacherProfile) {
+          setRoleError("Dieses Konto ist bereits als Lehrer registriert. Du kannst mit diesem Konto keine Schueler-Ankete erstellen.");
+          return;
+        }
+
+        if (!studentProfile) {
           setCurrentStatus("missing");
           return;
         }
 
-        setPhone(profile.phone || "");
-        setAge(profile.age || "");
-        setClassLevel(profile.classLevel || "");
-        setSubjects(profile.subjects.join(", "));
-        setLearningGoal(profile.learningGoal || "");
-        setPreferredFormat(profile.preferredFormat || "both");
-        setAvailability(profile.availability || "");
-        setNotes(profile.notes || "");
-        setCurrentStatus(profile.profileStatus || "pending");
-        setRejectionReason(profile.rejectionReason || "");
-      })
-      .catch(() => {
+        setPhone(studentProfile.phone || "");
+        setAge(studentProfile.age || "");
+        setClassLevel(studentProfile.classLevel || "");
+        setSubjects(studentProfile.subjects.join(", "));
+        setLearningGoal(studentProfile.learningGoal || "");
+        setPreferredFormat(studentProfile.preferredFormat || "both");
+        setAvailability(studentProfile.availability || "");
+        setNotes(studentProfile.notes || "");
+        setCurrentStatus(studentProfile.profileStatus || "pending");
+        setRejectionReason(studentProfile.rejectionReason || "");
+      } catch (err) {
+        console.error(err);
         setError("Deine gespeicherte Ankete konnte nicht geladen werden.");
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProfile();
   }, [user]);
 
   async function handleSave() {
@@ -65,6 +84,11 @@ export default function StudentProfileSetup() {
 
     if (!user) {
       setError("Bitte melde dich zuerst an.");
+      return;
+    }
+
+    if (roleError) {
+      setError(roleError);
       return;
     }
 
@@ -109,7 +133,7 @@ export default function StudentProfileSetup() {
       setMessage("Dein Schuelerprofil wurde eingereicht und wartet auf Pruefung.");
     } catch (err) {
       console.error(err);
-      setError("Profil konnte nicht gespeichert werden. Bitte versuche es nochmal.");
+      setError(err instanceof Error ? err.message : "Profil konnte nicht gespeichert werden. Bitte versuche es nochmal.");
     } finally {
       setSaving(false);
     }
@@ -132,15 +156,17 @@ export default function StudentProfileSetup() {
 
       <div className={s.layout}>
         <form className={s.form} onSubmit={(e) => e.preventDefault()}>
-          {currentStatus === "pending" && (
+          {roleError && <p className={s.error}>{roleError}</p>}
+
+          {currentStatus === "pending" && !roleError && (
             <p className={s.success}>Deine Ankete wartet aktuell auf Pruefung.</p>
           )}
 
-          {currentStatus === "approved" && (
+          {currentStatus === "approved" && !roleError && (
             <p className={s.success}>Deine Ankete ist freigegeben. Aenderungen werden erneut geprueft.</p>
           )}
 
-          {currentStatus === "rejected" && (
+          {currentStatus === "rejected" && !roleError && (
             <p className={s.error}>
               Deine Ankete wurde abgelehnt. Grund: {rejectionReason || "Bitte ueberarbeiten."}
             </p>
@@ -158,6 +184,7 @@ export default function StudentProfileSetup() {
                 placeholder="+998 ..."
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                disabled={Boolean(roleError)}
               />
             </label>
 
@@ -167,6 +194,7 @@ export default function StudentProfileSetup() {
                 placeholder="z.B. 15"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
+                disabled={Boolean(roleError)}
               />
             </label>
           </div>
@@ -177,6 +205,7 @@ export default function StudentProfileSetup() {
               placeholder="z.B. Klasse 8, A2, B1"
               value={classLevel}
               onChange={(e) => setClassLevel(e.target.value)}
+              disabled={Boolean(roleError)}
             />
           </label>
 
@@ -186,6 +215,7 @@ export default function StudentProfileSetup() {
               placeholder="z.B. Mathe, Deutsch, Englisch"
               value={subjects}
               onChange={(e) => setSubjects(e.target.value)}
+              disabled={Boolean(roleError)}
             />
           </label>
 
@@ -196,6 +226,7 @@ export default function StudentProfileSetup() {
               value={learningGoal}
               onChange={(e) => setLearningGoal(e.target.value)}
               rows={6}
+              disabled={Boolean(roleError)}
             />
           </label>
 
@@ -206,6 +237,7 @@ export default function StudentProfileSetup() {
                 type="button"
                 className={preferredFormat === "individual" ? s.active : ""}
                 onClick={() => setPreferredFormat("individual")}
+                disabled={Boolean(roleError)}
               >
                 Einzel
               </button>
@@ -213,6 +245,7 @@ export default function StudentProfileSetup() {
                 type="button"
                 className={preferredFormat === "group" ? s.active : ""}
                 onClick={() => setPreferredFormat("group")}
+                disabled={Boolean(roleError)}
               >
                 Gruppe
               </button>
@@ -220,6 +253,7 @@ export default function StudentProfileSetup() {
                 type="button"
                 className={preferredFormat === "both" ? s.active : ""}
                 onClick={() => setPreferredFormat("both")}
+                disabled={Boolean(roleError)}
               >
                 Beides
               </button>
@@ -232,6 +266,7 @@ export default function StudentProfileSetup() {
               placeholder="z.B. Mo-Fr ab 17:00, Samstag vormittags"
               value={availability}
               onChange={(e) => setAvailability(e.target.value)}
+              disabled={Boolean(roleError)}
             />
           </label>
 
@@ -242,6 +277,7 @@ export default function StudentProfileSetup() {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={4}
+              disabled={Boolean(roleError)}
             />
           </label>
 
@@ -253,7 +289,7 @@ export default function StudentProfileSetup() {
             </div>
           )}
 
-          <button className={s.submit} type="button" onClick={handleSave} disabled={saving}>
+          <button className={s.submit} type="button" onClick={handleSave} disabled={saving || Boolean(roleError)}>
             {saving ? "Speichern..." : "Zur Pruefung einreichen"}
           </button>
         </form>

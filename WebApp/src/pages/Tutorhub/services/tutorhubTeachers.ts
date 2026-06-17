@@ -9,11 +9,23 @@ import {
 } from "firebase/firestore";
 import { db } from "../../../firebase";
 import type { TeacherProfile } from "../models/tutorhubTeacher.model";
+import type { TutorhubUserProfile } from "../models/tutorhubUser.model";
 
 const TEACHERS_COLLECTION = "tutorhub_teacher_profiles";
 const USERS_COLLECTION = "tutorhub_app_users";
 
+async function getTutorhubUser(uid: string): Promise<TutorhubUserProfile | null> {
+  const snap = await getDoc(doc(db, USERS_COLLECTION, uid));
+  return snap.exists() ? (snap.data() as TutorhubUserProfile) : null;
+}
+
 export async function saveTeacherProfile(profile: TeacherProfile): Promise<void> {
+  const existing = await getTutorhubUser(profile.uid);
+
+  if (existing?.role && existing.role !== "teacher") {
+    throw new Error("Dieses Konto ist bereits als Schueler registriert.");
+  }
+
   const now = Date.now();
 
   await setDoc(
@@ -21,6 +33,8 @@ export async function saveTeacherProfile(profile: TeacherProfile): Promise<void>
     {
       ...profile,
       status: profile.status || "pending",
+      availabilityStatus: profile.availabilityStatus || "available",
+      rejectionReason: "",
       createdAt: profile.createdAt || now,
       updatedAt: now,
     },
@@ -37,6 +51,8 @@ export async function saveTeacherProfile(profile: TeacherProfile): Promise<void>
       phone: profile.phone || "",
       avatar: profile.avatar || "",
       profileStatus: profile.status || "pending",
+      rejectionReason: "",
+      createdAt: existing?.createdAt || now,
       updatedAt: now,
     },
     { merge: true }

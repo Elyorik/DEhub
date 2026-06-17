@@ -63,8 +63,9 @@
     color: #344054;
   }
 
-  input,
-  textarea {
+input,
+textarea,
+select {
     width: 100%;
     border: 1px solid #d0d5dd;
     border-radius: 8px;
@@ -75,8 +76,9 @@
     background: #ffffff;
   }
 
-  input:focus,
-  textarea:focus {
+input:focus,
+textarea:focus,
+select:focus {
     border-color: #4014d8;
     box-shadow: 0 0 0 3px rgba(64, 20, 216, 0.12);
   }

@@ -1,5 +1,7 @@
 export type TeacherStatus = "pending" | "approved" | "rejected";
 
+export type TeacherAvailabilityStatus = "available" | "busy" | "paused";
+
 export interface TeacherProfile {
   uid: string;
   name: string;
@@ -17,6 +19,7 @@ export interface TeacherProfile {
   curriculumImageUrl: string;
   certificates?: string[];
   availability?: string;
+  availabilityStatus: TeacherAvailabilityStatus;
   status: TeacherStatus;
   rejectionReason?: string;
   rating?: number;

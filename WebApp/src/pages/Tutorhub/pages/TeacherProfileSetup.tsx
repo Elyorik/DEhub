@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
+import type { TeacherAvailabilityStatus } from "../models/tutorhubTeacher.model";
 import { getTeacherProfile, saveTeacherProfile } from "../services/tutorhubTeachers";
+import { getStudentProfile, getTutorhubUser } from "../services/tutorhubUsers";
 import s from "./TeacherProfileSetup.module.scss";
 
 function isValidPhone(value: string) {
@@ -21,9 +23,11 @@ export default function TeacherProfileSetup() {
   const [groupPrice, setGroupPrice] = useState("");
   const [offersGroup, setOffersGroup] = useState(false);
   const [availability, setAvailability] = useState("");
+  const [availabilityStatus, setAvailabilityStatus] = useState<TeacherAvailabilityStatus>("available");
   const [curriculumImageUrl, setCurriculumImageUrl] = useState("");
   const [currentStatus, setCurrentStatus] = useState<"missing" | "pending" | "approved" | "rejected">("missing");
   const [rejectionReason, setRejectionReason] = useState("");
+  const [roleError, setRoleError] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -40,30 +44,48 @@ export default function TeacherProfileSetup() {
       return;
     }
 
-    getTeacherProfile(user.id)
-      .then((profile) => {
-        if (!profile) {
+    async function loadProfile() {
+      if (!user) return;
+
+      try {
+        const [tutorhubUser, studentProfile, teacherProfile] = await Promise.all([
+          getTutorhubUser(user.id),
+          getStudentProfile(user.id),
+          getTeacherProfile(user.id),
+        ]);
+
+        if (tutorhubUser?.role === "student" || studentProfile) {
+          setRoleError("Dieses Konto ist bereits als Schueler registriert. Du kannst mit diesem Konto kein Lehrerprofil erstellen.");
+          return;
+        }
+
+        if (!teacherProfile) {
           setCurrentStatus("missing");
           return;
         }
 
-        setPhone(profile.phone || "");
-        setSubjects(profile.subjects.join(", "));
-        setLanguages(profile.languages.join(", "));
-        setShortDescription(profile.shortDescription || "");
-        setDescription(profile.description || "");
-        setPrice(String(profile.individualPrice || 20));
-        setGroupPrice(profile.groupPrice ? String(profile.groupPrice) : "");
-        setOffersGroup(Boolean(profile.offersGroup));
-        setAvailability(profile.availability || "");
-        setCurriculumImageUrl(profile.curriculumImageUrl || "");
-        setCurrentStatus(profile.status || "pending");
-        setRejectionReason(profile.rejectionReason || "");
-      })
-      .catch(() => {
+        setPhone(teacherProfile.phone || "");
+        setSubjects(teacherProfile.subjects.join(", "));
+        setLanguages(teacherProfile.languages.join(", "));
+        setShortDescription(teacherProfile.shortDescription || "");
+        setDescription(teacherProfile.description || "");
+        setPrice(String(teacherProfile.individualPrice || 20));
+        setGroupPrice(teacherProfile.groupPrice ? String(teacherProfile.groupPrice) : "");
+        setOffersGroup(Boolean(teacherProfile.offersGroup));
+        setAvailability(teacherProfile.availability || "");
+        setAvailabilityStatus(teacherProfile.availabilityStatus || "available");
+        setCurriculumImageUrl(teacherProfile.curriculumImageUrl || "");
+        setCurrentStatus(teacherProfile.status || "pending");
+        setRejectionReason(teacherProfile.rejectionReason || "");
+      } catch (err) {
+        console.error(err);
         setError("Dein gespeichertes Lehrerprofil konnte nicht geladen werden.");
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProfile();
   }, [user]);
 
   async function handleSave() {
@@ -72,6 +94,11 @@ export default function TeacherProfileSetup() {
 
     if (!user) {
       setError("Bitte melde dich zuerst an.");
+      return;
+    }
+
+    if (roleError) {
+      setError(roleError);
       return;
     }
 
@@ -119,6 +146,7 @@ export default function TeacherProfileSetup() {
         offersGroup,
         curriculumImageUrl: curriculumImageUrl.trim(),
         availability: availability.trim(),
+        availabilityStatus,
         status: "pending",
         rejectionReason: "",
         createdAt: Date.now(),
@@ -130,7 +158,7 @@ export default function TeacherProfileSetup() {
       setMessage("Dein Lehrerprofil wurde eingereicht und wartet auf Freigabe.");
     } catch (err) {
       console.error(err);
-      setError("Profil konnte nicht gespeichert werden. Bitte versuche es nochmal.");
+      setError(err instanceof Error ? err.message : "Profil konnte nicht gespeichert werden. Bitte versuche es nochmal.");
     } finally {
       setSaving(false);
     }
@@ -153,15 +181,17 @@ export default function TeacherProfileSetup() {
 
       <div className={s.layout}>
         <form className={s.form} onSubmit={(e) => e.preventDefault()}>
-          {currentStatus === "pending" && (
+          {roleError && <p className={s.error}>{roleError}</p>}
+
+          {currentStatus === "pending" && !roleError && (
             <p className={s.success}>Dein Lehrerprofil wartet aktuell auf Pruefung.</p>
           )}
 
-          {currentStatus === "approved" && (
+          {currentStatus === "approved" && !roleError && (
             <p className={s.success}>Dein Lehrerprofil ist freigegeben. Aenderungen werden erneut geprueft.</p>
           )}
 
-          {currentStatus === "rejected" && (
+          {currentStatus === "rejected" && !roleError && (
             <p className={s.error}>
               Dein Lehrerprofil wurde abgelehnt. Grund: {rejectionReason || "Bitte ueberarbeiten."}
             </p>
@@ -178,6 +208,7 @@ export default function TeacherProfileSetup() {
               placeholder="+998 ..."
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              disabled={Boolean(roleError)}
             />
           </label>
 
@@ -188,6 +219,7 @@ export default function TeacherProfileSetup() {
                 placeholder="z.B. Mathe, Deutsch, Englisch"
                 value={subjects}
                 onChange={(e) => setSubjects(e.target.value)}
+                disabled={Boolean(roleError)}
               />
             </label>
 
@@ -197,6 +229,7 @@ export default function TeacherProfileSetup() {
                 placeholder="z.B. Deutsch, Englisch, Russisch"
                 value={languages}
                 onChange={(e) => setLanguages(e.target.value)}
+                disabled={Boolean(roleError)}
               />
             </label>
           </div>
@@ -207,6 +240,7 @@ export default function TeacherProfileSetup() {
               placeholder="z.B. Mathe-Nachhilfe fuer Klasse 5 bis 9"
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value)}
+              disabled={Boolean(roleError)}
             />
           </label>
 
@@ -217,6 +251,7 @@ export default function TeacherProfileSetup() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={7}
+              disabled={Boolean(roleError)}
             />
           </label>
 
@@ -229,6 +264,7 @@ export default function TeacherProfileSetup() {
                 placeholder="20"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
+                disabled={Boolean(roleError)}
               />
             </label>
 
@@ -240,7 +276,7 @@ export default function TeacherProfileSetup() {
                 placeholder="Optional"
                 value={groupPrice}
                 onChange={(e) => setGroupPrice(e.target.value)}
-                disabled={!offersGroup}
+                disabled={!offersGroup || Boolean(roleError)}
               />
             </label>
           </div>
@@ -250,8 +286,22 @@ export default function TeacherProfileSetup() {
               type="checkbox"
               checked={offersGroup}
               onChange={(e) => setOffersGroup(e.target.checked)}
+              disabled={Boolean(roleError)}
             />
             Ich biete auch Gruppenunterricht an
+          </label>
+
+          <label>
+            Oeffentlicher Lehrerstatus
+            <select
+              value={availabilityStatus}
+              onChange={(e) => setAvailabilityStatus(e.target.value as TeacherAvailabilityStatus)}
+              disabled={Boolean(roleError)}
+            >
+              <option value="available">Available</option>
+              <option value="busy">Busy</option>
+              <option value="paused">Paused</option>
+            </select>
           </label>
 
           <label>
@@ -260,6 +310,7 @@ export default function TeacherProfileSetup() {
               placeholder="z.B. Mo-Fr ab 16:00, Wochenende nach Absprache"
               value={availability}
               onChange={(e) => setAvailability(e.target.value)}
+              disabled={Boolean(roleError)}
             />
           </label>
 
@@ -269,6 +320,7 @@ export default function TeacherProfileSetup() {
               placeholder="https://..."
               value={curriculumImageUrl}
               onChange={(e) => setCurriculumImageUrl(e.target.value)}
+              disabled={Boolean(roleError)}
             />
           </label>
 
@@ -280,7 +332,7 @@ export default function TeacherProfileSetup() {
             </div>
           )}
 
-          <button className={s.submit} type="button" onClick={handleSave} disabled={saving}>
+          <button className={s.submit} type="button" onClick={handleSave} disabled={saving || Boolean(roleError)}>
             {saving ? "Speichern..." : "Zur Pruefung einreichen"}
           </button>
         </form>

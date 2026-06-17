@@ -1,34 +1,85 @@
-export type TutorhubRole = "student" | "teacher" | "admin";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../../../firebase";
+import type {
+  StudentProfile,
+  TutorhubRole,
+  TutorhubUserProfile,
+} from "../models/tutorhubUser.model";
 
-export type TutorhubProfileStatus = "missing" | "pending" | "approved" | "rejected";
+const USERS_COLLECTION = "tutorhub_app_users";
+const STUDENTS_COLLECTION = "tutorhub_student_profiles";
 
-export interface TutorhubUserProfile {
-  uid: string;
-  role: TutorhubRole;
-  name: string;
-  email: string;
-  phone?: string;
-  avatar?: string;
-  profileStatus: TutorhubProfileStatus;
-  rejectionReason?: string;
-  createdAt: number;
-  updatedAt: number;
+export async function getTutorhubUser(uid: string): Promise<TutorhubUserProfile | null> {
+  const snap = await getDoc(doc(db, USERS_COLLECTION, uid));
+  return snap.exists() ? (snap.data() as TutorhubUserProfile) : null;
 }
 
-export interface StudentProfile {
+export async function createOrUpdateTutorhubUser(data: {
   uid: string;
   name: string;
   email: string;
-  phone: string;
-  age?: string;
-  classLevel?: string;
-  subjects: string[];
-  learningGoal: string;
-  preferredFormat: "individual" | "group" | "both";
-  availability?: string;
-  notes?: string;
-  profileStatus: TutorhubProfileStatus;
-  rejectionReason?: string;
-  createdAt: number;
-  updatedAt: number;
+  avatar?: string;
+  role: TutorhubRole;
+}): Promise<void> {
+  const existing = await getTutorhubUser(data.uid);
+  const now = Date.now();
+
+  if (existing?.role && existing.role !== data.role) {
+    throw new Error(`Dieses Konto ist bereits als ${existing.role} registriert.`);
+  }
+
+  await setDoc(
+    doc(db, USERS_COLLECTION, data.uid),
+    {
+      ...existing,
+      ...data,
+      profileStatus: existing?.profileStatus || "missing",
+      createdAt: existing?.createdAt || now,
+      updatedAt: now,
+    },
+    { merge: true }
+  );
+}
+
+export async function saveStudentProfile(profile: StudentProfile): Promise<void> {
+  const existing = await getTutorhubUser(profile.uid);
+
+  if (existing?.role && existing.role !== "student") {
+    throw new Error("Dieses Konto ist bereits als Lehrer registriert.");
+  }
+
+  const now = Date.now();
+
+  await setDoc(
+    doc(db, STUDENTS_COLLECTION, profile.uid),
+    {
+      ...profile,
+      profileStatus: "pending",
+      rejectionReason: "",
+      createdAt: profile.createdAt || now,
+      updatedAt: now,
+    },
+    { merge: true }
+  );
+
+  await setDoc(
+    doc(db, USERS_COLLECTION, profile.uid),
+    {
+      uid: profile.uid,
+      role: "student",
+      name: profile.name,
+      email: profile.email,
+      phone: profile.phone,
+      profileStatus: "pending",
+      rejectionReason: "",
+      createdAt: existing?.createdAt || now,
+      updatedAt: now,
+    },
+    { merge: true }
+  );
+}
+
+export async function getStudentProfile(uid: string): Promise<StudentProfile | null> {
+  const snap = await getDoc(doc(db, STUDENTS_COLLECTION, uid));
+  return snap.exists() ? (snap.data() as StudentProfile) : null;
 }
