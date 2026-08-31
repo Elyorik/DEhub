@@ -29,6 +29,13 @@ function ParticleHero() {
   const animationRef = useRef<number>(0);
 
   useEffect(() => {
+    // The static mobile hero avoids running an expensive canvas animation on phones
+    // and also respects visitors who request reduced motion.
+    const shouldUseStaticHero = window.matchMedia(
+      "(max-width: 767px), (prefers-reduced-motion: reduce)",
+    ).matches;
+    if (shouldUseStaticHero) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -186,7 +193,10 @@ function ParticleHero() {
           Suchen
         </Link>
       </div>
- 
+      <div className={s.scrollIndicator} aria-hidden="true">
+        <span>Scroll</span>
+        <div className={s.scrollArrow} />
+      </div>
     </div>
   );
 }
@@ -286,10 +296,6 @@ function Home() {
     <div className={s.home}>
       {/* ===== PARTICLE HERO SECTION ===== */}
       <ParticleHero />
-      <div className={s.scrollIndicator}>
-        <span>Scroll</span>
-        <div className={s.scrollArrow} />
-      </div>
       {/* ===== FEATURE CARDS ===== */}
       <div className={s.containers}>
         {featureCards.map((card, index) => (
