@@ -1,103 +1,157 @@
+/* ============================================
+   HOME PAGE STYLES
+   ============================================ */
+
 .home {
   min-height: 100vh;
-  padding-top: 60px; // Adjust for header height
+  padding-top: 0;
   overflow-x: hidden;
+  background: #f8fafc;
 }
 
-/* ===== Landing Section ===== */
-.landing {
-   height: 100vh; /* 👈 всегда на весь экран */
-   display: flex;
-   flex-direction: column;
-   justify-content: center;
-   align-items: center;
-   text-align: center;
-   padding: 0 1rem;
+/* ============================================
+   PARTICLE HERO SECTION
+   ============================================ */
 
-   h1 {
-     font-size: clamp(2rem, 5vw, 3.5rem);
+.particleHero {
+  position: relative;
+  width: 100%;
+  height: min(760px, 88vh);
+  min-height: 560px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(191, 219, 254, 0.7) 0%, rgba(239, 246, 255, 0.65) 28%, transparent 58%),
+    linear-gradient(135deg, #ffffff 0%, #f4f8ff 50%, #eef6ff 100%);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-     margin-bottom: 1.5rem;
-     color: black;
-     line-height: 1.2;
-   }
+.particleCanvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 
-   h2 {
-     font-size: 2rem;
-     margin: 1rem 0;
-     color: black
-   }
+  width: 100%;
+  height: 100%;
 
-   p {
-     font-size: 1.2rem;
-     max-width: 600px;
-   }
+  z-index: 1;
+  opacity: 0.9;
+}
 
-   button {
-     margin-top: 1.5rem;
-     padding: 0.8rem 1.4rem;
-     font-size: 1rem;
-     background: #1da1f2;
-     color: #fff;
-     border-radius: 8px;
-     cursor: pointer;
-     transition: background 0.3s ease;
+.particleContent {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
 
-     &:hover {
-       background: #0d8ae0;
-     }
-   }
- }
+.particleTitle {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(3rem, 10vw, 7rem);
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  color: #1d4ed8;
+  text-transform: uppercase;
+  margin: 0;
+  margin-top: 20px;
+  opacity: 0.1;
+  text-shadow: 0 0 60px rgba(96, 165, 250, 0.22);
+}
 
-/* ===== Containers Section ===== */
+.particleSubtitle {
+  font-size: 1.1rem;
+  color: #1e3a8a;
+  letter-spacing: 0.2em;
+  font-weight: 300;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin: 0;
+  margin-top: 100px;
+}
+
+.particleButton {
+  pointer-events: auto;
+  margin-top: 1rem;
+  padding: 0.9rem 2.5rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: #2563eb;
+  color: #ffffff;
+  border: 1px solid #2563eb;
+  border-radius: 999px;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.4s ease;
+  font-family: inherit;
+
+  &:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    color: #ffffff;
+    transform: translateY(-2px);
+  }
+}
+
+/* Scroll Indicator */
+.scrollIndicator {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.4;
+  animation: bounceScroll 2s ease-in-out infinite;
+  pointer-events: none;
+
+  span {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: #1e40af;
+    text-transform: uppercase;
+  }
+}
+
+.scrollArrow {
+  width: 1px;
+  height: 30px;
+  background: linear-gradient(to bottom, #2563eb, transparent);
+}
+
+@keyframes bounceScroll {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ============================================
+   CONTAINERS SECTION
+   ============================================ */
+
 .containers {
   display: flex;
   justify-content: center;
+  margin-top: 10rem;
   align-items: stretch;
   gap: 2rem;
-  padding: 4rem 8%;
+  padding: 5rem 8%;
   flex-wrap: wrap;
 }
 
-/* ===== Feature Boxes ===== */
-.newFeatures,
-.searchImprovement {
-  flex: 1 1 45%;
-  min-height: 400px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  font-size: 1.2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  gap: 1rem;
-  padding: 2rem;
+/* ============================================
+   FEATURE CARDS
+   ============================================ */
 
-  &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  }
-
-  img {
-    width: 80%;
-    max-width: 400px;
-    height: auto;
-    border-radius: 10px;
-  }
-}
-
-.newFeatures {
-  background: #ffebee;
-}
-
-.searchImprovement {
-  background: #e3f2fd;
-}
-
-/* ===== Reusable Feature Card ===== */
 .featureCard {
   flex: 1 1 45%;
   min-height: 400px;
@@ -107,9 +161,10 @@
   align-items: center;
   text-align: center;
   font-size: 1.2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   gap: 1rem;
   padding: 2rem;
   text-decoration: none;
@@ -117,7 +172,20 @@
 
   &:hover {
     transform: translateY(-6px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    margin: 0;
+    color: #172554;
+  }
+
+  p {
+    font-size: 1rem;
+    color: #475569;
+    max-width: 400px;
+    line-height: 1.6;
   }
 
   img {
@@ -128,7 +196,10 @@
   }
 }
 
-/* ===== Special Animated Card (Meine Schule 60) ===== */
+/* ============================================
+   SPECIAL CARD (Meine Schule 60)
+   ============================================ */
+
 .specialCard {
   flex: 1 1 100%;
   display: flex;
@@ -139,13 +210,13 @@
   padding: 3rem;
   text-decoration: none;
   color: inherit;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #eff6ff 0%, #eef2ff 52%, #f5f3ff 100%);
   border-radius: 24px;
-  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+  border: 1px solid rgba(129, 140, 248, 0.2);
+  box-shadow: 0 14px 40px rgba(79, 70, 229, 0.12);
   position: relative;
   overflow: hidden;
 
-  // Floating particles effect
   &::before {
     content: "";
     position: absolute;
@@ -153,13 +224,13 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(147, 197, 253, 0.28) 0%, transparent 70%);
     animation: float 15s ease-in-out infinite;
   }
 
   &:hover {
     transform: scale(1.02);
-    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.6);
+    box-shadow: 0 20px 60px rgba(79, 70, 229, 0.2);
 
     .specialCardImage img {
       transform: scale(1.1) rotate(2deg);
@@ -178,15 +249,15 @@
 
   h2 {
     font-size: 2.5rem;
-    color: #fff;
+    color: #172554;
     margin-bottom: 1rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    text-shadow: none;
     transition: transform 0.3s ease;
   }
 
   p {
     font-size: 1.3rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: #475569;
     max-width: 400px;
   }
 }
@@ -202,27 +273,22 @@
     max-width: 350px;
     height: auto;
     border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 28px rgba(30, 64, 175, 0.16);
     transition: transform 0.5s ease;
   }
 }
 
 @keyframes float {
-  0%, 100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  25% {
-    transform: translate(20px, 20px) rotate(5deg);
-  }
-  50% {
-    transform: translate(0, 40px) rotate(0deg);
-  }
-  75% {
-    transform: translate(-20px, 20px) rotate(-5deg);
-  }
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(20px, 20px) rotate(5deg); }
+  50% { transform: translate(0, 40px) rotate(0deg); }
+  75% { transform: translate(-20px, 20px) rotate(-5deg); }
 }
 
-/* ===== 📱 Tablet Anpassung ===== */
+/* ============================================
+   TABLET (max-width: 900px)
+   ============================================ */
+
 @media (max-width: 900px) {
   .containers {
     flex-direction: column;
@@ -230,22 +296,14 @@
     padding: 3rem 5%;
   }
 
-  .newFeatures,
-  .searchImprovement {
+  .featureCard {
+    flex: 1 1 100%;
     font-size: 1rem;
 
     img {
       width: 90%;
       max-width: 350px;
     }
-  }
-
-  .landing h1 {
-    font-size: 2.2rem;
-  }
-
-  .landing h2 {
-    font-size: 1.6rem;
   }
 
   .specialCard {
@@ -268,25 +326,23 @@
   }
 }
 
-/* ===== 📱 Smartphone Anpassung ===== */
+/* ============================================
+   SMARTPHONE (max-width: 500px)
+   ============================================ */
+
 @media (max-width: 500px) {
-  .landing {
-    height: 100vh; /* 👈 фиксируем, чтобы занимала весь экран */
-    padding: 2rem 1rem;
-    justify-content: center;
+  .particleTitle {
+    font-size: 2.5rem;
+    letter-spacing: 0.15em;
   }
 
-  .landing h1 {
-    font-size: 2rem;
+  .particleSubtitle {
+    font-size: 0.85rem;
   }
 
-  .landing h2 {
-    font-size: 1.3rem;
-  }
-
-  .landing p {
-    font-size: 1rem;
-    max-width: 90%;
+  .particleButton {
+    padding: 0.7rem 1.8rem;
+    font-size: 0.8rem;
   }
 
   .containers {
@@ -294,8 +350,7 @@
     gap: 2rem;
   }
 
-  .newFeatures,
-  .searchImprovement {
+  .featureCard {
     padding: 1.5rem;
     min-height: 300px;
 

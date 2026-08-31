@@ -119,9 +119,9 @@
     outline: none;
   }
 
-input:focus,
-textarea:focus,
-select:focus {
+  input:focus,
+  textarea:focus,
+  select:focus {
     border-color: #4014d8;
     box-shadow: 0 0 0 3px rgba(64, 20, 216, 0.12);
   }
@@ -262,25 +262,35 @@ select:focus {
   margin-top: 14px;
 
   button {
-    border: 0;
     border-radius: 8px;
     padding: 10px 13px;
-    color: #ffffff;
     font-weight: 900;
     cursor: pointer;
   }
+}
 
-  button:first-child {
-    background: #067647;
-  }
+.approveButton {
+  border: 0;
+  background: #067647;
+  color: #ffffff;
+}
 
-  button:nth-child(2) {
-    background: #b42318;
-  }
+.rejectButton {
+  border: 0;
+  background: #b42318;
+  color: #ffffff;
+}
 
-  button:last-child {
-    background: #344054;
-  }
+.pendingButton {
+  border: 0;
+  background: #344054;
+  color: #ffffff;
+}
+
+.deleteButton {
+  border: 1px solid #f04438;
+  background: #fff1f0;
+  color: #b42318;
 }
 
 .empty {

@@ -6,6 +6,7 @@ import type { TeacherAvailabilityStatus } from "../models/tutorhubTeacher.model"
 import { getTeacherProfile, saveTeacherProfile } from "../services/tutorhubTeachers";
 import { getStudentProfile, getTutorhubUser } from "../services/tutorhubUsers";
 import s from "./TeacherProfileSetup.module.scss";
+import TutorhubBackToDashboard from "../components/TutorhubBackToDashboard";
 
 function isValidPhone(value: string) {
   return value.replace(/\D/g, "").length >= 7;
@@ -170,6 +171,7 @@ export default function TeacherProfileSetup() {
 
   return (
     <section className={s.page}>
+      <TutorhubBackToDashboard />
       <div className={s.header}>
         <p className={s.eyebrow}>TutorHub Lehrerbereich</p>
         <h1>Lehrer-Infoblatt</h1>

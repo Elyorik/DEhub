@@ -232,3 +232,33 @@
   text-align: center;
   text-decoration: none;
 }
+.field {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 900;
+
+  select,
+  textarea {
+    width: 100%;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    padding: 11px 12px;
+    color: #101828;
+    font: inherit;
+    outline: none;
+    background: #ffffff;
+  }
+
+  select:focus,
+  textarea:focus {
+    border-color: #4014d8;
+    box-shadow: 0 0 0 3px rgba(64, 20, 216, 0.12);
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}

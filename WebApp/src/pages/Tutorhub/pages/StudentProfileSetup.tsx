@@ -5,6 +5,7 @@ import type { RootState } from "../../../store";
 import { getTeacherProfile } from "../services/tutorhubTeachers";
 import { getStudentProfile, getTutorhubUser, saveStudentProfile } from "../services/tutorhubUsers";
 import s from "./StudentProfileSetup.module.scss";
+import TutorhubBackToDashboard from "../components/TutorhubBackToDashboard";
 
 function isValidPhone(value: string) {
   return value.replace(/\D/g, "").length >= 7;
@@ -145,6 +146,7 @@ export default function StudentProfileSetup() {
 
   return (
     <section className={s.page}>
+      <TutorhubBackToDashboard />
       <div className={s.header}>
         <p className={s.eyebrow}>TutorHub Schuelerbereich</p>
         <h1>Schueler-Infoblatt</h1>

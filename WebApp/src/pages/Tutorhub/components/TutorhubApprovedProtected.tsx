@@ -2,8 +2,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
-import { getStudentProfile } from "../services/tutorhubUsers";
 import { getTeacherProfile } from "../services/tutorhubTeachers";
+import { getStudentProfile, getTutorhubUser } from "../services/tutorhubUsers";
 
 type Props = {
   children: ReactNode;
@@ -25,15 +25,21 @@ export default function TutorhubApprovedProtected({ children }: Props) {
       if (!user) return;
 
       try {
-        const [student, teacher] = await Promise.all([
-          getStudentProfile(user.id),
-          getTeacherProfile(user.id),
-        ]);
+        const tutorhubUser = await getTutorhubUser(user.id);
 
-        setApproved(
-          student?.profileStatus === "approved" ||
-          teacher?.status === "approved"
-        );
+        if (tutorhubUser?.role === "student") {
+          const student = await getStudentProfile(user.id);
+          setApproved(student?.profileStatus === "approved");
+          return;
+        }
+
+        if (tutorhubUser?.role === "teacher") {
+          const teacher = await getTeacherProfile(user.id);
+          setApproved(teacher?.status === "approved");
+          return;
+        }
+
+        setApproved(false);
       } catch (err) {
         console.error(err);
         setApproved(false);
@@ -73,8 +79,6 @@ export default function TutorhubApprovedProtected({ children }: Props) {
         </p>
         <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
           <Link to="/Tutorhub/main">Status ansehen</Link>
-          <Link to="/Tutorhub/student-setup">Schueler-Ankete</Link>
-          <Link to="/Tutorhub/teacher-setup">Lehrer-Ankete</Link>
         </div>
       </div>
     );

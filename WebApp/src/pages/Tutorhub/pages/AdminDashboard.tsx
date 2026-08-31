@@ -3,6 +3,8 @@ import type { TeacherProfile } from "../models/tutorhubTeacher.model";
 import type { StudentProfile } from "../models/tutorhubUser.model";
 import {
   type AdminProfileStatus,
+  deleteStudentApplication,
+  deleteTeacherApplication,
   getAllStudents,
   getAllTeachers,
   updateStudentApproval,
@@ -114,12 +116,16 @@ export default function AdminDashboard() {
   }, [teachers, statusFilter, typeFilter, search]);
 
   async function approveStudent(uid: string) {
+    setMessage("");
+    setError("");
     await updateStudentApproval(uid, "approved");
     setMessage("Schueler wurde freigegeben.");
     await loadProfiles();
   }
 
   async function rejectStudent(uid: string) {
+    setMessage("");
+    setError("");
     const reason = window.prompt("Grund fuer Ablehnung?", "Bitte Profil ueberarbeiten.") || "";
     await updateStudentApproval(uid, "rejected", reason);
     setMessage("Schueler wurde abgelehnt.");
@@ -127,18 +133,44 @@ export default function AdminDashboard() {
   }
 
   async function resetStudent(uid: string) {
+    setMessage("");
+    setError("");
     await updateStudentApproval(uid, "pending");
     setMessage("Schueler wurde wieder auf Pending gesetzt.");
     await loadProfiles();
   }
 
+  async function removeStudent(uid: string, name: string) {
+    setMessage("");
+    setError("");
+
+    const confirmed = window.confirm(
+      `Schueler-Ankete von ${name || uid} wirklich loeschen? Der Nutzer kann danach neu starten.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteStudentApplication(uid);
+      setMessage("Schueler-Ankete wurde geloescht.");
+      await loadProfiles();
+    } catch (err) {
+      console.error(err);
+      setError("Schueler-Ankete konnte nicht geloescht werden.");
+    }
+  }
+
   async function approveTeacher(uid: string) {
+    setMessage("");
+    setError("");
     await updateTeacherApproval(uid, "approved");
     setMessage("Lehrer wurde freigegeben.");
     await loadProfiles();
   }
 
   async function rejectTeacher(uid: string) {
+    setMessage("");
+    setError("");
     const reason = window.prompt("Grund fuer Ablehnung?", "Bitte Profil ueberarbeiten.") || "";
     await updateTeacherApproval(uid, "rejected", reason);
     setMessage("Lehrer wurde abgelehnt.");
@@ -146,9 +178,31 @@ export default function AdminDashboard() {
   }
 
   async function resetTeacher(uid: string) {
+    setMessage("");
+    setError("");
     await updateTeacherApproval(uid, "pending");
     setMessage("Lehrer wurde wieder auf Pending gesetzt.");
     await loadProfiles();
+  }
+
+  async function removeTeacher(uid: string, name: string) {
+    setMessage("");
+    setError("");
+
+    const confirmed = window.confirm(
+      `Lehrer-Ankete von ${name || uid} wirklich loeschen? Der Nutzer kann danach neu starten.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteTeacherApplication(uid);
+      setMessage("Lehrer-Ankete wurde geloescht.");
+      await loadProfiles();
+    } catch (err) {
+      console.error(err);
+      setError("Lehrer-Ankete konnte nicht geloescht werden. Pruefe firestore.rules und deploye sie neu.");
+    }
   }
 
   return (
@@ -157,8 +211,8 @@ export default function AdminDashboard() {
         <p className={s.eyebrow}>TutorHub Admin</p>
         <h1>Profile verwalten</h1>
         <p>
-          Pruefe Anketen, gib Profile frei, lehne Profile ab und behalte die
-          TutorHub-Zahlen im Blick.
+          Pruefe Anketen, gib Profile frei, lehne Profile ab, loesche falsche
+          Anketen und behalte die TutorHub-Zahlen im Blick.
         </p>
       </div>
 
@@ -259,14 +313,17 @@ export default function AdminDashboard() {
                   )}
 
                   <div className={s.actions}>
-                    <button type="button" onClick={() => approveStudent(student.uid)}>
+                    <button className={s.approveButton} type="button" onClick={() => approveStudent(student.uid)}>
                       Approve
                     </button>
-                    <button type="button" onClick={() => rejectStudent(student.uid)}>
+                    <button className={s.rejectButton} type="button" onClick={() => rejectStudent(student.uid)}>
                       Reject
                     </button>
-                    <button type="button" onClick={() => resetStudent(student.uid)}>
+                    <button className={s.pendingButton} type="button" onClick={() => resetStudent(student.uid)}>
                       Pending
+                    </button>
+                    <button className={s.deleteButton} type="button" onClick={() => removeStudent(student.uid, student.name)}>
+                      Delete
                     </button>
                   </div>
                 </article>
@@ -315,14 +372,17 @@ export default function AdminDashboard() {
                   )}
 
                   <div className={s.actions}>
-                    <button type="button" onClick={() => approveTeacher(teacher.uid)}>
+                    <button className={s.approveButton} type="button" onClick={() => approveTeacher(teacher.uid)}>
                       Approve
                     </button>
-                    <button type="button" onClick={() => rejectTeacher(teacher.uid)}>
+                    <button className={s.rejectButton} type="button" onClick={() => rejectTeacher(teacher.uid)}>
                       Reject
                     </button>
-                    <button type="button" onClick={() => resetTeacher(teacher.uid)}>
+                    <button className={s.pendingButton} type="button" onClick={() => resetTeacher(teacher.uid)}>
                       Pending
+                    </button>
+                    <button className={s.deleteButton} type="button" onClick={() => removeTeacher(teacher.uid, teacher.name)}>
+                      Delete
                     </button>
                   </div>
                 </article>

@@ -1,5 +1,7 @@
 import {
   collection,
+  deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -106,4 +108,30 @@ export async function updateTeacherApproval(
     },
     { merge: true }
   );
+}
+
+async function resetTutorhubUserAfterProfileDelete(uid: string): Promise<void> {
+  const userRef = doc(db, USERS_COLLECTION, uid);
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    return;
+  }
+
+  await updateDoc(userRef, {
+    role: deleteField(),
+    profileStatus: "missing",
+    rejectionReason: "",
+    updatedAt: Date.now(),
+  });
+}
+
+export async function deleteStudentApplication(uid: string): Promise<void> {
+  await deleteDoc(doc(db, STUDENTS_COLLECTION, uid));
+  await resetTutorhubUserAfterProfileDelete(uid);
+}
+
+export async function deleteTeacherApplication(uid: string): Promise<void> {
+  await deleteDoc(doc(db, TEACHERS_COLLECTION, uid));
+  await resetTutorhubUserAfterProfileDelete(uid);
 }

@@ -63,7 +63,7 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
       allow create: if isAuthenticated() && docId == getCurrentUserId();
       allow update: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
-      allow delete: if isAuthenticated() && docId == getCurrentUserId();
+      allow delete: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
     }
 
     match /tutorhub_teacher_profiles/{docId} {
@@ -74,7 +74,7 @@ service cloud.firestore {
       );
       allow create: if isAuthenticated() && docId == getCurrentUserId();
       allow update: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
-      allow delete: if isAuthenticated() && docId == getCurrentUserId();
+      allow delete: if isAuthenticated() && (docId == getCurrentUserId() || isTutorhubAdmin());
     }
 
     match /tutorhub_wallets/{docId} {

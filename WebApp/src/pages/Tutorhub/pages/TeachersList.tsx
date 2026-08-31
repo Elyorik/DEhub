@@ -3,7 +3,7 @@ import TeacherCard from "../components/TeacherCard";
 import type { TeacherProfile } from "../models/tutorhubTeacher.model";
 import { getApprovedTeachers } from "../services/tutorhubTeachers";
 import s from "./TeachersList.module.scss";
-
+import TutorhubBackToDashboard from "../components/TutorhubBackToDashboard";
 export default function TeachersList() {
   const [teachers, setTeachers] = useState<TeacherProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +39,7 @@ export default function TeachersList() {
 
   return (
     <section className={s.page}>
+      <TutorhubBackToDashboard />
       <div className={s.header}>
         <p className={s.eyebrow}>TutorHub</p>
         <h1>Lehrer suchen</h1>

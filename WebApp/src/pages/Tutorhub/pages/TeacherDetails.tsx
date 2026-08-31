@@ -6,11 +6,14 @@ import type { TeacherProfile } from "../models/tutorhubTeacher.model";
 import { createTutorhubBooking } from "../services/tutorhubBookings";
 import { getTeacherProfile } from "../services/tutorhubTeachers";
 import s from "./TeacherDetails.module.scss";
+import TutorhubBackToDashboard from "../components/TutorhubBackToDashboard";
 
 export default function TeacherDetails() {
   const { id } = useParams();
   const user = useSelector((state: RootState) => state.user.currentUser);
   const [teacher, setTeacher] = useState<TeacherProfile | null>(null);
+  const [lessonType, setLessonType] = useState<"individual" | "group">("individual");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [bookingMessage, setBookingMessage] = useState("");
   const [bookingError, setBookingError] = useState("");
@@ -34,18 +37,28 @@ export default function TeacherDetails() {
       return;
     }
 
+    if (teacher.uid === user.id) {
+      setBookingError("Du kannst dich nicht bei dir selbst buchen.");
+      return;
+    }
+
+    const credits = lessonType === "group" ? teacher.groupPrice || teacher.individualPrice : teacher.individualPrice;
+
     setBooking(true);
 
     try {
       await createTutorhubBooking({
         studentId: user.id,
+        studentName: user.name || "Schueler",
         teacherId: teacher.uid,
         teacherName: teacher.name,
         subject: teacher.subjects[0] || "Unterricht",
-        lessonType: "individual",
-        credits: teacher.individualPrice,
+        lessonType,
+        credits,
+        message: message.trim(),
       });
 
+      setMessage("");
       setBookingMessage("Buchungsanfrage erstellt. Du findest sie unter Meine Buchungen.");
     } catch (err) {
       console.error(err);
@@ -72,6 +85,7 @@ export default function TeacherDetails() {
 
   return (
     <section className={s.page}>
+      <TutorhubBackToDashboard />
       <Link className={s.back} to="/Tutorhub/teachers">
         Zurueck zur Lehrerliste
       </Link>
@@ -120,7 +134,7 @@ export default function TeacherDetails() {
         </div>
 
         <aside className={s.booking}>
-          <p className={s.eyebrow}>Preis</p>
+          <p className={s.eyebrow}>Anfrage</p>
           <strong>{teacher.individualPrice} Credits</strong>
           <span>pro Einzelunterricht</span>
 
@@ -131,8 +145,26 @@ export default function TeacherDetails() {
             </div>
           )}
 
+          <label className={s.field}>
+            Unterrichtstyp
+            <select value={lessonType} onChange={(event) => setLessonType(event.target.value as "individual" | "group")}>
+              <option value="individual">Einzelunterricht</option>
+              {teacher.offersGroup && <option value="group">Gruppenunterricht</option>}
+            </select>
+          </label>
+
+          <label className={s.field}>
+            Nachricht an den Lehrer
+            <textarea
+              rows={4}
+              placeholder="Optional: Ziel, Terminwunsch, Thema..."
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+            />
+          </label>
+
           <button type="button" onClick={handleBooking} disabled={booking}>
-            {booking ? "Buchung..." : "Unterricht buchen"}
+            {booking ? "Buchung..." : "Unterricht anfragen"}
           </button>
 
           {bookingMessage && <p className={s.success}>{bookingMessage}</p>}
@@ -143,8 +175,7 @@ export default function TeacherDetails() {
           </Link>
 
           <p className={s.note}>
-            Diese Buchung ist zuerst eine Anfrage. Zahlung und Terminbestaetigung
-            verbinden wir im naechsten Schritt.
+            Die Anfrage ist noch keine Zahlung. Der Lehrer kann sie annehmen oder ablehnen.
           </p>
         </aside>
       </div>

@@ -49,26 +49,17 @@ export default function Tutorhub() {
     setCheckingRole(true);
 
     try {
-      const [tutorhubUser, studentProfile, teacherProfile] = await Promise.all([
-        getTutorhubUser(user.id),
-        getStudentProfile(user.id),
-        getTeacherProfile(user.id),
-      ]);
+      const tutorhubUser = await getTutorhubUser(user.id);
 
-      const isTeacherAccount = tutorhubUser?.role === "teacher" || Boolean(teacherProfile);
-
-      if (isTeacherAccount) {
+      if (tutorhubUser?.role === "teacher") {
         setRoleMessage("Dieses Konto ist bereits als Lehrer registriert. Du kannst nicht zusaetzlich Schueler werden.");
         navigate("/Tutorhub/main");
         return;
       }
 
-      if (!studentProfile) {
-        navigate("/Tutorhub/student-setup");
-        return;
-      }
+      const studentProfile = await getStudentProfile(user.id);
 
-      if (studentProfile.profileStatus === "rejected") {
+      if (!studentProfile || studentProfile.profileStatus === "rejected") {
         navigate("/Tutorhub/student-setup");
         return;
       }
@@ -94,26 +85,17 @@ export default function Tutorhub() {
     setCheckingRole(true);
 
     try {
-      const [tutorhubUser, studentProfile, teacherProfile] = await Promise.all([
-        getTutorhubUser(user.id),
-        getStudentProfile(user.id),
-        getTeacherProfile(user.id),
-      ]);
+      const tutorhubUser = await getTutorhubUser(user.id);
 
-      const isStudentAccount = tutorhubUser?.role === "student" || Boolean(studentProfile);
-
-      if (isStudentAccount) {
+      if (tutorhubUser?.role === "student") {
         setRoleMessage("Dieses Konto ist bereits als Schueler registriert. Du kannst nicht zusaetzlich Lehrer werden.");
         navigate("/Tutorhub/main");
         return;
       }
 
-      if (!teacherProfile) {
-        navigate("/Tutorhub/teacher-setup");
-        return;
-      }
+      const teacherProfile = await getTeacherProfile(user.id);
 
-      if (teacherProfile.status === "rejected") {
+      if (!teacherProfile || teacherProfile.status === "rejected") {
         navigate("/Tutorhub/teacher-setup");
         return;
       }

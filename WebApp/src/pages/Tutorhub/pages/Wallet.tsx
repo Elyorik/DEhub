@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { getWallet } from "../services/tutorhubWallet";
 import s from "./Wallet.module.scss";
+import TutorhubBackToDashboard from "../components/TutorhubBackToDashboard";
 
 export default function Wallet() {
   const user = useSelector((state: RootState) => state.user.currentUser);
@@ -25,6 +26,7 @@ export default function Wallet() {
 
   return (
     <section className={s.page}>
+      <TutorhubBackToDashboard />
       <div className={s.header}>
         <p className={s.eyebrow}>TutorHub Wallet</p>
         <h1>Guthaben</h1>
