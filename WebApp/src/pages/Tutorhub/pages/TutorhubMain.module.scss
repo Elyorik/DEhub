@@ -268,3 +268,28 @@
     text-align: center;
   }
 }
+
+.notifications {
+  display: grid;
+  gap: 12px;
+  margin: 0 auto 20px;
+  max-width: 1120px;
+}
+
+.approvalNotice,
+.requestNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 18px;
+  border-radius: 12px;
+
+  strong,
+  span { display: block; }
+  span { margin-top: 4px; color: #475569; }
+  a { flex: 0 0 auto; border-radius: 8px; padding: 10px 12px; color: #ffffff; font-weight: 800; text-decoration: none; }
+}
+
+.approvalNotice { border: 1px solid #86efac; background: #f0fdf4; strong { color: #166534; } a { background: #16a34a; } }
+.requestNotice { border: 1px solid #bfdbfe; background: #eff6ff; strong { color: #1d4ed8; } a { background: #2563eb; } }

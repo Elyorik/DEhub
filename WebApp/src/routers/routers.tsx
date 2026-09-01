@@ -25,6 +25,8 @@ import Bookings from '../pages/Tutorhub/pages/Bookings';
 import TutorhubAdminProtected from '../pages/Tutorhub/components/TutorhubAdminProtected';
 import AdminDashboard from '../pages/Tutorhub/pages/AdminDashboard';
 import TutorhubApprovedProtected from '../pages/Tutorhub/components/TutorhubApprovedProtected';
+import Groups from '../pages/Tutorhub/pages/Groups';
+import GroupCall from '../pages/Tutorhub/pages/GroupCall';
 
 
 export const routers = createBrowserRouter([
@@ -133,6 +135,14 @@ export const routers = createBrowserRouter([
       <Bookings />
     </TutorhubProtected>
   ),
+},
+{
+  path: "Tutorhub/groups",
+  element: (<TutorhubProtected><TutorhubApprovedProtected><Groups /></TutorhubApprovedProtected></TutorhubProtected>),
+},
+{
+  path: "Tutorhub/groups/:id/call",
+  element: (<TutorhubProtected><TutorhubApprovedProtected><GroupCall /></TutorhubApprovedProtected></TutorhubProtected>),
 },
 {
   path: "Tutorhub/admin",

@@ -99,7 +99,7 @@ function simpleLocalAI(message: string): string {
   
   // Help
   if (lowerMsg.includes("hilfe") || lowerMsg.includes("help") || lowerMsg.includes("was kannst du")) {
-    return "Ich kann dir bei vielen Dingen helfen: Fragen beantworten, Texte erklaeren und zusammenfassen, Bei Hausaufgaben unterstuetzen, Deutsche Sprache ueben, Ideen und Anregungen geben, Alltagsfragen beantworten. Was moechtest du wissen?";
+    return "Ich kann dir bei vielen Dingen helfen: Fragen beantworten, Texte erklären und zusammenfassen, Bei Hausaufgaben unterstuetzen, Deutsche Sprache ueben, Ideen und Anregungen geben, Alltagsfragen beantworten. Was moechtest du wissen?";
   }
   
   // Thanks
@@ -108,7 +108,7 @@ function simpleLocalAI(message: string): string {
   }
   
   // Time/Date
-  if (lowerMsg.includes("zeit") || lowerMsg.includes("uhr") || lowerMsg.includes("wie spaet")) {
+  if (lowerMsg.includes("zeit") || lowerMsg.includes("uhr") || lowerMsg.includes("wie spät")) {
     return `Aktuelle Zeit: ${new Date().toLocaleTimeString("de-DE")}. Das Datum heute ist: ${new Date().toLocaleDateString("de-DE")}.`;
   }
   

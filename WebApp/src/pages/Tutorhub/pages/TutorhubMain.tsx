@@ -6,6 +6,7 @@ import type { TeacherProfile } from "../models/tutorhubTeacher.model";
 import type { StudentProfile, TutorhubUserProfile } from "../models/tutorhubUser.model";
 import { getTeacherProfile } from "../services/tutorhubTeachers";
 import { getStudentProfile, getTutorhubUser } from "../services/tutorhubUsers";
+import { getGroupRequests, getGroups, type GroupJoinRequest, type TutorhubGroup } from "../services/tutorhubGroups";
 import s from "./TutorhubMain.module.scss";
 
 type Role = "student" | "teacher" | "admin" | null;
@@ -13,7 +14,7 @@ type Status = "missing" | "pending" | "approved" | "rejected";
 
 function getStatusLabel(status: Status) {
   if (status === "approved") return "Freigegeben";
-  if (status === "pending") return "In Pruefung";
+  if (status === "pending") return "In Prüfung";
   if (status === "rejected") return "Abgelehnt";
   return "Nicht erstellt";
 }
@@ -27,6 +28,8 @@ export default function TutorhubMain() {
   const [teacherProfile, setTeacherProfile] = useState<TeacherProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [groupRequests, setGroupRequests] = useState<GroupJoinRequest[]>([]);
+  const [groups, setGroups] = useState<TutorhubGroup[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -45,16 +48,20 @@ export default function TutorhubMain() {
         setTutorhubUser(appUser);
 
         if (appUser?.role === "student") {
-          const student = await getStudentProfile(user.id);
+          const [student, requests] = await Promise.all([getStudentProfile(user.id), getGroupRequests(undefined, user.id)]);
           setStudentProfile(student);
+          setGroupRequests(requests);
+          setGroups([]);
           setTeacherProfile(null);
           setRole("student");
           return;
         }
 
         if (appUser?.role === "teacher") {
-          const teacher = await getTeacherProfile(user.id);
+          const [teacher, requests, teacherGroups] = await Promise.all([getTeacherProfile(user.id), getGroupRequests(user.id), getGroups(user.id)]);
           setTeacherProfile(teacher);
+          setGroupRequests(requests);
+          setGroups(teacherGroups);
           setStudentProfile(null);
           setRole("teacher");
           return;
@@ -76,6 +83,12 @@ export default function TutorhubMain() {
 
   const studentStatus: Status = studentProfile?.profileStatus || "missing";
   const teacherStatus: Status = teacherProfile?.status || "missing";
+  const pendingRequests = groupRequests.filter((request) => request.status === "pending");
+  const approvedRequests = groupRequests.filter((request) => request.status === "approved");
+
+  function groupName(groupId: string) {
+    return groups.find((group) => group.id === groupId)?.name || "deine Lerngruppe";
+  }
 
   return (
     <section className={s.page}>
@@ -96,15 +109,15 @@ export default function TutorhubMain() {
           <div className={s.statusGrid}>
             <article className={s.statusCard}>
               <div className={s.statusTop}>
-                <span>Rolle waehlen</span>
+                <span>Rolle wählen</span>
                 <b className={s.missing}>Noch keine Rolle</b>
               </div>
-              <h2>Wie moechtest du TutorHub nutzen?</h2>
+              <h2>Wie möchtest du TutorHub nutzen?</h2>
               <p>
-                Ein Konto kann entweder Schueler oder Lehrer sein. Waehle den passenden Weg.
+                Ein Konto kann entweder Schüler oder Lehrer sein. Wähle den passenden Weg.
               </p>
               <div className={s.actions}>
-                <Link to="/Tutorhub/student-setup">Als Schueler starten</Link>
+                <Link to="/Tutorhub/student-setup">Als Schüler starten</Link>
                 <Link to="/Tutorhub/teacher-setup">Als Lehrer starten</Link>
               </div>
             </article>
@@ -112,21 +125,31 @@ export default function TutorhubMain() {
         </>
       ) : role === "student" ? (
         <>
+          {approvedRequests.length > 0 && (
+            <section className={s.notifications} aria-label="Gruppenbenachrichtigungen">
+              {approvedRequests.map((request) => (
+                <article key={request.id} className={s.approvalNotice}>
+                  <div><strong>Du wurdest in eine Gruppe aufgenommen!</strong><span>Dein Lehrer hat deine Gruppenanfrage freigegeben.</span></div>
+                  <Link to="/Tutorhub/groups">Meine Gruppen öffnen</Link>
+                </article>
+              ))}
+            </section>
+          )}
           <div className={s.statusGrid}>
             <article className={s.statusCard}>
               <div className={s.statusTop}>
-                <span>Schuelerprofil</span>
+                <span>Schülerprofil</span>
                 <b className={s[studentStatus]}>{getStatusLabel(studentStatus)}</b>
               </div>
 
-              <h2>{studentProfile?.name || "Schuelerprofil"}</h2>
+              <h2>{studentProfile?.name || "Schülerprofil"}</h2>
 
               {studentStatus === "approved" && (
-                <p>Dein Schuelerprofil ist freigegeben. Du kannst Lehrer suchen und Unterricht anfragen.</p>
+                <p>Dein Schülerprofil ist freigegeben. Du kannst Lehrer suchen und Unterricht anfragen.</p>
               )}
 
               {studentStatus === "pending" && (
-                <p>Deine Ankete wurde eingereicht und wartet auf Admin-Pruefung.</p>
+                <p>Deine Ankete wurde eingereicht und wartet auf Admin-Prüfung.</p>
               )}
 
               {studentStatus === "rejected" && (
@@ -134,7 +157,7 @@ export default function TutorhubMain() {
               )}
 
               {studentStatus === "missing" && (
-                <p>Bitte fuelle zuerst deine Schueler-Ankete aus.</p>
+                <p>Bitte fülle zuerst deine Schüler-Ankete aus.</p>
               )}
 
               {studentProfile?.rejectionReason && (
@@ -146,7 +169,7 @@ export default function TutorhubMain() {
 
               <div className={s.actions}>
                 <Link to="/Tutorhub/student-setup">
-                  {studentStatus === "missing" ? "Ankete ausfuellen" : "Ankete bearbeiten"}
+                  {studentStatus === "missing" ? "Ankete ausfüllen" : "Ankete bearbeiten"}
                 </Link>
                 {studentStatus === "approved" && <Link to="/Tutorhub/teachers">Lehrer suchen</Link>}
               </div>
@@ -166,15 +189,31 @@ export default function TutorhubMain() {
               <p>Sieh den Status deiner Unterrichtsanfragen.</p>
             </Link>
 
+            <Link className={s.card} to="/Tutorhub/groups">
+              <span>Gruppen</span>
+              <strong>Meine Lerngruppen</strong>
+              <p>Sieh deine Gruppen und tritt einem laufenden Unterricht bei.</p>
+            </Link>
+
             <Link className={s.card} to="/Tutorhub/wallet">
               <span>Wallet</span>
               <strong>Guthaben</strong>
-              <p>Pruefe Credits und spaeter Zahlungen.</p>
+              <p>Pruefe Credits und später Zahlungen.</p>
             </Link>
           </div>
         </>
       ) : (
         <>
+          {pendingRequests.length > 0 && (
+            <section className={s.notifications} aria-label="Neue Gruppenanfragen">
+              {pendingRequests.map((request) => (
+                <article key={request.id} className={s.requestNotice}>
+                  <div><strong>Neue Gruppenanfrage von {request.studentName}</strong><span>Ein Schüler möchte deiner Gruppe „{groupName(request.groupId)}“ beitreten.</span></div>
+                  <Link to="/Tutorhub/groups">Jetzt bearbeiten</Link>
+                </article>
+              ))}
+            </section>
+          )}
           <div className={s.statusGrid}>
             <article className={s.statusCard}>
               <div className={s.statusTop}>
@@ -185,11 +224,11 @@ export default function TutorhubMain() {
               <h2>{teacherProfile?.name || "Lehrerprofil"}</h2>
 
               {teacherStatus === "approved" && (
-                <p>Dein Lehrerprofil ist freigegeben. Schueler koennen dich finden und Unterricht anfragen.</p>
+                <p>Dein Lehrerprofil ist freigegeben. Schüler können dich finden und Unterricht anfragen.</p>
               )}
 
               {teacherStatus === "pending" && (
-                <p>Dein Lehrerprofil wurde eingereicht und wartet auf Admin-Pruefung.</p>
+                <p>Dein Lehrerprofil wurde eingereicht und wartet auf Admin-Prüfung.</p>
               )}
 
               {teacherStatus === "rejected" && (
@@ -197,7 +236,7 @@ export default function TutorhubMain() {
               )}
 
               {teacherStatus === "missing" && (
-                <p>Bitte fuelle zuerst dein Lehrerprofil aus.</p>
+                <p>Bitte fülle zuerst dein Lehrerprofil aus.</p>
               )}
 
               {teacherProfile?.rejectionReason && (
@@ -220,19 +259,25 @@ export default function TutorhubMain() {
             <Link className={s.primaryCard} to="/Tutorhub/bookings">
               <span>Buchungen</span>
               <strong>Anfragen an mich</strong>
-              <p>Sieh Unterrichtsanfragen von Schuelern und antworte darauf.</p>
+              <p>Sieh Unterrichtsanfragen von Schülern und antworte darauf.</p>
+            </Link>
+
+            <Link className={s.card} to="/Tutorhub/groups">
+              <span>Gruppen</span>
+              <strong>Gruppen verwalten</strong>
+              <p>Erstelle Fachgruppen, bearbeite Anfragen und starte Calls.</p>
             </Link>
 
             <Link className={s.card} to="/Tutorhub/teacher-setup">
               <span>Profil</span>
               <strong>Mein Lehrerprofil</strong>
-              <p>Halte Faecher, Preise und Verfuegbarkeit aktuell.</p>
+              <p>Halte Fächer, Preise und Verfügbarkeit aktuell.</p>
             </Link>
 
             <Link className={s.card} to="/Tutorhub/wallet">
               <span>Wallet</span>
               <strong>Guthaben</strong>
-              <p>Pruefe Credits und spaeter Auszahlungen.</p>
+              <p>Pruefe Credits und später Auszahlungen.</p>
             </Link>
           </div>
         </>

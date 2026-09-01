@@ -59,7 +59,7 @@ export default function TeachersList() {
         <label>
           Fach
           <select value={subject} onChange={(e) => setSubject(e.target.value)}>
-            <option value="all">Alle Faecher</option>
+            <option value="all">Alle Fächer</option>
             {subjects.map((item) => (
               <option value={item} key={item}>
                 {item}

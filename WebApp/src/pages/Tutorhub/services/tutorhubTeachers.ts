@@ -23,7 +23,7 @@ export async function saveTeacherProfile(profile: TeacherProfile): Promise<void>
   const existing = await getTutorhubUser(profile.uid);
 
   if (existing?.role && existing.role !== "teacher") {
-    throw new Error("Dieses Konto ist bereits als Schueler registriert.");
+    throw new Error("Dieses Konto ist bereits als Schüler registriert.");
   }
 
   const now = Date.now();

@@ -18,7 +18,7 @@ export default function TutorhubBackToDashboard() {
           boxShadow: "0 8px 20px rgba(16, 24, 40, 0.05)",
         }}
       >
-        Zurueck zum Dashboard
+        Zurück zum Dashboard
       </Link>
     </div>
   );

@@ -54,7 +54,7 @@ export default function TutorhubApprovedProtected({ children }: Props) {
   if (loading) {
     return (
       <div style={{ padding: "96px 24px", textAlign: "center" }}>
-        TutorHub-Zugriff wird geprueft...
+        TutorHub-Zugriff wird geprüft...
       </div>
     );
   }
@@ -72,7 +72,7 @@ export default function TutorhubApprovedProtected({ children }: Props) {
   if (!approved) {
     return (
       <div style={{ padding: "96px 24px", textAlign: "center" }}>
-        <h1>Ankete wird geprueft</h1>
+        <h1>Ankete wird geprüft</h1>
         <p>
           Du kannst diesen Bereich erst nutzen, wenn deine TutorHub-Ankete
           freigegeben wurde.

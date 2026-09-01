@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { TeacherProfile } from "../models/tutorhubTeacher.model";
 import type { StudentProfile } from "../models/tutorhubUser.model";
 import {
@@ -11,6 +11,14 @@ import {
   updateTeacherApproval,
 } from "../services/tutorhubAdmin";
 import s from "./AdminDashboard.module.scss";
+import {
+  createCalendarEvent,
+  parseCalendarCommand,
+  removeCalendarEvent,
+  subscribeToCalendarEvents,
+  type CalendarEvent,
+  type CalendarEventType,
+} from "../../../services/calendarEvents";
 
 function getStudentStatus(student: StudentProfile) {
   return student.profileStatus || "pending";
@@ -32,6 +40,7 @@ function matchesQuery(value: string, query: string) {
 }
 
 export default function AdminDashboard() {
+  const [activeSection, setActiveSection] = useState<"tutorhub" | "calendar" | "online">("tutorhub");
   const [students, setStudents] = useState<StudentProfile[]>([]);
   const [teachers, setTeachers] = useState<TeacherProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +49,11 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState<AdminProfileStatus>("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "students" | "teachers">("all");
   const [search, setSearch] = useState("");
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [calendarCommand, setCalendarCommand] = useState("");
+  const [calendarMessage, setCalendarMessage] = useState("");
+  const [calendarError, setCalendarError] = useState("");
+  const [calendarType, setCalendarType] = useState<CalendarEventType>("exam");
 
   async function loadProfiles() {
     setLoading(true);
@@ -64,6 +78,41 @@ export default function AdminDashboard() {
   useEffect(() => {
     loadProfiles();
   }, []);
+
+  useEffect(() => subscribeToCalendarEvents(setCalendarEvents), []);
+
+  async function handleCalendarCommand(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setCalendarMessage("");
+    setCalendarError("");
+    const command = calendarCommand.trim();
+    const isDelete = /^delete\s+/i.test(command);
+    const parsed = parseCalendarCommand(command.replace(/^delete\s+/i, ""));
+
+    if (!parsed) {
+      setCalendarError("Format: 22.09.2026 Exam for DSD2 oder Delete 22.09.2026 Exam for DSD2");
+      return;
+    }
+
+    try {
+      if (isDelete) {
+        const found = calendarEvents.find((item) => item.date === parsed.date && item.title.toLowerCase() === parsed.title.toLowerCase());
+        if (!found) {
+          setCalendarError("Kein passender Termin gefunden.");
+          return;
+        }
+        await removeCalendarEvent(found.id);
+        setCalendarMessage("Termin wurde gelöscht.");
+      } else {
+        await createCalendarEvent(parsed.date, parsed.title, calendarType);
+        setCalendarMessage("Termin wurde im Kalender veröffentlicht.");
+      }
+      setCalendarCommand("");
+    } catch (err) {
+      console.error(err);
+      setCalendarError("Termin konnte nicht gespeichert werden. Prüfe firestore.rules.");
+    }
+  }
 
   const stats = useMemo(() => {
     const pendingStudents = students.filter((student) => getStudentStatus(student) === "pending").length;
@@ -119,16 +168,16 @@ export default function AdminDashboard() {
     setMessage("");
     setError("");
     await updateStudentApproval(uid, "approved");
-    setMessage("Schueler wurde freigegeben.");
+    setMessage("Schüler wurde freigegeben.");
     await loadProfiles();
   }
 
   async function rejectStudent(uid: string) {
     setMessage("");
     setError("");
-    const reason = window.prompt("Grund fuer Ablehnung?", "Bitte Profil ueberarbeiten.") || "";
+    const reason = window.prompt("Grund für Ablehnung?", "Bitte Profil überarbeiten.") || "";
     await updateStudentApproval(uid, "rejected", reason);
-    setMessage("Schueler wurde abgelehnt.");
+    setMessage("Schüler wurde abgelehnt.");
     await loadProfiles();
   }
 
@@ -136,7 +185,7 @@ export default function AdminDashboard() {
     setMessage("");
     setError("");
     await updateStudentApproval(uid, "pending");
-    setMessage("Schueler wurde wieder auf Pending gesetzt.");
+    setMessage("Schüler wurde wieder auf Pending gesetzt.");
     await loadProfiles();
   }
 
@@ -145,18 +194,18 @@ export default function AdminDashboard() {
     setError("");
 
     const confirmed = window.confirm(
-      `Schueler-Ankete von ${name || uid} wirklich loeschen? Der Nutzer kann danach neu starten.`
+      `Schüler-Ankete von ${name || uid} wirklich löschen? Der Nutzer kann danach neu starten.`
     );
 
     if (!confirmed) return;
 
     try {
       await deleteStudentApplication(uid);
-      setMessage("Schueler-Ankete wurde geloescht.");
+      setMessage("Schüler-Ankete wurde gelöscht.");
       await loadProfiles();
     } catch (err) {
       console.error(err);
-      setError("Schueler-Ankete konnte nicht geloescht werden.");
+      setError("Schüler-Ankete konnte nicht gelöscht werden.");
     }
   }
 
@@ -171,7 +220,7 @@ export default function AdminDashboard() {
   async function rejectTeacher(uid: string) {
     setMessage("");
     setError("");
-    const reason = window.prompt("Grund fuer Ablehnung?", "Bitte Profil ueberarbeiten.") || "";
+    const reason = window.prompt("Grund für Ablehnung?", "Bitte Profil überarbeiten.") || "";
     await updateTeacherApproval(uid, "rejected", reason);
     setMessage("Lehrer wurde abgelehnt.");
     await loadProfiles();
@@ -190,18 +239,18 @@ export default function AdminDashboard() {
     setError("");
 
     const confirmed = window.confirm(
-      `Lehrer-Ankete von ${name || uid} wirklich loeschen? Der Nutzer kann danach neu starten.`
+      `Lehrer-Ankete von ${name || uid} wirklich löschen? Der Nutzer kann danach neu starten.`
     );
 
     if (!confirmed) return;
 
     try {
       await deleteTeacherApplication(uid);
-      setMessage("Lehrer-Ankete wurde geloescht.");
+      setMessage("Lehrer-Ankete wurde gelöscht.");
       await loadProfiles();
     } catch (err) {
       console.error(err);
-      setError("Lehrer-Ankete konnte nicht geloescht werden. Pruefe firestore.rules und deploye sie neu.");
+      setError("Lehrer-Ankete konnte nicht gelöscht werden. Pruefe firestore.rules und deploye sie neu.");
     }
   }
 
@@ -216,9 +265,16 @@ export default function AdminDashboard() {
         </p>
       </div>
 
+      <nav className={s.adminTabs} aria-label="Admin Bereiche">
+        <button type="button" className={activeSection === "tutorhub" ? s.activeTab : ""} onClick={() => setActiveSection("tutorhub")}>TutorHub</button>
+        <button type="button" className={activeSection === "calendar" ? s.activeTab : ""} onClick={() => setActiveSection("calendar")}>Kalender</button>
+        <button type="button" className={activeSection === "online" ? s.activeTab : ""} onClick={() => setActiveSection("online")}>Online Users</button>
+      </nav>
+
+      {activeSection === "tutorhub" && <>
       <div className={s.stats}>
         <article>
-          <span>Schueler gesamt</span>
+          <span>Schüler gesamt</span>
           <strong>{stats.studentsTotal}</strong>
         </article>
         <article>
@@ -252,7 +308,7 @@ export default function AdminDashboard() {
           Typ
           <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as typeof typeFilter)}>
             <option value="all">Alle</option>
-            <option value="students">Schueler</option>
+            <option value="students">Schüler</option>
             <option value="teachers">Lehrer</option>
           </select>
         </label>
@@ -275,14 +331,14 @@ export default function AdminDashboard() {
       <div className={s.grid}>
         <div className={s.panel}>
           <div className={s.panelHeader}>
-            <h2>Schueler</h2>
+            <h2>Schüler</h2>
             <span>{filteredStudents.length}</span>
           </div>
 
           {loading ? (
             <p className={s.empty}>Wird geladen...</p>
           ) : filteredStudents.length === 0 ? (
-            <p className={s.empty}>Keine passenden Schuelerprofile.</p>
+            <p className={s.empty}>Keine passenden Schülerprofile.</p>
           ) : (
             filteredStudents.map((student) => {
               const status = getStudentStatus(student);
@@ -391,6 +447,36 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+      </>}
+
+      {activeSection === "calendar" && (
+        <section className={s.calendarAdmin}>
+          <h2>Kalender verwalten</h2>
+          <p>Neue Termine werden sofort auf der Startseite für alle Nutzer angezeigt.</p>
+          <form onSubmit={handleCalendarCommand}>
+            <label htmlFor="calendar-command">Kalender-Befehl</label>
+            <input id="calendar-command" value={calendarCommand} onChange={(event) => setCalendarCommand(event.target.value)} placeholder="22.09.2026 Exam for DSD2" />
+            <select aria-label="Terminart" value={calendarType} onChange={(event) => setCalendarType(event.target.value as CalendarEventType)}>
+              <option value="exam">Prüfung</option>
+              <option value="event">Termin</option>
+              <option value="deadline">Deadline</option>
+            </select>
+            <button type="submit">Ausführen</button>
+          </form>
+          <p className={s.commandHint}>Zum Löschen: <code>Delete 22.09.2026 Exam for DSD2</code></p>
+          {calendarMessage && <p className={s.message}>{calendarMessage}</p>}
+          {calendarError && <p className={s.error}>{calendarError}</p>}
+          <div className={s.eventAdminList}>
+            {calendarEvents.length === 0 ? <p className={s.empty}>Noch keine Termine geplant.</p> : calendarEvents.map((calendarEvent) => (
+              <article key={calendarEvent.id}><time>{calendarEvent.date.split("-").reverse().join(".")}</time><span>{calendarEvent.title}</span><b>{calendarEvent.type === "deadline" ? "Deadline" : calendarEvent.type === "event" ? "Termin" : "Prüfung"}</b><button type="button" onClick={() => removeCalendarEvent(calendarEvent.id)}>Löschen</button></article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {activeSection === "online" && (
+        <section className={s.placeholder}><h2>Online Users</h2><p>Dieser Bereich ist für später vorbereitet.</p></section>
+      )}
     </section>
   );
 }

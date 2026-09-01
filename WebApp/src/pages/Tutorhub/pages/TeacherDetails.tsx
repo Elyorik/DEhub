@@ -49,7 +49,7 @@ export default function TeacherDetails() {
     try {
       await createTutorhubBooking({
         studentId: user.id,
-        studentName: user.name || "Schueler",
+        studentName: user.name || "Schüler",
         teacherId: teacher.uid,
         teacherName: teacher.name,
         subject: teacher.subjects[0] || "Unterricht",
@@ -77,7 +77,7 @@ export default function TeacherDetails() {
       <section className={s.page}>
         <div className={s.notFound}>
           <h1>Lehrer nicht gefunden</h1>
-          <Link to="/Tutorhub/teachers">Zurueck zur Lehrerliste</Link>
+          <Link to="/Tutorhub/teachers">Zurück zur Lehrerliste</Link>
         </div>
       </section>
     );
@@ -87,7 +87,7 @@ export default function TeacherDetails() {
     <section className={s.page}>
       <TutorhubBackToDashboard />
       <Link className={s.back} to="/Tutorhub/teachers">
-        Zurueck zur Lehrerliste
+        Zurück zur Lehrerliste
       </Link>
 
       <div className={s.profile}>
@@ -120,9 +120,9 @@ export default function TeacherDetails() {
           </div>
 
           <div className={s.block}>
-            <h2>Sprachen und Verfuegbarkeit</h2>
+            <h2>Sprachen und Verfügbarkeit</h2>
             <p>Sprachen: {teacher.languages.join(", ")}</p>
-            <p>{teacher.availability || "Verfuegbarkeit nach Absprache."}</p>
+            <p>{teacher.availability || "Verfügbarkeit nach Absprache."}</p>
           </div>
 
           {teacher.curriculumImageUrl && (
@@ -173,6 +173,12 @@ export default function TeacherDetails() {
           <Link className={s.bookingLink} to="/Tutorhub/bookings">
             Meine Buchungen
           </Link>
+
+          {teacher.offersGroup && (
+            <Link className={s.bookingLink} to={`/Tutorhub/groups?teacher=${teacher.uid}`}>
+              Gruppen dieses Lehrers ansehen
+            </Link>
+          )}
 
           <p className={s.note}>
             Die Anfrage ist noch keine Zahlung. Der Lehrer kann sie annehmen oder ablehnen.

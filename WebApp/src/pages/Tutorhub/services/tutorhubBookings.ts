@@ -94,6 +94,7 @@ export async function acceptTutorhubBooking(bookingId: string): Promise<void> {
   await updateDoc(doc(db, BOOKINGS_COLLECTION, bookingId), {
     status: "accepted",
     rejectionReason: "",
+    meetingLink: `https://meet.jit.si/DEhub-Unterricht-${bookingId}`,
     updatedAt: Date.now(),
   });
 }

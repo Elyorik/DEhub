@@ -52,7 +52,7 @@ export default function Tutorhub() {
       const tutorhubUser = await getTutorhubUser(user.id);
 
       if (tutorhubUser?.role === "teacher") {
-        setRoleMessage("Dieses Konto ist bereits als Lehrer registriert. Du kannst nicht zusaetzlich Schueler werden.");
+        setRoleMessage("Dieses Konto ist bereits als Lehrer registriert. Du kannst nicht zusätzlich Schüler werden.");
         navigate("/Tutorhub/main");
         return;
       }
@@ -88,7 +88,7 @@ export default function Tutorhub() {
       const tutorhubUser = await getTutorhubUser(user.id);
 
       if (tutorhubUser?.role === "student") {
-        setRoleMessage("Dieses Konto ist bereits als Schueler registriert. Du kannst nicht zusaetzlich Lehrer werden.");
+        setRoleMessage("Dieses Konto ist bereits als Schüler registriert. Du kannst nicht zusätzlich Lehrer werden.");
         navigate("/Tutorhub/main");
         return;
       }
@@ -163,7 +163,7 @@ export default function Tutorhub() {
             onClick={startAsStudent}
             disabled={checkingRole}
           >
-            {checkingRole ? "Pruefen..." : "Starten als Schueler"}
+            {checkingRole ? "Prüfen..." : "Starten als Schüler"}
           </button>
           <button
             className={s.whiteBtn}
@@ -171,7 +171,7 @@ export default function Tutorhub() {
             onClick={startAsTeacher}
             disabled={checkingRole}
           >
-            {checkingRole ? "Pruefen..." : "Starten als Lehrer"}
+            {checkingRole ? "Prüfen..." : "Starten als Lehrer"}
           </button>
         </div>
 
@@ -224,7 +224,7 @@ export default function Tutorhub() {
                 transform: `translateY(${20 - progress * 20}px)`,
               }}
             >
-              <h3>Persoenliche Foerderung</h3>
+              <h3>Persönliche Förderung</h3>
               <p>
                 Ob Einzel- oder Gruppenunterricht, unsere erfahrenen Tutorinnen und
                 Tutoren helfen dir, deine Ziele zu erreichen.
@@ -298,8 +298,8 @@ export default function Tutorhub() {
             >
               <h3>Gemeinsam zum Erfolg</h3>
               <p>
-                Wir helfen Schuelerinnen und Schuelern, Wissen aufzubauen,
-                Selbstvertrauen zu staerken und bessere Ergebnisse zu erzielen.
+                Wir helfen Schülerinnen und Schülern, Wissen aufzubauen,
+                Selbstvertrauen zu stärken und bessere Ergebnisse zu erzielen.
               </p>
             </div>
           </div>
@@ -307,7 +307,7 @@ export default function Tutorhub() {
       </div>
 
       <section className={s.fakeSection}>
-        <h2>Naechster Bereich</h2>
+        <h2>Nächster Bereich</h2>
       </section>
     </div>
   );

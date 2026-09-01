@@ -49,7 +49,7 @@ export default function StudentProfileSetup() {
         ]);
 
         if (tutorhubUser?.role === "teacher" || teacherProfile) {
-          setRoleError("Dieses Konto ist bereits als Lehrer registriert. Du kannst mit diesem Konto keine Schueler-Ankete erstellen.");
+          setRoleError("Dieses Konto ist bereits als Lehrer registriert. Du kannst mit diesem Konto keine Schüler-Ankete erstellen.");
           return;
         }
 
@@ -99,12 +99,12 @@ export default function StudentProfileSetup() {
     }
 
     if (!phone.trim() || subjectList.length === 0 || !learningGoal.trim()) {
-      setError("Bitte fuelle Telefonnummer, Faecher und Lernziel aus.");
+      setError("Bitte fülle Telefonnummer, Fächer und Lernziel aus.");
       return;
     }
 
     if (!isValidPhone(phone)) {
-      setError("Bitte gib eine gueltige Telefonnummer ein.");
+      setError("Bitte gib eine gültige Telefonnummer ein.");
       return;
     }
 
@@ -131,7 +131,7 @@ export default function StudentProfileSetup() {
 
       setCurrentStatus("pending");
       setRejectionReason("");
-      setMessage("Dein Schuelerprofil wurde eingereicht und wartet auf Pruefung.");
+      setMessage("Dein Schülerprofil wurde eingereicht und wartet auf Prüfung.");
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Profil konnte nicht gespeichert werden. Bitte versuche es nochmal.");
@@ -141,18 +141,18 @@ export default function StudentProfileSetup() {
   }
 
   if (loading) {
-    return <section className={s.page}>Schuelerprofil wird geladen...</section>;
+    return <section className={s.page}>Schülerprofil wird geladen...</section>;
   }
 
   return (
     <section className={s.page}>
       <TutorhubBackToDashboard />
       <div className={s.header}>
-        <p className={s.eyebrow}>TutorHub Schuelerbereich</p>
-        <h1>Schueler-Infoblatt</h1>
+        <p className={s.eyebrow}>TutorHub Schülerbereich</p>
+        <h1>Schüler-Infoblatt</h1>
         <p>
-          Sag uns, wobei du Hilfe brauchst. Du kannst deine Ankete spaeter bearbeiten.
-          Nach jeder Aenderung wird sie erneut geprueft.
+          Sag uns, wobei du Hilfe brauchst. Du kannst deine Ankete später bearbeiten.
+          Nach jeder Änderung wird sie erneut geprüft.
         </p>
       </div>
 
@@ -161,16 +161,16 @@ export default function StudentProfileSetup() {
           {roleError && <p className={s.error}>{roleError}</p>}
 
           {currentStatus === "pending" && !roleError && (
-            <p className={s.success}>Deine Ankete wartet aktuell auf Pruefung.</p>
+            <p className={s.success}>Deine Ankete wartet aktuell auf Prüfung.</p>
           )}
 
           {currentStatus === "approved" && !roleError && (
-            <p className={s.success}>Deine Ankete ist freigegeben. Aenderungen werden erneut geprueft.</p>
+            <p className={s.success}>Deine Ankete ist freigegeben. Änderungen werden erneut geprüft.</p>
           )}
 
           {currentStatus === "rejected" && !roleError && (
             <p className={s.error}>
-              Deine Ankete wurde abgelehnt. Grund: {rejectionReason || "Bitte ueberarbeiten."}
+              Deine Ankete wurde abgelehnt. Grund: {rejectionReason || "Bitte überarbeiten."}
             </p>
           )}
 
@@ -212,7 +212,7 @@ export default function StudentProfileSetup() {
           </label>
 
           <label>
-            Faecher
+            Fächer
             <input
               placeholder="z.B. Mathe, Deutsch, Englisch"
               value={subjects}
@@ -224,7 +224,7 @@ export default function StudentProfileSetup() {
           <label>
             Lernziel
             <textarea
-              placeholder="Was moechtest du verbessern? Pruefung, Hausaufgaben, Grammatik, Sprechen..."
+              placeholder="Was möchtest du verbessern? Prüfung, Hausaufgaben, Grammatik, Sprechen..."
               value={learningGoal}
               onChange={(e) => setLearningGoal(e.target.value)}
               rows={6}
@@ -263,7 +263,7 @@ export default function StudentProfileSetup() {
           </div>
 
           <label>
-            Verfuegbarkeit
+            Verfügbarkeit
             <input
               placeholder="z.B. Mo-Fr ab 17:00, Samstag vormittags"
               value={availability}
@@ -292,7 +292,7 @@ export default function StudentProfileSetup() {
           )}
 
           <button className={s.submit} type="button" onClick={handleSave} disabled={saving || Boolean(roleError)}>
-            {saving ? "Speichern..." : "Zur Pruefung einreichen"}
+            {saving ? "Speichern..." : "Zur Prüfung einreichen"}
           </button>
         </form>
 

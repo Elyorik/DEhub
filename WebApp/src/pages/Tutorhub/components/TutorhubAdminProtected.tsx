@@ -27,14 +27,14 @@ export default function TutorhubAdminProtected({ children }: Props) {
   }, [user]);
 
   if (loading) {
-    return <div style={{ padding: "96px 24px", textAlign: "center" }}>Admin-Zugriff wird geprueft...</div>;
+    return <div style={{ padding: "96px 24px", textAlign: "center" }}>Admin-Zugriff wird geprüft...</div>;
   }
 
   if (!user) {
     return (
       <div style={{ padding: "96px 24px", textAlign: "center" }}>
         <h1>Bitte zuerst anmelden</h1>
-        <p>Du musst angemeldet sein, um den Admin-Bereich zu oeffnen.</p>
+        <p>Du musst angemeldet sein, um den Admin-Bereich zu öffnen.</p>
         <Link to="/account">Zum Login</Link>
       </div>
     );
@@ -45,7 +45,7 @@ export default function TutorhubAdminProtected({ children }: Props) {
       <div style={{ padding: "96px 24px", textAlign: "center" }}>
         <h1>Kein Zugriff</h1>
         <p>Dein Konto ist nicht als TutorHub Admin eingetragen.</p>
-        <Link to="/Tutorhub">Zurueck zu TutorHub</Link>
+        <Link to="/Tutorhub">Zurück zu TutorHub</Link>
       </div>
     );
   }

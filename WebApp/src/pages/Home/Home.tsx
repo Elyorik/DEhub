@@ -5,6 +5,7 @@ import newSuchmaschiene from "../../assets/UpdatesImg/newSuchmaschiene.png";
 import newKIWerkzeuge from "../../assets/UpdatesImg/newKIWerkzeuge.png";
 import newSchule60 from "../../assets/UpdatesImg/newSchule60.png";
 import counterStyle from "../../components/VisitorsCounter/visitorCounter.module.scss";
+import { subscribeToCalendarEvents, type CalendarEvent } from "../../services/calendarEvents";
 
 // ===== Particle Hero Component =====
 import { useRef } from "react";
@@ -261,6 +262,75 @@ function FeatureCardComponent({ card }: { card: FeatureCard }) {
   );
 }
 
+const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+const weekdays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+
+function LearningCalendar() {
+  const today = new Date();
+  const [visibleMonth, setVisibleMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const year = visibleMonth.getFullYear();
+  const month = visibleMonth.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+  const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
+
+  useEffect(() => subscribeToCalendarEvents(setEvents), []);
+
+  const currentMonthEvents = events.filter((event) => event.date.startsWith(`${year}-${String(month + 1).padStart(2, "0")}`));
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const upcomingEvents = events.filter((event) => event.date >= todayKey);
+  const selectedEvent = currentMonthEvents.find((event) => event.id === selectedEventId) ?? null;
+  const eventLabel = (type?: CalendarEvent["type"]) => type === "deadline" ? "Deadline" : type === "event" ? "Termin" : "Prüfung";
+
+  return (
+    <section className={s.calendarSection} aria-labelledby="calendar-title">
+      <div className={s.calendarIntro}>
+        <span className={s.sectionEyebrow}>Lernplan</span>
+        <h2 id="calendar-title">Dein Lernkalender</h2>
+        <p>Plane deine DSD-Vorbereitung und behalte wichtige Termine im Blick.</p>
+        <Link to="/Tutorhub/main" className={s.calendarLink}>Bereite dich für deine Prüfungen mit uns vor</Link>
+      </div>
+      <div className={s.calendarCard}>
+        <div className={s.calendarHeader}>
+          <button type="button" onClick={() => setVisibleMonth(new Date(year, month - 1, 1))} aria-label="Vorheriger Monat">‹</button>
+          <h3>{monthNames[month]} {year}</h3>
+          <button type="button" onClick={() => setVisibleMonth(new Date(year, month + 1, 1))} aria-label="Nächster Monat">›</button>
+        </div>
+        <div className={s.calendarGrid}>
+          {weekdays.map((day) => <span key={day} className={s.weekday}>{day}</span>)}
+          {Array.from({ length: firstWeekday }).map((_, index) => <span key={`empty-${index}`} aria-hidden="true" />)}
+          {Array.from({ length: daysInMonth }, (_, index) => index + 1).map((day) => {
+            const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            const dayEvents = events.filter((event) => event.date === date);
+            const isSelected = dayEvents.some((event) => event.id === selectedEventId);
+            const eventType = dayEvents[0]?.type || "event";
+            return (
+              <button
+                key={day}
+                type="button"
+                className={`${s.calendarDay} ${isCurrentMonth && day === today.getDate() ? s.today : ""} ${dayEvents.length ? s.hasEvent : ""} ${s[`event${eventType[0].toUpperCase()}${eventType.slice(1)}`]} ${isSelected ? s.selectedDay : ""}`}
+                onClick={() => dayEvents.length && setSelectedEventId(dayEvents[0].id)}
+                aria-label={dayEvents.length ? `${day}. ${monthNames[month]}: ${dayEvents.map((event) => event.title).join(", ")}` : `${day}. ${monthNames[month]}`}
+                aria-pressed={isSelected}
+              >{day}</button>
+            );
+          })}
+        </div>
+        <div className={s.calendarLegend}><span><i className={s.todayMarker} />Heute</span><span><i className={s.examMarker} />Prüfung</span><span><i className={s.eventMarker} />Termin</span><span><i className={s.deadlineMarker} />Deadline</span></div>
+        {selectedEvent && <div className={`${s.selectedEvent} ${s[`selected${(selectedEvent.type || "event")[0].toUpperCase()}${(selectedEvent.type || "event").slice(1)}`]}`}><strong>{eventLabel(selectedEvent.type)} · {selectedEvent.date.slice(8, 10)}.{selectedEvent.date.slice(5, 7)}.{selectedEvent.date.slice(0, 4)}</strong><span>{selectedEvent.title}</span></div>}
+        {upcomingEvents.length > 0 && (
+          <div className={s.eventList}>
+            <p className={s.upcomingTitle}>Kommende Termine</p>
+            {upcomingEvents.map((event) => <button className={s[`list${(event.type || "event")[0].toUpperCase()}${(event.type || "event").slice(1)}`]} type="button" key={event.id} onClick={() => { setVisibleMonth(new Date(`${event.date}T00:00:00`)); setSelectedEventId(event.id); }}><time>{event.date.slice(8, 10)}.{event.date.slice(5, 7)}.</time><span>{event.title}<small>{eventLabel(event.type)}</small></span></button>)}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function Home() {
   const [online, setOnline] = useState<number>(0);
 
@@ -302,14 +372,7 @@ function Home() {
           <FeatureCardComponent key={index} card={card} />
         ))}
       </div>
-
-      {/* ===== ONLINE COUNTER ===== */}
-      <div className={counterStyle.counterContainer}>
-        <h2 className={counterStyle.title}>
-          Jetzt online:
-          <span className={counterStyle.number}>{online}</span>
-        </h2>
-      </div>
+      <LearningCalendar />
     </div>
   );
 }

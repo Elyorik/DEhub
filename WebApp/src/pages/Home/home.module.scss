@@ -278,6 +278,117 @@
   }
 }
 
+/* ============================================
+   LEARNING CALENDAR
+   ============================================ */
+
+.calendarSection {
+  width: min(1120px, 84%);
+  margin: 0 auto 5rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(320px, 1.15fr);
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 28px;
+  background: linear-gradient(135deg, #ffffff 0%, #f4f8ff 100%);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+}
+
+.sectionEyebrow { color: #2563eb; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+
+.calendarIntro h2 { margin: 0.55rem 0 0.75rem; color: #172554; font-size: clamp(1.8rem, 3vw, 2.5rem); }
+.calendarIntro p { margin: 0; color: #475569; line-height: 1.65; }
+
+.calendarLink {
+  display: inline-flex;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.1rem;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+
+  &:hover { background: #1d4ed8; transform: translateY(-2px); }
+}
+
+.calendarCard { padding: 1.25rem; border: 1px solid rgba(147, 197, 253, 0.55); border-radius: 18px; background: #ffffff; }
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+
+  h3 { margin: 0; color: #172554; font-size: 1.1rem; }
+  button {
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 0;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #1d4ed8;
+    cursor: pointer;
+    font-size: 1.8rem;
+    line-height: 1;
+    transition: background 0.2s ease;
+    &:hover { background: #dbeafe; }
+  }
+}
+
+.calendarGrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.35rem; text-align: center; }
+.weekday { padding-bottom: 0.45rem; color: #64748b; font-size: 0.73rem; font-weight: 700; }
+.calendarDay { display: grid; aspect-ratio: 1; place-items: center; position: relative; border: 0; border-radius: 50%; background: transparent; color: #334155; font: inherit; font-size: 0.88rem; cursor: default; }
+.hasEvent { cursor: pointer; font-weight: 700; }
+.hasEvent:hover { background: #eff6ff; }
+.hasEvent::after { content: ""; position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; background: #ef4444; }
+.eventExam::after { background: #ef4444; }
+.eventEvent::after { background: #16a34a; }
+.eventDeadline::after { background: #f59e0b; }
+.today.hasEvent::after { background: #ffffff; }
+.today { background: #2563eb; color: #ffffff; font-weight: 700; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.28); }
+.selectedDay { animation: eventPulse 1.15s ease-in-out infinite; background: #dbeafe; color: #1d4ed8; }
+.today.selectedDay { background: #1d4ed8; color: #ffffff; }
+
+.calendarLegend {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  span { display: inline-flex; align-items: center; gap: 0.35rem; }
+}
+
+.todayMarker { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #2563eb; }
+.eventMarker { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #ef4444; }
+.examMarker { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #ef4444; }
+.eventMarker { background: #16a34a; }
+.deadlineMarker { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #f59e0b; }
+.eventList { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #e2e8f0; }
+.upcomingTitle { margin: 0 0 0.45rem; color: #64748b; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.eventList button { display: flex; width: 100%; gap: 0.6rem; margin: 0.5rem 0; padding: 0.3rem; border: 0; border-radius: 6px; background: transparent; color: #334155; font: inherit; font-size: 0.85rem; line-height: 1.4; text-align: left; cursor: pointer; }
+.eventList button:hover { background: #eff6ff; }
+.eventList button span { display: flex; flex: 1; flex-direction: column; }
+.eventList button small { margin-top: 0.15rem; color: #64748b; font-size: 0.7rem; font-weight: 700; }
+.listExam { border-left: 3px solid #ef4444 !important; }
+.listEvent { border-left: 3px solid #16a34a !important; }
+.listDeadline { border-left: 3px solid #f59e0b !important; }
+.eventList time { flex: 0 0 auto; color: #1d4ed8; font-weight: 700; }
+
+.selectedEvent { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 1rem; padding: 0.8rem 0.9rem; border-left: 3px solid #2563eb; border-radius: 8px; background: #eff6ff; color: #172554; animation: revealEvent 0.25s ease-out; }
+.selectedEvent strong { font-size: 0.8rem; }
+.selectedEvent span { line-height: 1.45; }
+.selectedExam { border-left-color: #ef4444; }
+.selectedEvent { border-left-color: #16a34a; }
+.selectedDeadline { border-left-color: #f59e0b; }
+
+@keyframes eventPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); } 50% { box-shadow: 0 0 0 7px rgba(37, 99, 235, 0); } }
+@keyframes revealEvent { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
 @keyframes float {
   0%, 100% { transform: translate(0, 0) rotate(0deg); }
   25% { transform: translate(20px, 20px) rotate(5deg); }
@@ -324,6 +435,8 @@
   .specialCardImage img {
     max-width: 280px;
   }
+
+  .calendarSection { width: min(90%, 620px); grid-template-columns: 1fr; gap: 2rem; margin-bottom: 3rem; }
 }
 
 /* ============================================
@@ -404,6 +517,10 @@
   .specialCardImage img {
     max-width: 220px;
   }
+
+  .calendarSection { width: calc(100% - 2rem); margin-bottom: 2.75rem; padding: 1.5rem; border-radius: 20px; }
+  .calendarCard { padding: 1rem; }
+  .calendarLegend { flex-direction: column; gap: 0.5rem; }
 }
 
 @media (max-width: 767px) {
@@ -418,7 +535,9 @@
   }
 
   .scrollIndicator,
-  .specialCard::before {
+  .specialCard::before,
+  .selectedDay,
+  .selectedEvent {
     animation: none;
   }
 }

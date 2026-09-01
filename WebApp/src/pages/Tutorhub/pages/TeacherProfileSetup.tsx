@@ -56,7 +56,7 @@ export default function TeacherProfileSetup() {
         ]);
 
         if (tutorhubUser?.role === "student" || studentProfile) {
-          setRoleError("Dieses Konto ist bereits als Schueler registriert. Du kannst mit diesem Konto kein Lehrerprofil erstellen.");
+          setRoleError("Dieses Konto ist bereits als Schüler registriert. Du kannst mit diesem Konto kein Lehrerprofil erstellen.");
           return;
         }
 
@@ -109,22 +109,22 @@ export default function TeacherProfileSetup() {
     }
 
     if (!phone.trim() || !isValidPhone(phone)) {
-      setError("Bitte gib eine gueltige Telefonnummer ein.");
+      setError("Bitte gib eine gültige Telefonnummer ein.");
       return;
     }
 
     if (subjectList.length === 0 || !shortDescription.trim() || !description.trim()) {
-      setError("Bitte fuelle Faecher, kurze Beschreibung und lange Beschreibung aus.");
+      setError("Bitte fülle Fächer, kurze Beschreibung und lange Beschreibung aus.");
       return;
     }
 
     if (!priceNumber || priceNumber < 1) {
-      setError("Bitte gib einen gueltigen Preis fuer Einzelunterricht ein.");
+      setError("Bitte gib einen gültigen Preis für Einzelunterricht ein.");
       return;
     }
 
     if (offersGroup && (!groupPriceNumber || groupPriceNumber < 1)) {
-      setError("Bitte gib einen gueltigen Preis fuer Gruppenunterricht ein.");
+      setError("Bitte gib einen gültigen Preis für Gruppenunterricht ein.");
       return;
     }
 
@@ -176,8 +176,8 @@ export default function TeacherProfileSetup() {
         <p className={s.eyebrow}>TutorHub Lehrerbereich</p>
         <h1>Lehrer-Infoblatt</h1>
         <p>
-          Erstelle oder bearbeite dein Lehrerprofil. Nach jeder Aenderung wird es
-          erneut geprueft, bevor es in der Lehrerliste erscheint.
+          Erstelle oder bearbeite dein Lehrerprofil. Nach jeder Änderung wird es
+          erneut geprüft, bevor es in der Lehrerliste erscheint.
         </p>
       </div>
 
@@ -186,16 +186,16 @@ export default function TeacherProfileSetup() {
           {roleError && <p className={s.error}>{roleError}</p>}
 
           {currentStatus === "pending" && !roleError && (
-            <p className={s.success}>Dein Lehrerprofil wartet aktuell auf Pruefung.</p>
+            <p className={s.success}>Dein Lehrerprofil wartet aktuell auf Prüfung.</p>
           )}
 
           {currentStatus === "approved" && !roleError && (
-            <p className={s.success}>Dein Lehrerprofil ist freigegeben. Aenderungen werden erneut geprueft.</p>
+            <p className={s.success}>Dein Lehrerprofil ist freigegeben. Änderungen werden erneut geprüft.</p>
           )}
 
           {currentStatus === "rejected" && !roleError && (
             <p className={s.error}>
-              Dein Lehrerprofil wurde abgelehnt. Grund: {rejectionReason || "Bitte ueberarbeiten."}
+              Dein Lehrerprofil wurde abgelehnt. Grund: {rejectionReason || "Bitte überarbeiten."}
             </p>
           )}
 
@@ -216,7 +216,7 @@ export default function TeacherProfileSetup() {
 
           <div className={s.row}>
             <label>
-              Faecher
+              Fächer
               <input
                 placeholder="z.B. Mathe, Deutsch, Englisch"
                 value={subjects}
@@ -239,7 +239,7 @@ export default function TeacherProfileSetup() {
           <label>
             Kurze Beschreibung
             <input
-              placeholder="z.B. Mathe-Nachhilfe fuer Klasse 5 bis 9"
+              placeholder="z.B. Mathe-Nachhilfe für Klasse 5 bis 9"
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value)}
               disabled={Boolean(roleError)}
@@ -249,7 +249,7 @@ export default function TeacherProfileSetup() {
           <label>
             Lange Beschreibung
             <textarea
-              placeholder="Erzaehle, wie du unterrichtest, wem du hilfst und was Schueler erwarten koennen."
+              placeholder="Erzähle, wie du unterrichtest, wem du hilfst und was Schüler erwarten können."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={7}
@@ -307,7 +307,7 @@ export default function TeacherProfileSetup() {
           </label>
 
           <label>
-            Verfuegbarkeit
+            Verfügbarkeit
             <input
               placeholder="z.B. Mo-Fr ab 16:00, Wochenende nach Absprache"
               value={availability}
@@ -335,7 +335,7 @@ export default function TeacherProfileSetup() {
           )}
 
           <button className={s.submit} type="button" onClick={handleSave} disabled={saving || Boolean(roleError)}>
-            {saving ? "Speichern..." : "Zur Pruefung einreichen"}
+            {saving ? "Speichern..." : "Zur Prüfung einreichen"}
           </button>
         </form>
 

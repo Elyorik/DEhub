@@ -31,8 +31,7 @@ export default function Wallet() {
         <p className={s.eyebrow}>TutorHub Wallet</p>
         <h1>Guthaben</h1>
         <p>
-          Hier siehst du dein TutorHub-Guthaben. Spaeter werden hier Aufladungen,
-          Unterrichtszahlungen und Transaktionen angezeigt.
+          Hier siehst du dein TutorHub-Guthaben, Zahlungen und deine Einnahmen.
         </p>
       </div>
 
@@ -41,10 +40,20 @@ export default function Wallet() {
           <span>Aktuelles Guthaben</span>
           <strong>{loading ? "..." : balance}</strong>
           <p>Credits</p>
+          <small>1 Credit = 1 soʻm</small>
         </div>
 
         <div className={s.panel}>
-          <h2>Aktionen</h2>
+          <h2>Zahlungsaufteilung</h2>
+          <div className={s.split}>
+            <div><strong>85%</strong><span>für den Lehrer</span></div>
+            <div><strong>15%</strong><span>für die Plattform</span></div>
+          </div>
+          <p>Bei jeder bezahlten Unterrichtsstunde erhält der Lehrer 85%. 15% bleiben bei TutorHub für Betriebskosten, Support, Sicherheit und die Administration der Plattform.</p>
+        </div>
+
+        <div className={s.panel}>
+          <h2>Credits & Auszahlungen</h2>
 
           <button type="button" disabled>
             Credits aufladen
@@ -55,16 +64,14 @@ export default function Wallet() {
           </button>
 
           <p>
-            Zahlungsfunktionen sind noch nicht verbunden. Das Guthaben-System ist
-            vorbereitet und kann spaeter mit Payment oder Admin-Aufladung erweitert werden.
+            Aufladungen und Auszahlungen werden nach der Verbindung eines verifizierten Zahlungsanbieters aktiviert. Bis dahin werden keine echten Geldbeträge über TutorHub verarbeitet.
           </p>
         </div>
 
         <div className={s.panel}>
-          <h2>Was sind Credits?</h2>
+          <h2>Wichtige Zahlungsinformationen</h2>
           <p>
-            Credits sind das interne TutorHub-Guthaben. Schueler bezahlen damit
-            Unterricht, Lehrer erhalten daraus spaeter ihre Auszahlung.
+            Credits sind das interne TutorHub-Guthaben. Zahlungen können nur nach erfolgreicher Bestätigung durch den Zahlungsanbieter gebucht werden. Prüfe vor jeder Zahlung den Lehrer, den Preis und den Unterrichtstermin. Bei Streitfällen oder Rückerstattungen wende dich an den TutorHub-Support.
           </p>
           <Link to="/Tutorhub/teachers">Lehrer suchen</Link>
         </div>
